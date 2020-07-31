@@ -409,7 +409,7 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
                         if shape:
                             cut = cv2.resize(cut, (shape[1], shape[0]))
 
-                        if frame:
+                        if frames:
                             cv2.imwrite(pathFrames + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
 
                         cuts_pedestrian[id_ped][index_frame] = cut
