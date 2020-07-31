@@ -223,8 +223,9 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
 
                 for id_ped, ped in enumerate(list_pedestrian):
 
-                    if not os.path.exists(pathFrames + f_no_ext + '/' + ped):
-                        os.mkdir(pathFrames + f_no_ext + '/' + ped)
+                    if frame:
+                        if not os.path.exists(pathFrames + f_no_ext + '/' + ped):
+                            os.mkdir(pathFrames + f_no_ext + '/' + ped)
 
                     #Compruebo si el peaton se encuentra en el frame actual
                     list_frames = data[f_no_ext]['ped_annotations'][ped]['frames']
