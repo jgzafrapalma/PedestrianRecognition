@@ -16,8 +16,8 @@ def create_model(the_input_shape, dropout_rate, learning_rate):
     model.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
               activation='relu'))
 
-    model.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu'))
+    #model.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+              #activation='relu'))
 
     model.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last',
               activation='relu'))
