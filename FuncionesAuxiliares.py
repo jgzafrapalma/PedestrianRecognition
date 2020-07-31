@@ -167,20 +167,23 @@ def create_Train_Validation(path_instances, percent_Validation):
 
     return train.tolist(), validation.tolist()
 
+#pathVideos: ruta donde se encuentran los videos
+#pathInsatnces: ruta donde se quiere almacenar las instancias que se van a generar
+#pathFrames: ruta donde se van a almacenar los frames del problema si la variable booleana frames esta activa
 
-def extract_pedestrians_datasets(pathDataset, pathData, rate, shape=()):
+def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData, rate, shape=(), frames=True):
 
     with open(pathData, 'rb') as f:
         data = pickle.load(f)
 
-    if not os.path.exists(pathDataset + '/Peatones'):
-        os.mkdir(pathDataset + '/Peatones')
+    if frames:
+        if not os.path.exists(pathFrames):
+            os.mkdir(pathFrames)
 
-    if not os.path.exists(pathDataset + '/instances'):
-        os.mkdir(pathDataset + '/instances')
+    if not os.path.exists(pathInstances):
+        os.mkdir(pathInstances)
 
     #Se recorren todos los videos
-    pathVideos = pathDataset + '/JAAD_clips/'
     for f in os.listdir(pathVideos):
         if isfile(join(pathVideos, f)):
             cap = cv2.VideoCapture(pathVideos + f)
@@ -190,8 +193,9 @@ def extract_pedestrians_datasets(pathDataset, pathData, rate, shape=()):
             #Nombre del fichero sin extención
             f_no_ext = ".".join(f.split(".")[:-1])
 
-            if not os.path.exists(pathDataset + '/Peatones/' + f_no_ext):
-                os.mkdir(pathDataset + '/Peatones/' + f_no_ext)
+            if frames:
+                if not os.path.exists(pathFrames + f_no_ext):
+                    os.mkdir(pathFrames + f_no_ext)
 
             width = data[f_no_ext]['width']
             height = data[f_no_ext]['height']
@@ -219,8 +223,8 @@ def extract_pedestrians_datasets(pathDataset, pathData, rate, shape=()):
 
                 for id_ped, ped in enumerate(list_pedestrian):
 
-                    if not os.path.exists(pathDataset + '/Peatones/' + f_no_ext + '/' + ped):
-                        os.mkdir(pathDataset + '/Peatones/' + f_no_ext + '/' + ped)
+                    if not os.path.exists(pathFrames + f_no_ext + '/' + ped):
+                        os.mkdir(pathFrames + f_no_ext + '/' + ped)
 
                     #Compruebo si el peaton se encuentra en el frame actual
                     list_frames = data[f_no_ext]['ped_annotations'][ped]['frames']
@@ -404,7 +408,8 @@ def extract_pedestrians_datasets(pathDataset, pathData, rate, shape=()):
                         if shape:
                             cut = cv2.resize(cut, (shape[1], shape[0]))
 
-                        cv2.imwrite(pathDataset + '/Peatones/' + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
+                        if frame:
+                            cv2.imwrite(pathFrames + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
 
                         cuts_pedestrian[id_ped][index_frame] = cut
 
@@ -413,7 +418,7 @@ def extract_pedestrians_datasets(pathDataset, pathData, rate, shape=()):
             cap.release()
 
             for id_ped, cut_predestrian in enumerate(cuts_pedestrian):
-                np.save(pathDataset + '/instances/' + f_no_ext + '_' + list_pedestrian[id_ped] + '.npy', cuts_pedestrian[id_ped])
+                np.save(pathInstances + f_no_ext + '_' + list_pedestrian[id_ped] + '.npy', cuts_pedestrian[id_ped])
 
 
 
