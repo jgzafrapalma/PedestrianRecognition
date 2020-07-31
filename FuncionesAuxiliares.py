@@ -186,16 +186,16 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
     #Se recorren todos los videos
     for f in os.listdir(pathVideos):
         if isfile(join(pathVideos, f)):
-            cap = cv2.VideoCapture(pathVideos + f)
+            cap = cv2.VideoCapture(pathVideos + '/' + f)
 
-            print(pathVideos + f)
+            print(pathVideos + '/' + f)
 
             #Nombre del fichero sin extención
             f_no_ext = ".".join(f.split(".")[:-1])
 
             if frames:
-                if not os.path.exists(pathFrames + f_no_ext):
-                    os.mkdir(pathFrames + f_no_ext)
+                if not os.path.exists(pathFrames + '/' + f_no_ext):
+                    os.mkdir(pathFrames + '/' + f_no_ext)
 
             width = data[f_no_ext]['width']
             height = data[f_no_ext]['height']
@@ -224,8 +224,8 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
                 for id_ped, ped in enumerate(list_pedestrian):
 
                     if frames:
-                        if not os.path.exists(pathFrames + f_no_ext + '/' + ped):
-                            os.mkdir(pathFrames + f_no_ext + '/' + ped)
+                        if not os.path.exists(pathFrames + '/' + f_no_ext + '/' + ped):
+                            os.mkdir(pathFrames + '/' + f_no_ext + '/' + ped)
 
                     #Compruebo si el peaton se encuentra en el frame actual
                     list_frames = data[f_no_ext]['ped_annotations'][ped]['frames']
@@ -410,7 +410,7 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
                             cut = cv2.resize(cut, (shape[1], shape[0]))
 
                         if frames:
-                            cv2.imwrite(pathFrames + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
+                            cv2.imwrite(pathFrames + '/' + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
 
                         cuts_pedestrian[id_ped][index_frame] = cut
 
@@ -419,7 +419,7 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
             cap.release()
 
             for id_ped, cut_predestrian in enumerate(cuts_pedestrian):
-                np.save(pathInstances + f_no_ext + '_' + list_pedestrian[id_ped] + '.npy', cuts_pedestrian[id_ped])
+                np.save(pathInstances + '/' + f_no_ext + '_' + list_pedestrian[id_ped] + '.npy', cuts_pedestrian[id_ped])
 
 
 
