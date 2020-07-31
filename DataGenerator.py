@@ -6,7 +6,7 @@ from FuncionesAuxiliares import ShuffleFrames
 from FuncionesAuxiliares import create_Train_Validation
 from FuncionesAuxiliares import save_frames
 
-from tensorflow_core.python.keras.utils.np_utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 
 import os
 
