@@ -223,7 +223,7 @@ def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData
 
                 for id_ped, ped in enumerate(list_pedestrian):
 
-                    if frame:
+                    if frames:
                         if not os.path.exists(pathFrames + f_no_ext + '/' + ped):
                             os.mkdir(pathFrames + f_no_ext + '/' + ped)
 
