@@ -18,7 +18,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--dim', nargs=2, default=(128, 128), type=int, dest='dim', help='dimensionality of input data')
 
-parser.add_argument('-i', '--instances', default='/media/jorge/DATOS/TFG/datasets/instances', type=str, dest='path_instances', help='path of the instances')
+parser.add_argument('-t', '--train', default='/media/jorge/DATOS/TFG/datasets/ids_instances/train.txt', type=str, dest='path_train_instances', help='path of the train instances')
+
+parser.add_argument('-v', '--validation', default='/media/jorge/DATOS/TFG/datasets/ids_instances/validation.txt', type=str, dest='path_validation_instances', help='path of the validation instances')
 
 parser.add_argument('-b', '--batch', default=32, type=int, dest='batch_size', help='batch size')
 
@@ -45,6 +47,8 @@ args = parser.parse_args()
 
 print(args.random)
 
+print(args.path_instances)
+
 #Si el valor de random es igual a False y no se ha introducido una semilla
 if (not args.random and args.seed == None):
     parser.error('When the value of the random argument is False, the seed command must be entered')
@@ -61,7 +65,7 @@ if (not args.random and args.seed != None):
 
 from model import create_model
 
-from FuncionesAuxiliares import create_Train_Validation
+from FuncionesAuxiliares import read_instance_file_txt
 from FuncionesAuxiliares import save_frames
 from DataGenerator import DataGenerator
 
@@ -86,10 +90,14 @@ params = {'dim': tuple(args.dim),
           'n_channels': 3,
           'n_frames': args.n_frames,
           'normalized': args.normalized,
-          'shuffle': args.shuffle}
+          'shuffle': args.shuffle,
+          'step_swaps': 5}
 
-train_ids_instances, validation_ids_instances = create_Train_Validation(args.path_instances, 0.3)
+#train_ids_instances, validation_ids_instances = create_Train_Validation(args.path_instances, 0.3)
 
+train_ids_instances = read_instance_file_txt('/media/jorge/DATOS/TFG/datasets/ids_instances/train.txt')
+
+validation_ids_instances = read_instance_file_txt('/media/jorge/DATOS/TFG/datasets/ids_instances/validation.txt')
 
 train_generator = DataGenerator(train_ids_instances, **params)
 
