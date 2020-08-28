@@ -1,12 +1,21 @@
+#Se carga el fichero de configuración
+import yaml
+
+with open('config.yaml', 'r') as file_descriptor:
+    config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
+
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
+
+semilla = config['Keras_Tuner']['seed']
+
 from numpy.random import seed
-seed(1)
+seed(semilla)
 import tensorflow as tf
-tf.random.set_seed(1)
+tf.random.set_seed(semilla)
 from random import seed
-seed(1)
-SEED = 1
+seed(semilla)
+SEED = semilla
 
 #############################################SOLUCIONAR EL ERROR DE LA LIBRERIA CUDNN###################################
 from tensorflow.compat.v1 import ConfigProto
@@ -20,40 +29,27 @@ session = InteractiveSession(config=config)
 
 from HyperModel import CNNHyperModel
 from FuncionesAuxiliares import read_instance_file_txt
-from DataGenerator import DataGenerator
 
 from tensorflow.keras.callbacks import EarlyStopping
 
-import argparse
 
 from Tuner import MyTunerBayesian
 
-parser = argparse.ArgumentParser()
+#VARIABLES GLOBALES DEL PROBLEMA.
+NUM_CLASSES = config['Keras_Tuner']['num_classes']
+INPUT_SHAPE = (config['Keras_Tuner']['n_frames'], config['Keras_Tuner']['dim'][0], config['Keras_Tuner']['dim'][1], 3)
 
-parser.add_argument('-d', '--dim', nargs=2, default=(128, 128), type=int, dest='dim', help='dimensionality of input data')
-
-parser.add_argument('-t', '--train', default='/media/jorge/DATOS/TFG/datasets/ids_instances/train.txt', type=str, dest='path_train_instances', help='path of the train instances')
-
-parser.add_argument('-v', '--validation', default='/media/jorge/DATOS/TFG/datasets/ids_instances/validation.txt', type=str, dest='path_validation_instances', help='path of the validation instances')
-
-parser.add_argument('-e', '--epochs', default=100, type=int, dest='epochs', help='number of epochs')
-
-parser.add_argument('-f', '--frames', default=8, type=int, dest='n_frames', help='number of frames')
-
-
-args = parser.parse_args()
-
-#VARIABLES GLOBALES DEL PROBLEMA. PONERLAS COMO ENTRADA POR LINEA DE ARGUMENTOS!!!!
-NUM_CLASSES = 2
-INPUT_SHAPE = (8, 128, 128, 3)
-
-N_EPOCH_SEARCH = args.epochs
+N_EPOCH_SEARCH = config['Keras_Tuner']['epochs']
 HYPERBAND_MAX_EPOCHS = 40
-MAX_TRIALS = 100
+MAX_TRIALS = 100 # Number of hyperparameter combinations that will be tested by the tuner
 EXECUTION_PER_TRIAL = 2
 BAYESIAN_NUM_INITIAL_POINTS = 5
 
 def run_hyperparameter_tuning():
+
+    #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
+    train_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_train_instances'])
+    validation_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_validation_instances'])
 
     #Instanciación del objeto de la clase HyperModel
     hypermodel = CNNHyperModel(input_shape=INPUT_SHAPE, num_classes=NUM_CLASSES)
@@ -72,10 +68,6 @@ def run_hyperparameter_tuning():
 
     tuner.search_space_summary()
 
-
-    #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
-    train_ids_instances = read_instance_file_txt(args.path_train_instances)
-    validation_ids_instances = read_instance_file_txt(args.path_validation_instances)
 
     earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min',
                                   restore_best_weights=True)

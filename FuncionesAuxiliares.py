@@ -115,7 +115,7 @@ def extract_Frames_Matriz(pathInstances, ID_instance, n_frames_extracted):
     return np.array(frames)
 
 
-def extract_Frames_Labels_Matriz(input_frames, input_labels, n_frames_extracted, ID_video, ID_pedestrian):
+def extract_Frames_JAAD(input_frames, input_labels, n_frames_extracted, ID_video, ID_pedestrian):
 
     #Numero total de frames en los que aparece el peaton
     total_frames = input_frames.shape[0]
@@ -209,13 +209,6 @@ def equal_arrays(array1, array2):
 
     return True
 
-def create_Train_Validation(path_instances, percent_Validation):
-    #Me quedo unicamente con el nombre de las instancias sin el formato
-    onlyfiles = [f for f in os.listdir(path_instances) if isfile(join(path_instances, f))]
-
-    train, validation = np.split(onlyfiles, [int(len(onlyfiles)*(1 - percent_Validation))])
-
-    return train.tolist(), validation.tolist()
 
 #Función que recibe como parámetro la ruta de la carpeta donde se encuentran las instancias y los porcentajes para las
 #particiones de validación y test, y genera tres ficheros con los ID de los videos pertenecientes a cada conjunto de datos
@@ -302,7 +295,7 @@ def read_instance_file_txt(path_file):
 #pathInsatnces: ruta donde se quiere almacenar las instancias que se van a generar
 #pathFrames: ruta donde se van a almacenar los frames del problema si la variable booleana frames esta activa
 
-def extract_pedestrians_datasets(pathVideos, pathInstances, pathFrames, pathData, rate, n_frames, shape=(), frames=True):
+def extract_pedestrians_datasets_JAAD(pathVideos, pathInstances, pathFrames, pathData, rate, n_frames, shape=(), frames=True):
 
     with open(pathData, 'rb') as f:
         data = pickle.load(f)
@@ -676,37 +669,19 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                             diff_x = int(bbox[2]) - int(bbox[0]) + 1
                             diff_y = int(bbox[3]) - int(bbox[1]) + 1
 
-                            """print("x1: %d" % bbox[0])
-                            print("x2: %d" % bbox[2])
-                            print("y1: %d" % bbox[1])
-                            print("y2: %d" % bbox[3])"""
-
-                            #print("diff_x: %d" % diff_x)
-
-                            #print("diff_y: %d" % diff_x)
-
-
                             # Si la diferencia de la coordenada de x es mayor (Caso habitual)
                             if diff_x >= diff_y:
-
-                                #print("diff_x >= diff_y")
 
                                 # Incremento que se va a realizar sobre el recorte tanto por la parte superior como
                                 # inferior de los fotogramas
                                 increment = math.floor(diff_x * rate)
 
-                                #print("increment: %d" % increment)
-
                                 expected_size_cut = int(diff_x + 2 * increment)
-
-                                #print("expected_size_cut: %d" % expected_size_cut)
 
                                 """Se calcula la nueva posición que va a tener la coordenada x1,
                                 increment será igual a la cantidad de pixeles en la que se amplia la imagen por la parte
                                 izquierda"""
                                 new_x1 = int(bbox[0]) - increment
-
-                                #print("new_x1_pre_loop: %d" % new_x1)
 
                                 # Si pasa del marco izquierdo de la imagen
                                 if new_x1 < 0:
@@ -714,18 +689,12 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                                     cut_x1 = new_x1 * (-1)
                                     # La nueva coordenada de x se establece en 0
                                     new_x1 = 0
-                                    #print("cut_x1: %d" % cut_x1)
                                 else:
                                     """La imagen no se sale por el lateral izquierdo, por lo tanto, en la imagen final 
                                     se empieza a escribir la imagen recortada desde la esquina superior izquierda"""
                                     cut_x1 = 0
-                                    #print("cut_x1: %d" % cut_x1)
-
-                                #print("new_x1_post_loop: %d" % new_x1)
 
                                 new_x2 = int(bbox[2]) + increment
-
-                                #print("new_x2_pre_loop: %d" % new_x2)
 
                                 """Si pasa del marco derecho de la imagen (1920 o superior, ya que el ultimo valor de pixel
                                 por la derecha es el 1919)"""
@@ -734,219 +703,125 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                                         cut_x2 es la posición final en la que se recorta la imagen"""
                                     cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
                                     new_x2 = (width - 1)
-                                    #print("cut_x2: %d" % cut_x2)
                                 else:
                                     cut_x2 = expected_size_cut - 1
-                                    #print("cut_x2: %d" % cut_x2)
-
-                                #print("new_x2_post_loop: %d" % new_x2)
 
                                 # La longitud que va a tener la parte vertical debera de ser igual a la nueva diferencia
                                 # de las coordenadas x
                                 diff = expected_size_cut - diff_y
 
-                                #print("diff: %d" % diff)
-
                                 # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
                                 if diff % 2 != 0:
                                     increment = math.floor(diff / 2)
 
-                                    #print("increment: %d" % increment)
-
                                     new_y1 = int(bbox[1]) - increment
-
-                                    #print("new_y1_pre_loop: %d" % new_y1)
 
                                     # Se pasa del marco superior de la imagen
                                     if new_y1 < 0:
                                         cut_y1 = new_y1 * (-1)
                                         new_y1 = 0
-                                        #print("cut_y1: %d" % cut_y1)
                                     else:
                                         cut_y1 = 0
-                                        #print("cut_y1: %d" % cut_y1)
-
-                                    #print("new_y1_post_loop: %d" % new_y1)
 
                                     new_y2 = int(bbox[3]) + increment + 1
-
-                                    #print("new_y2_pre_loop: %d" % new_y2)
 
                                     if new_y2 > (height - 1):
                                         # Cantidad que me salgo hacia la derecha de la imagen
                                         cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
                                         new_y2 = (height - 1)
-                                        #print("cut_y2: %d" % cut_y2)
                                     else:
                                         cut_y2 = expected_size_cut - 1
-                                        #print("cut_y2: %d" % cut_y2)
-
-                                    #print("new_y2_post_loop: %d" % new_y2)
 
                                 else:
 
                                     increment = diff / 2
 
-                                    #print("increment: %d" % increment)
-
                                     new_y1 = int(bbox[1]) - increment
-
-                                    #print("new_y1_pre_loop: %d" % new_y1)
 
                                     # Se pasa del marco superior de la imagen
                                     if new_y1 < 0:
                                         cut_y1 = new_y1 * (-1)
                                         new_y1 = 0
-                                        #print("cut_y1: %d" % cut_y1)
                                     else:
                                         cut_y1 = 0
-                                        #print("cut_y1: %d" % cut_y1)
-
-                                    #print("new_y1_post_loop: %d" % new_y1)
 
                                     new_y2 = int(bbox[3]) + increment
-
-                                    #print("new_y2_pre_loop: %d" % new_y2)
 
                                     if new_y2 > (height - 1):
                                         cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
                                         new_y2 = (height - 1)
-                                        #print("cut_y2: %d" % cut_y2)
                                     else:
                                         cut_y2 = expected_size_cut - 1
-                                        #print("cut_y2: %d" % cut_y2)
-
-                                    #print("new_y2_post_loop: %d" % new_y2)
 
                             else: # diff_y > diff_x
 
                                 increment = math.floor(diff_y * rate)
 
-                                #print("increment: %d" % increment)
-
                                 expected_size_cut = int(diff_y + 2 * increment)
-
-                                #print("expected_size_cut: %d" % expected_size_cut)
 
                                 # Se calcula la nueva posición que va a tener la coordenada y1
                                 new_y1 = int(bbox[1]) - increment
-
-                                #print("new_y1_pre_loop: %d" % new_y1)
 
                                 # Si pasa del marco superior
                                 if new_y1 < 0:
                                     cut_y1 = new_y1 * (-1)
                                     new_y1 = 0
-                                    #print("cut_y1: %d" % cut_y1)
                                 else:
                                     cut_y1 = 0
-                                    #print("cut_y1: %d" % cut_y1)
-
-                                #print("new_y1_post_loop: %d" % new_y1)
 
                                 # Se calcula la nueva posición que va a tener la coordenada y1
                                 new_y2 = int(bbox[3]) + increment
-
-                                #print("new_y2_pre_loop: %d" % new_y2)
 
                                 # Si pasa del inferior
                                 if new_y2 > (height - 1):
                                     cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
                                     new_y2 = (height - 1)
-                                    #print("cut_y2: %d" % cut_y2)
                                 else:
                                     cut_y2 = expected_size_cut - 1
-                                    #print("cut_y2: %d" % cut_y2)
-
-                                #print("new_y2_post_loop: %d" % new_y2)
 
                                 diff = expected_size_cut - diff_x
-
-                                #print("diff: %d" % diff)
 
                                 # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
                                 if diff % 2 != 0:
                                     increment = math.floor(diff / 2)
 
-                                    #print("increment: %d" % increment)
-
                                     new_x1 = int(bbox[0]) - increment
-
-                                    #print("new_x1_pre_loop: %d" % new_x1)
 
                                     # Se pasa del marco lateral izquierdo de la imagen
                                     if new_x1 < 0:
                                         cut_x1 = new_x1 * (-1)
                                         new_x1 = 0
-                                        #print("cut_x1: %d" % cut_x1)
                                     else:
                                         cut_x1 = 0
-                                        #print("cut_x1: %d" % cut_x1)
-
-                                    #print("new_x1_post_loop: %d" % new_x1)
 
                                     new_x2 = int(bbox[2]) + increment + 1
-
-                                    #print("new_x2_pre_loop: %d" % new_x2)
 
                                     if new_x2 > (width - 1):
                                         cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
                                         new_x2 = (width - 1)
-                                        #print("cut_x2: %d" % cut_x2)
                                     else:
                                         cut_x2 = expected_size_cut - 1
 
-                                    #print("new_x2_post_loop: %d" % new_x2)
                                 else:
 
                                     increment = diff / 2
 
-                                    #print("increment: %d" % increment)
-
                                     new_x1 = int(bbox[0]) - increment
-
-                                    #print("new_x1_pre_loop: %d" % new_x1)
 
                                     # Se pasa del marco lateral izquierdo de la imagen
                                     if new_x1 < 0:
                                         cut_x1 = new_x1 * (-1)
                                         new_x1 = 0
-                                        #print("cut_x1: %d" % cut_x1)
                                     else:
                                         cut_x1 = 0
-                                        #print("cut_x1: %d" % cut_x1)
-
-                                    #print("new_x1_post_loop: %d" % new_x1)
 
                                     new_x2 = int(bbox[2]) + increment
-
-                                    #print("new_x2_pre_loop: %d" % new_x2)
 
                                     if new_x2 > (width - 1):
                                         cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
                                         new_x2 = (width - 1)
-                                        #print("cut_x2: %d" % cut_x2)
                                     else:
                                         cut_x2 = expected_size_cut - 1
-                                        #print("cut_x2: %d" % cut_x2)
-
-                                    #print("new_x2_post_loop: %d" % new_x2)
-
-
-                            """print("x1: %d" % bbox[0])
-                            print("x2: %d" % bbox[2])
-                            print("y1: %d" % bbox[1])
-                            print("y2: %d" % bbox[3])
-
-                            print("new_x1: %d" % new_x1)
-                            print("new_x2: %d" % new_x2)
-                            print("new_y2: %d" % new_y1)
-                            print("new_y2: %d" % new_y2)
-
-                            print("cut_x1: %d" % cut_x1)
-                            print("cut_x2: %d" % cut_x2)
-                            print("cut_y1: %d" % cut_y1)
-                            print("cut_y2: %d" % cut_y2)"""
 
                             cut = np.zeros((expected_size_cut, expected_size_cut, 3))
 
@@ -954,8 +829,6 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                             if shape:
                                 cut = cv2.resize(cut, (shape[1], shape[0]))
-
-                            # cv2.imwrite(pathFrames + '/' + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
 
                             cv2.imwrite(join(PATH_frames_ped, '%03d' % id_frame + '.jpg'), cut)
 
@@ -1038,37 +911,3 @@ def save_frames(path_saves, frames, ID):
     for i in range(len(frames)):
         cv2.imwrite(path_saves + '/' + str(ID) + "__" + str(i) + ".jpg", frames[i])
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--pathIn', help="path to video")
-
-    args = parser.parse_args()
-
-    videos = os.listdir("./datasets/JAAD_clips/")
-
-    #NINSTANCES = len(videos) * 2
-    #NFRAMES = 5
-    #WIDTH = 1920
-    #HEIGHT = 1080
-    #CHANNELS = 3
-
-    # Por cada secuencia de frames (clase positiva), se va a generar otra desordenada (clase negativa)
-    #Dataset = np.zeros((NINSTANCES, NFRAMES, HEIGHT, WIDTH, CHANNELS))
-
-    #labels = np.zeros(len(videos) * 2)
-
-    #for i in range(len(videos)):
-    frames = extractFrames(args.pathIn, 8)
-
-    frames_shuffle = ShuffleFrames(frames, 1)
-
-    print(frames_shuffle.shape)
-
-    for id_frame in range(8):
-        filename = "./datasets/JAAD_clips/shuffle/" + str(id_frame) + ".jpg"
-
-        cv2.imwrite(filename, frames_shuffle[id_frame])
-
-
-    # path in -> "./datasets/JAAD_clips/video_0001.mp4"
