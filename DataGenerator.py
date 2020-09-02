@@ -3,7 +3,6 @@ from tensorflow.keras.utils import Sequence
 from FuncionesAuxiliares import extract_Frames_Matriz
 from FuncionesAuxiliares import ShuffleFrames
 
-from FuncionesAuxiliares import create_Train_Validation
 from FuncionesAuxiliares import save_frames
 
 from tensorflow.keras.utils import to_categorical

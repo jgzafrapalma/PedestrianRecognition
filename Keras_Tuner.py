@@ -7,23 +7,23 @@ with open('config.yaml', 'r') as file_descriptor:
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
 
-semilla = config['Keras_Tuner']['seed']
+if not config['Keras_Tuner']['random']:
 
-from numpy.random import seed
-seed(semilla)
-import tensorflow as tf
-tf.random.set_seed(semilla)
-from random import seed
-seed(semilla)
-SEED = semilla
+    SEED = config['Keras_Tuner']['seed']
+    from numpy.random import seed
+    seed(SEED)
+    import tensorflow as tf
+    tf.random.set_seed(SEED)
+    from random import seed
+    seed(SEED)
 
 #############################################SOLUCIONAR EL ERROR DE LA LIBRERIA CUDNN###################################
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
 
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
+configProto = ConfigProto()
+configProto.gpu_options.allow_growth = True
+session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
@@ -31,59 +31,175 @@ from HyperModel import CNNHyperModel
 from FuncionesAuxiliares import read_instance_file_txt
 
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import TensorBoard
 
+from Tuner import MyTunerBayesian, MyTunerRandom, MyTunerHyperBand
 
-from Tuner import MyTunerBayesian
+from loguru import logger
 
-#VARIABLES GLOBALES DEL PROBLEMA.
-NUM_CLASSES = config['Keras_Tuner']['num_classes']
-INPUT_SHAPE = (config['Keras_Tuner']['n_frames'], config['Keras_Tuner']['dim'][0], config['Keras_Tuner']['dim'][1], 3)
+import pickle
 
-N_EPOCH_SEARCH = config['Keras_Tuner']['epochs']
-HYPERBAND_MAX_EPOCHS = 40
-MAX_TRIALS = 100 # Number of hyperparameter combinations that will be tested by the tuner
-EXECUTION_PER_TRIAL = 2
-BAYESIAN_NUM_INITIAL_POINTS = 5
+from os.path import join
+
+from datetime import datetime
+
+import time
+
+from DataGenerator import DataGenerator
 
 def run_hyperparameter_tuning():
 
     #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
-    train_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_train_instances'])
-    validation_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_validation_instances'])
+    train_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_train_id_instances'])
+    validation_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_validation_id_instances'])
+    test_ids_instances = read_instance_file_txt(config['Keras_Tuner']['path_test_id_instances'])
 
-    #Instanciación del objeto de la clase HyperModel
-    hypermodel = CNNHyperModel(input_shape=INPUT_SHAPE, num_classes=NUM_CLASSES)
+    dim = config['Keras_Tuner']['dim']
+    path_instances = config['Keras_Tuner']['path_instances']
+    epochs = config['Keras_Tuner']['epochs']
+    n_frames = config['Keras_Tuner']['n_frames']
+    num_classes = config['Keras_Tuner']['num_classes']
+    path_dir_results = config['Keras_Tuner']['path_dir_results']
 
-
-    tuner = MyTunerBayesian(
-        hypermodel,
-        objective="val_accuracy",
-        seed=SEED,
-        max_trials=MAX_TRIALS,
-        num_initial_points=BAYESIAN_NUM_INITIAL_POINTS,
-        directory="Bayesian_search",
-        project_name="CONV3D",
-        overwrite=True
+    tuners, tuners_types, project_names = define_tuners(
+        (n_frames, dim[0], dim[1], 3),
+        num_classes,
     )
 
-    tuner.search_space_summary()
+    earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+    for id_tuner, tuner in enumerate(tuners):
+
+        tuner.search_space_summary()
+
+        logger.info(f"Iniciando busqueda para {tuner}")
+
+        start_time = time.time()
+
+        tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, 1, epochs, [earlystopping])
+
+        stop_time = time.time()
+
+        logger.success(f"Busqueda para {tuner} finalizada")
+
+        elapsed_time = start_time - stop_time
+
+        tuner.results_summary()
+
+        best_model = tuner.get_best_models(num_models=1)[0]
+
+        best_hp = tuner.get_best_hyperparameters()[0].values
+
+        params = {
+            'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': best_hp['batch_size'],
+            'n_clases': 2,
+            'n_channels': 3,
+            'n_frames': n_frames,
+            'normalized': best_hp['normalized'],
+            'shuffle': best_hp['shuffle'],
+            'step_swaps': best_hp['step_swaps']
+        }
+
+        test_generator = DataGenerator(test_ids_instances, **params)
+
+        loss, accuracy = best_model.evaluate(test_generator)
+
+        date_time = datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
+
+        path_output = join(path_dir_results, tuners_types[id_tuner], project_names[id_tuner], f"{date_time}-{accuracy}")
+
+        #Se almacena el tuner en un fichero binario
+        with open(join(path_output, 'tuner'), 'wb') as file_descriptor:
+            pickle.dump(tuner, file_descriptor)
+
+        logger.success(f"Almacenado fichero binario para {tuner}")
+
+        with open(join(path_output, "results.txt"), 'w') as filehandle:
+            filehandle.write("Mejores hiperparámetros del mejor modelo:\n")
+            filehandle.write(best_hp + "\n")
+            filehandle.write("Tiempo de busqueda: " + elapsed_time + "\n")
+            filehandle.write('Resultados de los modelos para el conjunto de validación: \n')
+            filehandle.write(tuner.results_summary())
+
+        logger.success(f"Almacenados resultados en fichero de texto")
 
 
-    earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min',
-                                  restore_best_weights=True)
+def define_tuners(input_shape, num_classes):
 
-    keras_callbacks = [earlystopping]
+    #Instanciación del objeto de la clase HyperModel
+    hypermodel = CNNHyperModel(input_shape=input_shape, num_classes=num_classes)
 
-    tuner.search(train_ids_instances, validation_ids_instances, tuple(args.dim), args.path_instances, args.n_frames, 1, N_EPOCH_SEARCH, keras_callbacks)
+    tuners = []
+    tuners_types = []
+    project_names = []
 
-    tuner.results_summary()
+    #Se recorren todos los keras tuner que se encuentren en el fichero de configuración
+    for tuner_id in list(config['Keras_Tuner']['tuners']):
+        #Se obtiene el tipo del keras tuner
+        tuner_type = config['Keras_Tuner']['tuners'][tuner_id]['type']
 
-    best_model = tuner.get_best_models(num_models=1)[0]
+        if tuner_type == 'Random_Search':
 
-    best_hp = tuner.get_best_hyperparameters()
+            tuners.append(
+                MyTunerRandom(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
+                    seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
+                    max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
+                    executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
+                    directory=config['Keras_Tuner']['tuners'][tuner_id]['directory'],
+                    project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
+                    overwrite=True
+                )
+            )
+
+            tuners_types.append('Random_Search')
+
+            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
+
+        elif tuner_type == 'HyperBand':
+
+            tuners.append(
+                MyTunerHyperBand(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
+                    seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
+                    max_epochs=config['Keras_Tuner']['tuners'][tuner_id]['max_epochs'],
+                    executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
+                    directory=config['Keras_Tuner']['tuners'][tuner_id]['directory'],
+                    project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
+                    overwrite=True
+                )
+            )
+
+            tuners_types.append('HyperBand')
+
+            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
+
+        else:
+
+            tuners.append(
+                MyTunerBayesian(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
+                    seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
+                    max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
+                    num_initial_points=config['Keras_Tuner']['tuners'][tuner_id]['num_initial_points'],
+                    directory="Bayesian_search",
+                    project_name="CONV3D",
+                    overwrite=True
+                )
+            )
+
+            tuners_types.append('Baayesian_Optimization')
+
+            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
+
+    return tuners, tuners_types, project_names
 
 
-def define_tuners():
 
 
 run_hyperparameter_tuning()
