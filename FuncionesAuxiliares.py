@@ -8,7 +8,6 @@ import pickle
 import errno
 import copy
 from pathlib import Path
-from loguru import logger
 
 import argparse
 

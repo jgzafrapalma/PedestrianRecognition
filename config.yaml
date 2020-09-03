@@ -1,39 +1,24 @@
 Keras_Tuner:
   dim: !!python/tuple [128, 128]
-  path_instances: /media/jorge/DATOS/TFG/instances/PIE_pedestrians
-  path_train_id_instances: /media/jorge/DATOS/TFG/ids_instances/PIE/train.txt
-  path_validation_id_instances: /media/jorge/DATOS/TFG/ids_instances/PIE/validation.txt
-  path_test_id_instances: /media/jorge/DATOS/TFG/ids_instances/PIE/test.txt
-  path_dir_results: /media/jorge/DATOS/TFG/tuners_results/PIE_dataset
+  dataset: JAAD_dataset
+  path_instances: /pub/experiments/jzafra/instances/JAAD_pedestrians
+  path_train_id_instances: /pub/experiments/jzafra/ids_instances/JAAD/train.txt
+  path_validation_id_instances: /pub/experiments/jzafra/ids_instances/JAAD/validation.txt
+  path_test_id_instances: /pub/experiments/jzafra/ids_instances/JAAD/test.txt
+  path_dir_results: /pub/experiments/jzafra/
   epochs: 100
-  n_frames: 16
+  n_frames: 8
   seed: 1
   num_classes: 2
   random: False
   tuners:
     tuner_1:
-      type: Random_Search
-      objetive: val_accuracy
-      seed: 1
-      max_trials: 100
-      executions_per_trial: 2
-      directory: /media/jorge/DATOS/TFG/hypertuners/PIE_dataset/Random_Search
-      project_name: CONV3D_model
-    tuner_2:
-      type: HyperBand
-      objetive: val_accuracy
-      seed: 1
-      max_epochs: 40
-      executions_per_trial: 2
-      directory: /media/jorge/DATOS/TFG/hypertuners/PIE_dataset/HyperBand
-      project_name: CONV3D_model
-    tuner_3:
       type: Bayesian_Optimization
       objetive: val_accuracy
       seed: 1
       num_initial_points: 5
       max_trials: 100
-      directory: /media/jorge/DATOS/TFG/hypertuners/PIE_dataset/Bayesian_Optimization
+      directory: /pub/experiments/jzafra/tuner_keras_results/JAAD_dataset/hypertuners/Bayesian_Optimization
       project_name: CONV3D_model
 
 

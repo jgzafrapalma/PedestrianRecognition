@@ -1,3 +1,4 @@
+#LIMITAR CPU AL 45%
 import os
 import tensorflow as tf
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -42,17 +43,17 @@ from tensorflow.keras.callbacks import TensorBoard
 
 from Tuner import MyTunerBayesian, MyTunerRandom, MyTunerHyperBand
 
-from loguru import logger
-
 import pickle
 
-from os.path import join
-
 from datetime import datetime
+
+from os.path import join
 
 import time
 
 from DataGenerator import DataGenerator
+
+from pathlib import Path
 
 def run_hyperparameter_tuning():
 
@@ -66,7 +67,19 @@ def run_hyperparameter_tuning():
     epochs = config['Keras_Tuner']['epochs']
     n_frames = config['Keras_Tuner']['n_frames']
     num_classes = config['Keras_Tuner']['num_classes']
-    path_dir_results = config['Keras_Tuner']['path_dir_results']
+    path_dir_results= Path(join(config['Keras_Tuner']['path_dir_results'], 'tuner_keras_results'))
+    path_results_dataset = Path(path_dir_results / config['Keras_Tuner']['dataset'])
+    path_results_hypertuners = Path(path_results_dataset / 'hypertuners')
+    path_results_tuners = Path(path_results_dataset / 'tuners_results')
+
+    if not path_dir_results.exists():
+        
+        path_dir_results.mkdir()
+        path_results_dataset.mkdir()
+        path_results_hypertuners.mkdir()
+        path_results_tuners.mkdir()
+
+
 
     tuners, tuners_types, project_names = define_tuners(
         (n_frames, dim[0], dim[1], 3),
@@ -79,17 +92,13 @@ def run_hyperparameter_tuning():
 
         tuner.search_space_summary()
 
-        logger.info(f"Iniciando busqueda para {tuner}")
-
         start_time = time.time()
 
         tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, 1, epochs, [earlystopping])
 
         stop_time = time.time()
 
-        logger.success(f"Busqueda para {tuner} finalizada")
-
-        elapsed_time = start_time - stop_time
+        elapsed_time = stop_time - start_time 
 
         tuner.results_summary()
 
@@ -111,27 +120,43 @@ def run_hyperparameter_tuning():
 
         test_generator = DataGenerator(test_ids_instances, **params)
 
-        loss, accuracy = best_model.evaluate(test_generator)
+        loss_test, accuracy_test = best_model.evaluate(test_generator)
+
+        validation_generator = DataGenerator(validation_ids_instances, **params)
+
+        loss_validation, accuracy_validation = best_model.evaluate(validation_generator)
 
         date_time = datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
 
-        path_output = join(path_dir_results, tuners_types[id_tuner], project_names[id_tuner], f"{date_time}-{accuracy}")
+        path_results_type = Path(path_results_tuners / tuners_types[id_tuner])
+
+        if not path_results_type.exists():
+            path_results_type.mkdir()
+        
+        path_results_proyect = Path(path_results_type / project_names[id_tuner])
+
+        if not path_results_proyect.exists():
+            path_results_proyect.mkdir()
+
+        path_output = Path(path_results_proyect / (date_time + '-' + str(accuracy_test)))
+
+        if not path_output.exists():
+            path_output.mkdir()
 
         #Se almacena el tuner en un fichero binario
-        with open(join(path_output, 'tuner'), 'wb') as file_descriptor:
+        with (path_output / 'tuner.pkl').open('wb') as file_descriptor:
             pickle.dump(tuner, file_descriptor)
 
-        logger.success(f"Almacenado fichero binario para {tuner}")
-
-        with open(join(path_output, "results.txt"), 'w') as filehandle:
+        with (path_output / 'results.txt').open('w') as filehandle:
             filehandle.write("Mejores hiperparámetros del mejor modelo:\n")
-            filehandle.write(best_hp + "\n")
-            filehandle.write("Tiempo de busqueda: " + elapsed_time + "\n")
-            filehandle.write('Resultados de los modelos para el conjunto de validación: \n')
-            filehandle.write(tuner.results_summary())
-
-        logger.success(f"Almacenados resultados en fichero de texto")
-
+            filehandle.write(str(best_hp) + "\n")
+            filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+            filehandle.write("Resultados en el conjunto de test: \n")
+            filehandle.write("Loss test: %f\n" % loss_test)
+            filehandle.write("Accuracy test: %f\n" % accuracy_test)
+            filehandle.write("Resultados en el conjunto de validación: \n")
+            filehandle.write("Loss validation: %f\n" % loss_validation)
+            filehandle.write("Accuracy validation: %f\n" % accuracy_validation)
 
 def define_tuners(input_shape, num_classes):
 
@@ -194,13 +219,13 @@ def define_tuners(input_shape, num_classes):
                     seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                     max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
                     num_initial_points=config['Keras_Tuner']['tuners'][tuner_id]['num_initial_points'],
-                    directory="Bayesian_search",
+                    directory=config['Keras_Tuner']['tuners'][tuner_id]['directory'],
                     project_name="CONV3D",
-                    overwrite=True
+                    overwrite=False
                 )
             )
 
-            tuners_types.append('Baayesian_Optimization')
+            tuners_types.append('Bayesian_Optimization')
 
             project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
 
