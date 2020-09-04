@@ -63,11 +63,11 @@ if (not args.random and args.seed != None):
     set_random_seed(args.seed)
 
 
-from model import create_model
+from models import Shuffle_model_Conv3D
 
 from FuncionesAuxiliares import read_instance_file_txt
 from FuncionesAuxiliares import save_frames
-from DataGenerator import DataGenerator
+from DataGenerators import DataGenerator
 
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import EarlyStopping
@@ -103,7 +103,7 @@ train_generator = DataGenerator(train_ids_instances, **params)
 
 validation_generator = DataGenerator(validation_ids_instances, **params)
 
-model = create_model((args.n_frames, args.dim[0], args.dim[1], 3), args.dropout_rate, args.learning_rate)
+model = Shuffle_model_Conv3D((args.n_frames, args.dim[0], args.dim[1], 3), args.dropout_rate, args.learning_rate)
 
 #CALLBACKS
 

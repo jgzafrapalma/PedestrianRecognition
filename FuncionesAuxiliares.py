@@ -280,7 +280,7 @@ def read_instance_file_txt(path_file):
 
     files = []
 
-    with open(path_file, 'r') as filehandle:
+    with path_file.open('r') as filehandle:
 
         files = [place.rstrip() for place in filehandle.readlines()]
 
