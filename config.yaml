@@ -19,7 +19,7 @@ Keras_Tuner:
       num_initial_points: 5
       max_trials: 100
       directory: '/pub/experiments/jzafra/tuner_keras_results/JAAD_dataset/hypertuners/Bayesian_Optimization'
-      project_name: 'CONV3D_model'
+      project_name: '04092020-213445'
 Shuffle:
   dim: !!python/tuple [128, 128]
   dataset: 'PIE_dataset'

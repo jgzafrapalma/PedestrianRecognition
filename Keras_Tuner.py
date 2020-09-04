@@ -78,16 +78,27 @@ def run_hyperparameter_tuning():
     #Se crean los directorios de salida de los resultados
     path_dir_results = Path(config['Keras_Tuner']['path_dir_results'])
     path_results_dataset = Path(path_dir_results / dataset)
-    path_results_hypertuners = Path(path_results_dataset / 'hypertuners')
-    path_results_hypertuners_pretext_task = Path(path_results_hypertuners / pretext_task)
+    path_results_tuners = Path(path_results_dataset / 'tuners')
+    path_resultstuners_pretexttask = Path(path_results_tuners / pretext_task)
+
+
     path_results_tuners = Path(path_results_dataset / 'tuners_results')
 
+    #Se crean las carpetas necesarias para almacenar los resultados
     if not path_dir_results.exists():
         
         path_dir_results.mkdir()
+
+    if not path_results_dataset.exists():
+
         path_results_dataset.mkdir()
+
+    if not path_results_hypertuners.exists():
+
         path_results_hypertuners.mkdir()
-        path_results_hypertuners_pretext_task.mkdir()
+
+
+        path_resultshypertuners_pretexttask.mkdir()
         path_results_tuners.mkdir()
 
     tuners, tuners_types, project_names = define_tuners(
@@ -95,7 +106,8 @@ def run_hyperparameter_tuning():
         num_classes,
         pretext_task,
         model_name,
-        path_results_hypertuners
+        path_resultstuners_pretexttask,
+        date_time
     )
 
     earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
@@ -141,7 +153,7 @@ def run_hyperparameter_tuning():
 
         loss_validation, accuracy_validation = best_model.evaluate(validation_generator)
 
-        date_time = datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
+        date_time = datetime.now().strftime("%m%d%Y-%H%M%S")
 
         path_results_type = Path(path_results_tuners / tuners_types[id_tuner])
 
@@ -178,7 +190,7 @@ def run_hyperparameter_tuning():
             filehandle.write("Loss validation: %f\n" % loss_validation)
             filehandle.write("Accuracy validation: %f\n" % accuracy_validation)
 
-def define_tuners(input_shape, num_classes, pretext_task, model_name, path_results_hypertuners):
+def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resultstuners_pretexttask):
     #El hipermodelo depende de la tarea de pretexto que se esta realizando y del modelo
     if pretext_task == 'Shuffle' & model_name == 'CONV3D':
         hypermodel = HyperModels.HyperModelShuffleCONV3D(input_shape=input_shape, num_classes=num_classes)
@@ -192,6 +204,13 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
         #Se obtiene el tipo del keras tuner
         tuner_type = config['Keras_Tuner']['tuners'][tuner_id]['type']
 
+        path_results_tuners_pretext_task_tunertype = Path(path_resultstuners_pretexttask / tuner_type)
+
+        if not path_results_tuners_pretext_task_tunertype.exists():
+            path_results_tuners_pretext_task_tunertype.mkdir()
+
+        path_results_tuners_pretext_task_tunertype_model = Path(path_results_tuners_pretext_task_tunertype / model_name)
+
         if tuner_type == 'Random_Search':
 
             if pretext_task == 'Shuffle':
@@ -203,9 +222,9 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
                         executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=path_results_hypertuners / 'Random',
+                        directory=path_results_tuners_pretext_task_tunertype_model,
                         project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
-                        overwrite=True
+                        overwrite=False
                     )
                 )
 
@@ -224,9 +243,9 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_epochs=config['Keras_Tuner']['tuners'][tuner_id]['max_epochs'],
                         executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=config['Keras_Tuner']['tuners'][tuner_id]['directory'],
+                        directory=path_results_tuners_pretext_task_tunertype_model,
                         project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
-                        overwrite=True
+                        overwrite=False
                     )
                 )
 
@@ -245,8 +264,8 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
                         num_initial_points=config['Keras_Tuner']['tuners'][tuner_id]['num_initial_points'],
-                        directory=config['Keras_Tuner']['tuners'][tuner_id]['directory'],
-                        project_name="CONV3D",
+                        directory=path_results_tuners_pretext_task_tunertype_model,
+                        project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
                         overwrite=False
                     )
                 )
