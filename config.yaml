@@ -1,6 +1,6 @@
 Keras_Tuner:
   dim: !!python/tuple [128, 128]
-  dataset: 'JAAD_dataset'
+  dataset: 'PIE_dataset'
   pretext_task: 'Shuffle'
   model: 'CONV3D'
   path_instances: '/pub/experiments/jzafra/instances/'
@@ -8,7 +8,7 @@ Keras_Tuner:
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters'
   epochs: 100
-  n_frames: 8
+  n_frames: 16
   seed: 1
   num_classes: 2
   random: False
@@ -19,7 +19,7 @@ Keras_Tuner:
       seed: 1
       num_initial_points: 5
       max_trials: 100
-      project_name: '04092020-213445'
+      project_name: '04092020-213100'
 Shuffle:
   dim: !!python/tuple [128, 128]
   dataset: 'JAAD_dataset'

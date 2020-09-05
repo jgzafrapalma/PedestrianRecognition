@@ -72,7 +72,7 @@ def run_hyperparameter_tuning():
     #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
     train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
     validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
-    test_ids_instances = read_instance_file_txt(path_id_instances / 'test.txt')
+    #test_ids_instances = read_instance_file_txt(path_id_instances / 'test.txt')
 
     dim = config['Keras_Tuner']['dim']
     epochs = config['Keras_Tuner']['epochs']
@@ -159,11 +159,11 @@ def run_hyperparameter_tuning():
                 'step_swaps': best_hp['step_swaps']
             }
 
-            test_generator = DataGenerators.DataGeneratorShuffle(test_ids_instances, **params)
+            #test_generator = DataGenerators.DataGeneratorShuffle(test_ids_instances, **params)
 
             validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
 
-        loss_test, accuracy_test = best_model.evaluate(test_generator)
+        #loss_test, accuracy_test = best_model.evaluate(test_generator)
 
         loss_validation, accuracy_validation = best_model.evaluate(validation_generator)
 
@@ -173,9 +173,9 @@ def run_hyperparameter_tuning():
 
         with (paths_results[id_tuner] / 'results.txt').open('w') as filehandle:
             filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
-            filehandle.write("Resultados en el conjunto de test: \n")
-            filehandle.write("Loss test: %f\n" % loss_test)
-            filehandle.write("Accuracy test: %f\n" % accuracy_test)
+            #filehandle.write("Resultados en el conjunto de test: \n")
+            #filehandle.write("Loss test: %f\n" % loss_test)
+            #filehandle.write("Accuracy test: %f\n" % accuracy_test)
             filehandle.write("Resultados en el conjunto de validación: \n")
             filehandle.write("Loss validation: %f\n" % loss_validation)
             filehandle.write("Accuracy validation: %f\n" % accuracy_validation)

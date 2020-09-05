@@ -265,14 +265,20 @@ def create_train_validation_test(path_instances, percent_validation, percent_tes
     if not os.path.exists(output_path):
         os.mkdir(output_path)
 
-    with open(output_path + '/test.txt', 'w') as filehandle:
-        filehandle.writelines("%s\n" % place for place in test)
+    if not test == []:
 
-    with open(output_path + '/validation.txt', 'w') as filehandle:
-        filehandle.writelines("%s\n" % place for place in validation)
+        with open(output_path + '/test.txt', 'w') as filehandle:
+            filehandle.writelines("%s\n" % place for place in test)
 
-    with open(output_path + '/train.txt', 'w') as filehandle:
-        filehandle.writelines("%s\n" % place for place in files)
+    if not validation == []:
+
+        with open(output_path + '/validation.txt', 'w') as filehandle:
+            filehandle.writelines("%s\n" % place for place in validation)
+
+    if not files == []:
+
+        with open(output_path + '/train.txt', 'w') as filehandle:
+            filehandle.writelines("%s\n" % place for place in files)
 
 #Función que realiza la lectura de las instancias que se encuentran en el fichero path_file y devuelve la lista con
 #el nombre de las mismas
