@@ -45,7 +45,7 @@ import Tuners
 
 import pickle
 
-from datetime import datetime
+#import logging
 
 from os.path import join
 
@@ -55,7 +55,11 @@ import DataGenerators
 
 from pathlib import Path
 
+import json
+
 def run_hyperparameter_tuning():
+
+    #logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
     dataset = config['Keras_Tuner']['dataset']
 
@@ -78,11 +82,14 @@ def run_hyperparameter_tuning():
     #Se crean los directorios de salida de los resultados
     path_dir_results = Path(config['Keras_Tuner']['path_dir_results'])
     path_results_dataset = Path(path_dir_results / dataset)
-    path_results_tuners = Path(path_results_dataset / 'tuners')
-    path_resultstuners_pretexttask = Path(path_results_tuners / pretext_task)
+    path_results_pretext_task = Path(path_results_dataset / pretext_task)
 
+    path_dir_hyperparameters = Path(config['Keras_Tuner']['path_hyperparameters'])
 
-    path_results_tuners = Path(path_results_dataset / 'tuners_results')
+    path_hyperparameters_dataset = Path(path_dir_hyperparameters / dataset)
+
+    path_hyperparameters_pretex_task = Path(path_hyperparameters_dataset / pretext_task)
+
 
     #Se crean las carpetas necesarias para almacenar los resultados
     if not path_dir_results.exists():
@@ -93,21 +100,28 @@ def run_hyperparameter_tuning():
 
         path_results_dataset.mkdir()
 
-    if not path_results_hypertuners.exists():
+    if not path_results_pretext_task.exists():
 
-        path_results_hypertuners.mkdir()
+        path_results_pretext_task.mkdir()
+
+    #Se creean las carpetas necesarias para almacenar los hipeparámetros
+    if not path_dir_hyperparameters.exists():
+        path_dir_hyperparameters.mkdir()
+
+    if not path_hyperparameters_dataset.exists():
+        path_hyperparameters_dataset.mkdir()
+
+    if not path_hyperparameters_pretex_task.exists():
+        path_hyperparameters_pretex_task.mkdir()
 
 
-        path_resultshypertuners_pretexttask.mkdir()
-        path_results_tuners.mkdir()
-
-    tuners, tuners_types, project_names = define_tuners(
+    tuners, paths_results, paths_hyperparameters = define_tuners(
         (n_frames, dim[0], dim[1], 3),
         num_classes,
         pretext_task,
         model_name,
-        path_resultstuners_pretexttask,
-        date_time
+        path_results_pretext_task,
+        path_hyperparameters_pretex_task
     )
 
     earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
@@ -147,41 +161,17 @@ def run_hyperparameter_tuning():
 
             test_generator = DataGenerators.DataGeneratorShuffle(test_ids_instances, **params)
 
-            loss_test, accuracy_test = best_model.evaluate(test_generator)
-
             validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
+
+        loss_test, accuracy_test = best_model.evaluate(test_generator)
 
         loss_validation, accuracy_validation = best_model.evaluate(validation_generator)
 
-        date_time = datetime.now().strftime("%m%d%Y-%H%M%S")
-
-        path_results_type = Path(path_results_tuners / tuners_types[id_tuner])
-
-        if not path_results_type.exists():
-            path_results_type.mkdir()
-        
-        path_results_proyect = Path(path_results_type / project_names[id_tuner])
-
-        if not path_results_proyect.exists():
-            path_results_proyect.mkdir()
-
-        path_output = Path(path_results_proyect / (date_time + '-' + str(accuracy_test)))
-
-        if not path_output.exists():
-            path_output.mkdir()
-
         #Se almacena el tuner en un fichero binario
-        with (path_output / 'tuner.pkl').open('wb') as file_descriptor:
+        with (paths_results[id_tuner] / 'tuner.pkl').open('wb') as file_descriptor:
             pickle.dump(tuner, file_descriptor)
 
-        #Se almacena el modelo
-        model = tuner.hypermodel.build(best_hp)
-
-        model.save()
-
-        with (path_output / 'results.txt').open('w') as filehandle:
-            filehandle.write("Mejores hiperparámetros del mejor modelo:\n")
-            filehandle.write(str(best_hp) + "\n")
+        with (paths_results[id_tuner] / 'results.txt').open('w') as filehandle:
             filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
             filehandle.write("Resultados en el conjunto de test: \n")
             filehandle.write("Loss test: %f\n" % loss_test)
@@ -190,26 +180,45 @@ def run_hyperparameter_tuning():
             filehandle.write("Loss validation: %f\n" % loss_validation)
             filehandle.write("Accuracy validation: %f\n" % accuracy_validation)
 
-def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resultstuners_pretexttask):
+        #Se guardan los hiperparámetros
+        with (paths_hyperparameters[id_tuner]).open('w') as filehandle:
+            json.dump(best_hp, filehandle)
+
+
+def define_tuners(input_shape, num_classes, pretext_task, model_name, path_results_pretext_task, path_hyperparameters_pretex_task):
     #El hipermodelo depende de la tarea de pretexto que se esta realizando y del modelo
     if pretext_task == 'Shuffle' & model_name == 'CONV3D':
         hypermodel = HyperModels.HyperModelShuffleCONV3D(input_shape=input_shape, num_classes=num_classes)
 
     tuners = []
-    tuners_types = []
-    project_names = []
+    paths_results = []
+    paths_hyperparameters = []
 
     #Se recorren todos los keras tuner que se encuentren en el fichero de configuración
     for tuner_id in list(config['Keras_Tuner']['tuners']):
         #Se obtiene el tipo del keras tuner
         tuner_type = config['Keras_Tuner']['tuners'][tuner_id]['type']
 
-        path_results_tuners_pretext_task_tunertype = Path(path_resultstuners_pretexttask / tuner_type)
+        path_results_pretext_task_tunertype = Path(path_results_pretext_task / tuner_type)
 
-        if not path_results_tuners_pretext_task_tunertype.exists():
-            path_results_tuners_pretext_task_tunertype.mkdir()
+        if not path_results_pretext_task_tunertype.exists():
+            path_results_pretext_task_tunertype.mkdir()
 
-        path_results_tuners_pretext_task_tunertype_model = Path(path_results_tuners_pretext_task_tunertype / model_name)
+        path_results_pretext_task_tunertype_model = Path(path_results_pretext_task_tunertype / model_name)
+
+        path_hyperparameters_pretex_task_tuner_type = Path(path_hyperparameters_pretex_task / tuner_type)
+
+        if not path_hyperparameters_pretex_task_tuner_type.exists():
+            path_hyperparameters_pretex_task_tuner_type.mkdir()
+
+        path_hyperparameters_pretex_task_tuner_type_model = Path(path_hyperparameters_pretex_task_tuner_type / model_name)
+
+        if not path_hyperparameters_pretex_task_tuner_type_model.exists():
+            path_hyperparameters_pretex_task_tuner_type_model.mkdir()
+
+        paths_results.append(Path(path_results_pretext_task_tunertype_model / config['Keras_Tuner']['tuners'][tuner_id]['project_name']))
+
+        paths_hyperparameters.append(Path(path_hyperparameters_pretex_task_tuner_type_model / (config['Keras_Tuner']['tuners'][tuner_id]['project_name'] + '.json')))
 
         if tuner_type == 'Random_Search':
 
@@ -222,15 +231,11 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
                         executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=path_results_tuners_pretext_task_tunertype_model,
+                        directory=path_results_pretext_task_tunertype_model,
                         project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
                         overwrite=False
                     )
                 )
-
-            tuners_types.append('Random_Search')
-
-            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
 
         elif tuner_type == 'HyperBand':
 
@@ -243,15 +248,11 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_epochs=config['Keras_Tuner']['tuners'][tuner_id]['max_epochs'],
                         executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=path_results_tuners_pretext_task_tunertype_model,
+                        directory=path_results_pretext_task_tunertype_model,
                         project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
                         overwrite=False
                     )
                 )
-
-            tuners_types.append('HyperBand')
-
-            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
 
         else:
 
@@ -264,19 +265,12 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                         seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
                         max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
                         num_initial_points=config['Keras_Tuner']['tuners'][tuner_id]['num_initial_points'],
-                        directory=path_results_tuners_pretext_task_tunertype_model,
+                        directory=path_results_pretext_task_tunertype_model,
                         project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
                         overwrite=False
                     )
                 )
 
-            tuners_types.append('Bayesian_Optimization')
-
-            project_names.append(config['Keras_Tuner']['tuners'][tuner_id]['project_name'])
-
-    return tuners, tuners_types, project_names
-
-
-
+    return tuners, paths_results
 
 run_hyperparameter_tuning()

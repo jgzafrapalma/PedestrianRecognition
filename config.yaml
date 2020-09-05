@@ -6,6 +6,7 @@ Keras_Tuner:
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters'
   epochs: 100
   n_frames: 8
   seed: 1
@@ -18,7 +19,6 @@ Keras_Tuner:
       seed: 1
       num_initial_points: 5
       max_trials: 100
-      directory: '/pub/experiments/jzafra/tuner_keras_results/JAAD_dataset/hypertuners/Bayesian_Optimization'
       project_name: '04092020-213445'
 Shuffle:
   dim: !!python/tuple [128, 128]
