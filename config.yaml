@@ -24,16 +24,16 @@ Shuffle:
   dim: !!python/tuple [128, 128]
   dataset: 'JAAD_dataset'
   model_name: 'CONV3D'
-  path_instances: '/media/jorge/DATOS/TFG/instances/'
-  path_id_instances: '/media/jorge/DATOS/TFG/ids_instances/'
+  path_instances: '/pub/experiments/jzafra/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   epochs: 100
   n_frames: 8
   seed: 1
   random: False
-  tensorboard_logs: '/media/jorge/DATOS/TFG/tensorboard'
-  path_output_model: '/media/jorge/DATOS/TFG/models'
+  tensorboard_logs: '/pub/experiments/jzafra/tensorboard'
+  path_output_model: '/pub/experiments/jzafra/models'
   load_hyperparameters: False
-  path_hyperparameters: 'media/jorge/DATOS/TFG/hyperparameters/JAAD_dataset/Shuffle/Bayesian_Optimization/CONV3D/04092020-213445'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/JAAD_dataset/Shuffle/Bayesian_Optimization/CONV3D/04092020-213445'
   hyperparameters:
     batch_size: 16
     dense_activation: 'relu'

@@ -42,6 +42,7 @@ from pathlib import Path
 from os.path import join
 import json
 from datetime import datetime
+import numpy as np
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -60,7 +61,7 @@ path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
 epochs = config['Shuffle']['epochs']
 n_frames = config['Shuffle']['n_frames']
 
-tensorboard_logs = Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time))
+tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time)))
 
 if config['Shuffle']['load_hyperparameters']:
     path_hyperparameters = Path(config['Shuffle']['path_hyperparameters'])
@@ -112,7 +113,7 @@ validation_generator = DataGeneratorShuffle(validation_ids_instances, **params)
 
 if config['Shuffle']['model_name'] == 'CONV3D':
 
-    model = models.Shuffle_model_Conv3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, units, learning_rate)
+    model = models.Shuffle_model_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, units, learning_rate)
 
 #CALLBACKS
 
@@ -130,11 +131,34 @@ history = model.fit_generator(generator=train_generator, validation_data=validat
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', model_name, date_time))
+path_output_model = Path(config['Shuffle']['path_output_model'])
 
-with (path_output_model / 'history.json').open('w') as filehandle:
-    json.dump(history.history, filehandle)
+if not path_output_model.exists():
+    path_output_model.mkdir()
 
-model.save(path_output_model / 'model.h5')
+path_output_model_dataset = Path(path_output_model / dataset)
 
-model.save_weights(path_output_model / 'weights.h5')
+if not path_output_model_dataset.exists():
+    path_output_model_dataset.mkdir()
+
+path_output_model_dataset_pretext = Path(path_output_model_dataset / 'Shuffle')
+
+if not path_output_model_dataset_pretext.exists():
+    path_output_model_dataset_pretext.mkdir()
+
+path_output_model_dataset_pretext_model = Path(path_output_model_dataset_pretext / model_name)
+
+if not path_output_model_dataset_pretext_model.exists():
+    path_output_model_dataset_pretext_model.mkdir()
+
+path_output_model_dataset_pretext_model_date = Path(path_output_model_dataset_pretext_model / date_time)
+
+if not path_output_model_dataset_pretext_model_date.exists():
+    path_output_model_dataset_pretext_model_date.mkdir()
+
+
+np.save(path_output_model_dataset_pretext_model_date / 'history.npy', history.history)
+
+model.save(path_output_model_dataset_pretext_model_date / 'model.h5')
+
+model.save_weights(str(path_output_model_dataset_pretext_model_date / 'weights.h5'))
