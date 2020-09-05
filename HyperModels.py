@@ -3,7 +3,7 @@ from tensorflow import keras
 
 from tensorflow.keras.layers import Conv3D, Flatten, Dropout, Dense
 
-class HyperModelShuffleConv3D(HyperModel):
+class HyperModelShuffleCONV3D(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
     def __init__(self, input_shape, num_classes):
         """Se inicializan las variables de la clase"""

@@ -187,7 +187,7 @@ def run_hyperparameter_tuning():
 
 def define_tuners(input_shape, num_classes, pretext_task, model_name, path_results_pretext_task, path_hyperparameters_pretex_task):
     #El hipermodelo depende de la tarea de pretexto que se esta realizando y del modelo
-    if pretext_task == 'Shuffle' & model_name == 'CONV3D':
+    if pretext_task == 'Shuffle' and model_name == 'CONV3D':
         hypermodel = HyperModels.HyperModelShuffleCONV3D(input_shape=input_shape, num_classes=num_classes)
 
     tuners = []
@@ -271,6 +271,6 @@ def define_tuners(input_shape, num_classes, pretext_task, model_name, path_resul
                     )
                 )
 
-    return tuners, paths_results
+    return tuners, paths_results, paths_hyperparameters
 
 run_hyperparameter_tuning()

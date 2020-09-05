@@ -1,5 +1,5 @@
 import kerastuner
-from DataGenerators import DataGenerator
+import DataGenerators
 
 
 class TunerBayesianShuffle(kerastuner.tuners.BayesianOptimization):
@@ -18,9 +18,9 @@ class TunerBayesianShuffle(kerastuner.tuners.BayesianOptimization):
             'step_swaps': trial.hyperparameters.Int('step_swaps', min_value=1, max_value=int(epochs / n_frames), default=5, step=1)
         }
 
-        train_generator = DataGenerator(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorShuffle(train_ids_instances, **params)
 
-        validation_generator = DataGenerator(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
 
         super(TunerBayesianShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
 
@@ -41,9 +41,9 @@ class TunerRandomShuffle(kerastuner.tuners.RandomSearch):
             'step_swaps': trial.hyperparameters.Int('step_swaps', min_value=1, max_value=int(epochs / n_frames), default=5, step=1)
         }
 
-        train_generator = DataGenerator(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorShuffle(train_ids_instances, **params)
 
-        validation_generator = DataGenerator(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
 
         super(TunerRandomShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
 
@@ -63,8 +63,8 @@ class TunerHyperBandShuffle(kerastuner.tuners.Hyperband):
             'step_swaps': trial.hyperparameters.Int('step_swaps', min_value=1, max_value=int(epochs / n_frames), default=5, step=1)
         }
 
-        train_generator = DataGenerator(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorShuffle(train_ids_instances, **params)
 
-        validation_generator = DataGenerator(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
 
         super(TunerHyperBandShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)

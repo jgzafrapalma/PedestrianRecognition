@@ -3,6 +3,8 @@ from tensorflow.keras.utils import Sequence
 from FuncionesAuxiliares import ShuffleFrames
 from tensorflow.keras.utils import to_categorical
 
+from pathlib import Path
+
 import pickle
 
 class DataGeneratorShuffle(Sequence):
@@ -50,7 +52,7 @@ class DataGeneratorShuffle(Sequence):
 
             #frames = extract_Frames_Matriz(self.path_instances, ID_instance, self.n_frames)
 
-            with open(self.path_instances + '/' + ID_instance, 'rb') as input:
+            with (self.path_instances / ID_instance).open('rb') as input:
                 instance = pickle.load(input)
 
             """Me quedo unicamente con el campo de frames de la instancia que almacena el vector de numpy con los fotograma
