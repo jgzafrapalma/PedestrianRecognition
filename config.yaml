@@ -44,5 +44,19 @@ Shuffle:
     shuffle: true
     step_swaps: 1
     units: 512
+Transfer_Learning:
+  dataset: 'PIE_dataset'
+  pretext_task: 'Shuffle'
+  model_name: 'CONV3D'
+  input_model:
+  path_models: '/pub/experiments/jzafra/models'
+  seed: 1
+  random: False
+  dim: !!python/tuple [128, 128]
+  n_frames: 16
+  channels: 3
+  new_model_top:
+    dropout_rate_1:
+    dropout_rate_2:
 
 
