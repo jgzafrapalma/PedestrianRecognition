@@ -77,7 +77,7 @@ if config['Shuffle']['load_hyperparameters']:
     normalized = hyperparameters['normalized']
     shuffle = hyperparameters['shuffle']
     step_swaps = hyperparameters['step_swaps']
-    units = hyperparameters['units']
+    unit = hyperparameters['unit']
 
 else:
 
@@ -89,7 +89,7 @@ else:
     normalized = config['Shuffle']['hyperparameters']['normalized']
     shuffle = config['Shuffle']['hyperparameters']['shuffle']
     step_swaps = config['Shuffle']['hyperparameters']['step_swaps']
-    units = config['Shuffle']['hyperparameters']['units']
+    unit = config['Shuffle']['hyperparameters']['unit']
 
 
 params = {'dim': dim,
@@ -113,7 +113,7 @@ validation_generator = DataGeneratorShuffle(validation_ids_instances, **params)
 
 if config['Shuffle']['model_name'] == 'CONV3D':
 
-    model = models.Shuffle_model_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, units, learning_rate)
+    model = models.Shuffle_model_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 #CALLBACKS
 

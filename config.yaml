@@ -22,18 +22,18 @@ Keras_Tuner:
       project_name: '04092020-213100'
 Shuffle:
   dim: !!python/tuple [128, 128]
-  dataset: 'JAAD_dataset'
+  dataset: 'PIE_dataset'
   model_name: 'CONV3D'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   epochs: 100
-  n_frames: 8
+  n_frames: 16
   seed: 1
   random: False
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard'
   path_output_model: '/pub/experiments/jzafra/models'
-  load_hyperparameters: False
-  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/JAAD_dataset/Shuffle/Bayesian_Optimization/CONV3D/04092020-213445'
+  load_hyperparameters: True
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Shuffle/Bayesian_Optimization/CONV3D/04092020-213100.json'
   hyperparameters:
     batch_size: 16
     dense_activation: 'relu'
@@ -43,20 +43,17 @@ Shuffle:
     normalized: true
     shuffle: true
     step_swaps: 1
-    units: 512
+    unit: 512
 Transfer_Learning:
   dataset: 'PIE_dataset'
   pretext_task: 'Shuffle'
   model_name: 'CONV3D'
-  input_model:
+  input_model: '06092020-170054'
   path_models: '/pub/experiments/jzafra/models'
   seed: 1
   random: False
   dim: !!python/tuple [128, 128]
   n_frames: 16
   channels: 3
-  new_model_top:
-    dropout_rate_1:
-    dropout_rate_2:
 
 
