@@ -40,8 +40,8 @@ Shuffle:
     dropout_rate_1: 0.5
     dropout_rate_2: 0.5
     learning_rate: 0.0001
-    normalized: true
-    shuffle: true
+    normalized: True
+    shuffle: True
     step_swaps: 1
     unit: 512
 Transfer_Learning:
@@ -50,10 +50,17 @@ Transfer_Learning:
   model_name: 'CONV3D'
   input_model: '06092020-170054'
   path_models: '/pub/experiments/jzafra/models'
+  path_instances: '/pub/experiments/jzafra/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
+  tensorboard_logs: '/pub/experiments/jzafra/tensorboard'
+  epochs: 100
   seed: 1
   random: False
   dim: !!python/tuple [128, 128]
   n_frames: 16
   channels: 3
+  batch_size: 32
+  normalized: True
+  shuffle: True
 
 

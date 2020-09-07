@@ -39,17 +39,57 @@ from tensorflow import keras
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
 from pathlib import Path
 from os.path import join
+from FuncionesAuxiliares import read_instance_file_txt
+from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ReduceLROnPlateau
+
+from datetime import datetime
+
+from DataGenerators import DataGeneratorFINALMODEL, DataGeneratorFINALMODELPredict
 
 dataset = config['Transfer_Learning']['dataset']
 pretext_task = config['Transfer_Learning']['pretext_task']
 model_name = config['Transfer_Learning']['model_name']
 input_model = config['Transfer_Learning']['input_model']
 
+path_instances = Path(join(config['Transfer_Learning']['path_instances'], dataset))
+path_id_instances = Path(join(config['Transfer_Learning']['path_id_instances'], dataset))
+
 dim = config['Transfer_Learning']['dim']
 n_frames = config['Transfer_Learning']['n_frames']
 channels = config['Transfer_Learning']['channels']
+epochs = config['Transfer_Learning']['epochs']
+batch_size = config['Transfer_Learning']['batch_size']
+normalized = config['Transfer_Learning']['normalized']
+shuffle = config['Transfer_Learning']['shuffle']
+
+
+date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
+
+tensorboard_logs = str(Path(join(config['Transfer_Learning']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time)))
+
+params = {'dim': dim,
+          'path_instances': path_instances,
+          'batch_size': batch_size,
+          'n_clases': 1,
+          'n_channels': 3,
+          'n_frames': n_frames,
+          'normalized': normalized,
+          'shuffle': shuffle}
+
+
+train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
+
+validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
+
+train_generator = DataGeneratorFINALMODEL(train_ids_instances, **params)
+
+validation_generator = DataGeneratorFINALMODEL(validation_ids_instances, **params)
+
 
 
 #SE CARGA EL MODELO ENTRENADO PREVIAMENTE
@@ -90,7 +130,32 @@ outputs = Dense(1, activation='sigmoid')(x)
 
 model = keras.Model(base_model.input, outputs)
 
-model.compile(optimizer='adam', loss='mse', metrics=['mse'])
+#CALLBACKS
+
+#tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_images=True)
+
+earlystopping = EarlyStopping(monitor='val_mse', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+#reducelronplateau = ReduceLROnPlateau(monitor='val_mse', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
+
+keras_callbacks = [earlystopping]
+
+#ENTRENAMIENTO
+
+optimizer = Adam(learning_rate=0.0001)
+
+model.compile(optimizer=optimizer, loss='mse', metrics=['mse'])
 
 model.summary()
+
+history = model.fit_generator(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+
+
+validation_generator = DataGeneratorFINALMODELPredict(validation_ids_instances, **params)
+
+predictions = model.predict(validation_generator)
+
+with open('predictions.txt','w') as filehandle:
+    filehandle.write(str(predictions))
+
 
