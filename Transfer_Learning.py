@@ -49,7 +49,7 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 from datetime import datetime
 
-from DataGenerators import DataGeneratorFINALMODEL, DataGeneratorFINALMODELPredict
+from DataGenerators import DataGeneratorFINALMODEL
 
 dataset = config['Transfer_Learning']['dataset']
 pretext_task = config['Transfer_Learning']['pretext_task']
@@ -148,14 +148,19 @@ model.compile(optimizer=optimizer, loss='mse', metrics=['mse'])
 
 model.summary()
 
-history = model.fit_generator(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+history = model.fit(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
+#ALMACENAR EL MODELO OBTENIDO
 
-validation_generator = DataGeneratorFINALMODELPredict(validation_ids_instances, **params)
+"""Inicialización del DataGenerator, en el constructor se inicializa el orden en el que se van a devolver las instancias del problema."""
+validation_generator = DataGeneratorFINALMODEL(validation_ids_instances, **params)
 
-predictions = model.predict(validation_generator)
+"""Se obtiene los identificadores de las intancias y se etiqueta en el orden en el que son insertadas en el modelo final"""
+id_instances_validation, y_validation = DataGeneratorFINALMODEL.get_ID_instances_and_real_labels()
 
-with open('predictions.txt','w') as filehandle:
-    filehandle.write(str(predictions))
+y_predictions = model.predict(validation_generator)
+
+with open('predictions.txt', 'w') as filehandle:
+    filehandle.write(str(y_predictions))
 
 

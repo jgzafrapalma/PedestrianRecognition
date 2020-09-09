@@ -127,7 +127,7 @@ keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
 
 #ENTRENAMIENTO
 
-history = model.fit_generator(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+history = model.fit(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
