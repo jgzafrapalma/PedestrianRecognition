@@ -63,34 +63,20 @@ n_frames = config['Shuffle']['n_frames']
 
 tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time)))
 
-if config['Shuffle']['load_hyperparameters']:
-    path_hyperparameters = Path(config['Shuffle']['path_hyperparameters'])
+path_hyperparameters = Path(config['Shuffle']['path_hyperparameters'])
 
-    with path_hyperparameters.open('r') as file_descriptor:
-        hyperparameters = json.load(file_descriptor)
+with path_hyperparameters.open('r') as file_descriptor:
+    hyperparameters = json.load(file_descriptor)
 
-    batch_size = hyperparameters['batch_size']
-    dense_activation = hyperparameters['dense_activation']
-    dropout_rate_1 = hyperparameters['dropout_rate_1']
-    dropout_rate_2 = hyperparameters['dropout_rate_2']
-    learning_rate = hyperparameters['learning_rate']
-    normalized = hyperparameters['normalized']
-    shuffle = hyperparameters['shuffle']
-    step_swaps = hyperparameters['step_swaps']
-    unit = hyperparameters['unit']
-
-else:
-
-    batch_size = config['Shuffle']['hyperparameters']['batch_size']
-    dense_activation = config['Shuffle']['hyperparameters']['dense_activation']
-    dropout_rate_1 = config['Shuffle']['hyperparameters']['dropout_rate_1']
-    dropout_rate_2 = config['Shuffle']['hyperparameters']['dropout_rate_2']
-    learning_rate = config['Shuffle']['hyperparameters']['learning_rate']
-    normalized = config['Shuffle']['hyperparameters']['normalized']
-    shuffle = config['Shuffle']['hyperparameters']['shuffle']
-    step_swaps = config['Shuffle']['hyperparameters']['step_swaps']
-    unit = config['Shuffle']['hyperparameters']['unit']
-
+batch_size = hyperparameters['batch_size']
+dense_activation = hyperparameters['dense_activation']
+dropout_rate_1 = hyperparameters['dropout_rate_1']
+dropout_rate_2 = hyperparameters['dropout_rate_2']
+learning_rate = hyperparameters['learning_rate']
+normalized = hyperparameters['normalized']
+shuffle = hyperparameters['shuffle']
+step_swaps = hyperparameters['step_swaps']
+unit = hyperparameters['unit']
 
 params = {'dim': dim,
           'path_instances': path_instances,
@@ -127,38 +113,17 @@ keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
 
 #ENTRENAMIENTO
 
-history = model.fit(generator=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(config['Shuffle']['path_output_model'])
+path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', model_name, date_time))
 
-if not path_output_model.exists():
-    path_output_model.mkdir()
+#Se crean los directorios en los que se van a almacenar los resultados
+path_output_model.mkdir(parents=True, exist_ok=True)
 
-path_output_model_dataset = Path(path_output_model / dataset)
+np.save(path_output_model / 'history.npy', history.history)
 
-if not path_output_model_dataset.exists():
-    path_output_model_dataset.mkdir()
+model.save(path_output_model / 'model.h5')
 
-path_output_model_dataset_pretext = Path(path_output_model_dataset / 'Shuffle')
-
-if not path_output_model_dataset_pretext.exists():
-    path_output_model_dataset_pretext.mkdir()
-
-path_output_model_dataset_pretext_model = Path(path_output_model_dataset_pretext / model_name)
-
-if not path_output_model_dataset_pretext_model.exists():
-    path_output_model_dataset_pretext_model.mkdir()
-
-path_output_model_dataset_pretext_model_date = Path(path_output_model_dataset_pretext_model / date_time)
-
-if not path_output_model_dataset_pretext_model_date.exists():
-    path_output_model_dataset_pretext_model_date.mkdir()
-
-
-np.save(path_output_model_dataset_pretext_model_date / 'history.npy', history.history)
-
-model.save(path_output_model_dataset_pretext_model_date / 'model.h5')
-
-model.save_weights(str(path_output_model_dataset_pretext_model_date / 'weights.h5'))
+model.save_weights(str(path_output_model / 'weights.h5'))

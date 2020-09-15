@@ -43,6 +43,8 @@ from tensorflow.keras.callbacks import TensorBoard
 
 import Tuners
 
+from kerastuner.tuners import BayesianOptimization, Hyperband, RandomSearch
+
 import pickle
 
 #import logging
@@ -65,6 +67,9 @@ def run_hyperparameter_tuning():
 
     pretext_task = config['Keras_Tuner']['pretext_task']
     model_name = config['Keras_Tuner']['model']
+    tuner_type = config['Keras_Tuner']['tuner']['type']
+    project_name = config['Keras_Tuner']['tuner']['project_name']
+    classification = config['Keras_Tuner']['classification']
 
     path_instances = Path(join(config['Keras_Tuner']['path_instances'], dataset))
     path_id_instances = Path(join(config['Keras_Tuner']['path_id_instances'], dataset))
@@ -72,61 +77,77 @@ def run_hyperparameter_tuning():
     #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
     train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
     validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
-    #test_ids_instances = read_instance_file_txt(path_id_instances / 'test.txt')
+
 
     dim = config['Keras_Tuner']['dim']
     epochs = config['Keras_Tuner']['epochs']
     n_frames = config['Keras_Tuner']['n_frames']
     num_classes = config['Keras_Tuner']['num_classes']
 
-    #Se crean los directorios de salida de los resultados
-    path_dir_results = Path(config['Keras_Tuner']['path_dir_results'])
-    path_results_dataset = Path(path_dir_results / dataset)
-    path_results_pretext_task = Path(path_results_dataset / pretext_task)
+    Transfer_Learning = config['Keras_Tuner']['Transfer_Learning']
 
-    path_dir_hyperparameters = Path(config['Keras_Tuner']['path_hyperparameters'])
+    if not Transfer_Learning:
 
-    path_hyperparameters_dataset = Path(path_dir_hyperparameters / dataset)
+        path_output_results = Path(join(config['Keras_Tuner']['path_dir_results'], dataset, pretext_task, tuner_type, model_name))
 
-    path_hyperparameters_pretex_task = Path(path_hyperparameters_dataset / pretext_task)
+        path_output_hyperparameters = Path(join(config['Keras_Tuner']['path_hyperparameters'], dataset, pretext_task, tuner_type, model_name))
 
+        #Se crean los directorios donde almacenar los resultados
+        path_output_results.mkdir(parents=True, exist_ok=True)
 
-    #Se crean las carpetas necesarias para almacenar los resultados
-    if not path_dir_results.exists():
-        
-        path_dir_results.mkdir()
+        path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 
-    if not path_results_dataset.exists():
+        #SE DEFINE EL TUNER
+        if pretext_task == 'Shuffle' and model_name == 'CONV3D':
+            hypermodel = HyperModels.HyperModelShuffleCONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes)
 
-        path_results_dataset.mkdir()
+        if tuner_type == 'Random_Search':
 
-    if not path_results_pretext_task.exists():
+            if pretext_task == 'Shuffle':
 
-        path_results_pretext_task.mkdir()
+                tuner = Tuners.TunerRandomShuffle(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                    executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                    directory=path_output_results,
+                    project_name=project_name,
+                    overwrite=False
+                )
+                
+        elif tuner_type == 'HyperBand':
 
-    #Se creean las carpetas necesarias para almacenar los hipeparámetros
-    if not path_dir_hyperparameters.exists():
-        path_dir_hyperparameters.mkdir()
+            if pretext_task == 'Shuffle':
 
-    if not path_hyperparameters_dataset.exists():
-        path_hyperparameters_dataset.mkdir()
+                tuner = Tuners.TunerHyperBandShuffle(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_epochs=config['Keras_Tuner']['tuner']['max_epochs'],
+                    executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                    directory=path_output_results,
+                    project_name=project_name,
+                    overwrite=False
+                )
+                
+        else:
 
-    if not path_hyperparameters_pretex_task.exists():
-        path_hyperparameters_pretex_task.mkdir()
+            if pretext_task == 'Shuffle':
 
+                tuner = Tuners.TunerBayesianShuffle(
+                    hypermodel,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                    num_initial_points=config['Keras_Tuner']['tuner']['num_initial_points'],
+                    directory=path_output_results,
+                    project_name=project_name,
+                    overwrite=False
+                )
 
-    tuners, paths_results, paths_hyperparameters = define_tuners(
-        (n_frames, dim[0], dim[1], 3),
-        num_classes,
-        pretext_task,
-        model_name,
-        path_results_pretext_task,
-        path_hyperparameters_pretex_task
-    )
-
-    earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
-
-    for id_tuner, tuner in enumerate(tuners):
+        #SE LLEVA A CABO LA BUSQUEDA DE LOS MEJORES HIPERPARÁMETROS
+        earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
         tuner.search_space_summary()
 
@@ -140,137 +161,201 @@ def run_hyperparameter_tuning():
 
         tuner.results_summary()
 
-        #Para obtener el accuracy en el conjunto de test
-        best_model = tuner.get_best_models(num_models=1)[0]
-
         best_hp = tuner.get_best_hyperparameters()[0].values
 
-        if pretext_task == 'Shuffle':
-
-            params = {
-                'dim': dim,
-                'path_instances': path_instances,
-                'batch_size': best_hp['batch_size'],
-                'n_clases': 2,
-                'n_channels': 3,
-                'n_frames': n_frames,
-                'normalized': best_hp['normalized'],
-                'shuffle': best_hp['shuffle'],
-                'step_swaps': best_hp['step_swaps']
-            }
-
-            #test_generator = DataGenerators.DataGeneratorShuffle(test_ids_instances, **params)
-
-            validation_generator = DataGenerators.DataGeneratorShuffle(validation_ids_instances, **params)
-
-        #loss_test, accuracy_test = best_model.evaluate(test_generator)
-
-        loss_validation, accuracy_validation = best_model.evaluate(validation_generator)
-
         #Se almacena el tuner en un fichero binario
-        with (paths_results[id_tuner] / 'tuner.pkl').open('wb') as file_descriptor:
+        with (path_output_results / project_name / 'tuner.pkl').open('wb') as file_descriptor:
             pickle.dump(tuner, file_descriptor)
 
-        with (paths_results[id_tuner] / 'results.txt').open('w') as filehandle:
+        with (path_output_results / project_name / 'search_time.txt').open('w') as filehandle:
             filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
-            #filehandle.write("Resultados en el conjunto de test: \n")
-            #filehandle.write("Loss test: %f\n" % loss_test)
-            #filehandle.write("Accuracy test: %f\n" % accuracy_test)
-            filehandle.write("Resultados en el conjunto de validación: \n")
-            filehandle.write("Loss validation: %f\n" % loss_validation)
-            filehandle.write("Accuracy validation: %f\n" % accuracy_validation)
 
         #Se guardan los hiperparámetros
-        with (paths_hyperparameters[id_tuner]).open('w') as filehandle:
+        with (path_output_hyperparameters / (project_name + '.json')).open('w') as filehandle:
             json.dump(best_hp, filehandle)
+                
+    else:
 
+        path_output_results_CL = Path(join(config['Keras_Tuner']['path_dir_results'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name, 'Classification_Layer'))
 
-def define_tuners(input_shape, num_classes, pretext_task, model_name, path_results_pretext_task, path_hyperparameters_pretex_task):
-    #El hipermodelo depende de la tarea de pretexto que se esta realizando y del modelo
-    if pretext_task == 'Shuffle' and model_name == 'CONV3D':
-        hypermodel = HyperModels.HyperModelShuffleCONV3D(input_shape=input_shape, num_classes=num_classes)
+        path_output_results_FT = Path(join(config['Keras_Tuner']['path_dir_results'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name, 'Fine_Tuning'))
 
-    tuners = []
-    paths_results = []
-    paths_hyperparameters = []
+        path_output_hyperparameters_CL = Path(join(config['Keras_Tuner']['path_hyperparameters'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name, 'Classification_Layer'))
 
-    #Se recorren todos los keras tuner que se encuentren en el fichero de configuración
-    for tuner_id in list(config['Keras_Tuner']['tuners']):
-        #Se obtiene el tipo del keras tuner
-        tuner_type = config['Keras_Tuner']['tuners'][tuner_id]['type']
+        path_output_hyperparameters_FT = Path(join(config['Keras_Tuner']['path_hyperparameters'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name, 'Fine_Tuning'))
 
-        path_results_pretext_task_tunertype = Path(path_results_pretext_task / tuner_type)
+        path_output_results_CL.mkdir(parents=True, exist_ok=True)
 
-        if not path_results_pretext_task_tunertype.exists():
-            path_results_pretext_task_tunertype.mkdir()
+        path_output_results_FT.mkdir(parents=True, exist_ok=True)
 
-        path_results_pretext_task_tunertype_model = Path(path_results_pretext_task_tunertype / model_name)
+        path_output_hyperparameters_CL.mkdir(parents=True, exist_ok=True)
 
-        path_hyperparameters_pretex_task_tuner_type = Path(path_hyperparameters_pretex_task / tuner_type)
+        path_output_hyperparameters_FT.mkdir(parents=True, exist_ok=True)
 
-        if not path_hyperparameters_pretex_task_tuner_type.exists():
-            path_hyperparameters_pretex_task_tuner_type.mkdir()
+        path_weights = config['Keras_Tuner']['Transfer_Learning']['path_weights_conv_layers']
 
-        path_hyperparameters_pretex_task_tuner_type_model = Path(path_hyperparameters_pretex_task_tuner_type / model_name)
+        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and not classification:
 
-        if not path_hyperparameters_pretex_task_tuner_type_model.exists():
-            path_hyperparameters_pretex_task_tuner_type_model.mkdir()
-
-        paths_results.append(Path(path_results_pretext_task_tunertype_model / config['Keras_Tuner']['tuners'][tuner_id]['project_name']))
-
-        paths_hyperparameters.append(Path(path_hyperparameters_pretex_task_tuner_type_model / (config['Keras_Tuner']['tuners'][tuner_id]['project_name'] + '.json')))
+            hypermodel_cl = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_Regression_CL(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights)
 
         if tuner_type == 'Random_Search':
 
-            if pretext_task == 'Shuffle':
+            if not classification:
 
-                tuners.append(
-                    Tuners.TunerRandomShuffle(
-                        hypermodel,
-                        objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
-                        seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
-                        max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
-                        executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=path_results_pretext_task_tunertype_model,
-                        project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
-                        overwrite=False
-                    )
+                tuner = Tuners.TunerRandomFINALRegression(
+                    hypermodel_cl,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                    executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                    directory=path_output_results_CL,
+                    project_name=project_name,
+                    overwrite=False
                 )
-
+                
         elif tuner_type == 'HyperBand':
 
-            if pretext_task == 'Shuffle':
+            if not classification:
 
-                tuners.append(
-                    Tuners.TunerHyperBandShuffle(
-                        hypermodel,
-                        objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
-                        seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
-                        max_epochs=config['Keras_Tuner']['tuners'][tuner_id]['max_epochs'],
-                        executions_per_trial=config['Keras_Tuner']['tuners'][tuner_id]['executions_per_trial'],
-                        directory=path_results_pretext_task_tunertype_model,
-                        project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
-                        overwrite=False
-                    )
+                tuner = Tuners.TunerHyperBandFINALRegression(
+                    hypermodel_cl,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_epochs=config['Keras_Tuner']['tuner']['max_epochs'],
+                    executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                    directory=path_output_results_CL,
+                    project_name=project_name,
+                    overwrite=False
                 )
-
+                
         else:
 
-            if pretext_task == 'Shuffle':
+            if not classification:
 
-                tuners.append(
-                    Tuners.TunerBayesianShuffle(
-                        hypermodel,
-                        objective=config['Keras_Tuner']['tuners'][tuner_id]['objetive'],
-                        seed=config['Keras_Tuner']['tuners'][tuner_id]['seed'],
-                        max_trials=config['Keras_Tuner']['tuners'][tuner_id]['max_trials'],
-                        num_initial_points=config['Keras_Tuner']['tuners'][tuner_id]['num_initial_points'],
-                        directory=path_results_pretext_task_tunertype_model,
-                        project_name=config['Keras_Tuner']['tuners'][tuner_id]['project_name'],
-                        overwrite=False
-                    )
+                tuner = Tuners.TunerBayesianFINALRegression(
+                    hypermodel_cl,
+                    objective=config['Keras_Tuner']['tuner']['objetive'],
+                    seed=config['Keras_Tuner']['tuner']['seed'],
+                    max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                    num_initial_points=config['Keras_Tuner']['tuner']['num_initial_points'],
+                    directory=path_output_results_CL,
+                    project_name=project_name,
+                    overwrite=False
                 )
 
-    return tuners, paths_results, paths_hyperparameters
+        earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+        tuner.search_space_summary()
+
+        start_time = time.time()
+
+        tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, 1, epochs, [earlystopping])
+
+        stop_time = time.time()
+
+        elapsed_time = stop_time - start_time 
+
+        tuner.results_summary()
+
+        best_hp = tuner.get_best_hyperparameters()[0].values
+
+        #Se almacena el tuner en un fichero binario
+        with (path_output_results_CL / project_name / 'tuner.pkl').open('wb') as file_descriptor:
+            pickle.dump(tuner, file_descriptor)
+
+        with (path_output_results_CL / project_name / 'search_time.txt').open('w') as filehandle:
+            filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+
+        #Se guardan los hiperparámetros
+        with (path_output_hyperparameters_CL / (project_name + '.json')).open('w') as filehandle:
+            json.dump(best_hp, filehandle)
+
+
+        #Fine Tuning
+
+        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and not classification:
+            hypermodel_ft = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_Regression_FT(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights, hyperparameters=best_hp)
+
+        if tuner_type == 'Random_Search':
+
+            tuner = RandomSearch(
+                hypermodel_ft,
+                objective=config['Keras_Tuner']['tuner']['objetive'],
+                seed=config['Keras_Tuner']['tuner']['seed'],
+                max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                directory=path_output_results_FT,
+                project_name=project_name,
+                overwrite=False
+            )
+                
+        elif tuner_type == 'HyperBand':
+
+            tuner = Hyperband(
+                hypermodel_cl,
+                objective=config['Keras_Tuner']['tuner']['objetive'],
+                seed=config['Keras_Tuner']['tuner']['seed'],
+                max_epochs=config['Keras_Tuner']['tuner']['max_epochs'],
+                executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+                directory=path_output_results_FT,
+                project_name=project_name,
+                overwrite=False
+            )
+                
+        else:
+
+            tuner = BayesianOptimization(
+                hypermodel_cl,
+                objective=config['Keras_Tuner']['tuner']['objetive'],
+                seed=config['Keras_Tuner']['tuner']['seed'],
+                max_trials=config['Keras_Tuner']['tuner']['max_trials'],
+                num_initial_points=config['Keras_Tuner']['tuner']['num_initial_points'],
+                directory=path_output_results_FT,
+                project_name=project_name,
+                overwrite=False
+            )
+
+        params = {
+            'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': best_hp['batch_size'],
+            'n_clases': num_classes,
+            'n_channels': 3,
+            'n_frames': n_frames,
+            'normalized': best_hp['normalized'],
+            'shuffle': best_hp['normalized'],
+        }
+
+        if not classification:
+            train_generator = Datagenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
+            validation_generator = Datagenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+
+        earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+        tuner.search_space_summary()
+
+        start_time = time.time()
+
+        tuner.search(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=[earlystopping])
+
+        stop_time = time.time()
+
+        elapsed_time = stop_time - start_time 
+
+        tuner.results_summary()
+
+        best_hp = tuner.get_best_hyperparameters()[0].values
+
+        #Se almacena el tuner en un fichero binario
+        with (path_output_results_FT / project_name / 'tuner.pkl').open('wb') as file_descriptor:
+            pickle.dump(tuner, file_descriptor)
+
+        with (path_output_results_FT / project_name / 'search_time.txt').open('w') as filehandle:
+            filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+
+        #Se guardan los hiperparámetros
+        with (path_output_hyperparameters_FT / (project_name + '.json')).open('w') as filehandle:
+            json.dump(best_hp, filehandle)
+
 
 run_hyperparameter_tuning()

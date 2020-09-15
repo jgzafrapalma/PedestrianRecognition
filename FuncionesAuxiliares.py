@@ -602,7 +602,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
         PATH_frames_set = Path(join(PATH_frames, set_video.name))
 
-        logger.info("Accediendo al directorio %s" % set_video)
+        #logger.info("Accediendo al directorio %s" % set_video)
 
         #En el directorio donde se almacenan los frames se crea una carpeta para cada set
         if not PATH_frames_set.exists():
@@ -612,7 +612,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
             if video.is_file():
 
-                logger.info("Extrayendo peatones del video %s" % video)
+                #logger.info("Extrayendo peatones del video %s" % video)
 
                 cap = cv2.VideoCapture(str(video))
 
@@ -631,6 +631,8 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                 intention_pedestrian = list()
 
+                crossing_pedestrian = list()
+
                 #Se reserva memoria para almacenar los frames de cada uno de los peatones y se almacena la etiqueta de cada peaton
                 for id_ped in list_pedestrian:
                     num_frames = len(data[set_video.name][video.stem]['ped_annotations'][id_ped]['frames'])
@@ -641,8 +643,16 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                     intention_pedestrian.append(
                         data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['intention_prob']
                     )
+                    #Se rellena la lista con la etiqueta correspondiente a si el peaton cruza la calzada o no
+                    crossing = data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['crossing']
+                    
+                    #Los casos irrelevantes se clasifican tambien como que no cruzan la calzada
+                    if crossing == -1:
+                        crossing_pedestrian.append(0)
+                    else:
+                        crossing_pedestrian.append(crossing)
 
-                logger.success("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
+                #logger.success("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
 
                 id_frame = 0
                 while cap.isOpened():
@@ -843,18 +853,18 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                 cap.release()
 
-                logger.success("Peatones del video %s recortados con exito" % video)
+                #logger.success("Peatones del video %s recortados con exito" % video)
 
                 for id_ped, cut_pedestrian in enumerate(cuts_pedestrian):
 
                     output_frames = extract_Frames_PIE(output_path_cuts, cut_pedestrian, n_frames, set_video.name, video.stem, list_pedestrian[id_ped])
 
-                    dict_ped = {'frames': output_frames, 'intention_prob': intention_pedestrian[id_ped]}
+                    dict_ped = {'frames': output_frames, 'intention_prob': intention_pedestrian[id_ped], 'crossing': crossing_pedestrian[id_ped]}
 
                     with open(join(output_path_instances, list_pedestrian[id_ped] + '.pkl'), 'wb') as output:
                         pickle.dump(dict_ped, output)
 
-                logger.success("Instancias del video %s guardadas con exito" % video)
+                #logger.success("Instancias del video %s guardadas con exito" % video)
 
 
 def extract_Frames_PIE(output_path_cuts, input_frames, n_frames_extracted, ID_set, ID_video, ID_pedestrian):
