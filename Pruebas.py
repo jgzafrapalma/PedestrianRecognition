@@ -15,9 +15,13 @@ from FuncionesAuxiliares import extract_pedestrian_dataset_PIE
                             , pathFrames='', pathData='./JAAD-JAAD_2.0/data_cache/jaad_database.pkl', rate=0.05, n_frames=8, shape=(128, 128), frames=False)"""
 
 
-extract_pedestrian_dataset_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.pkl', input_path_dataset='/media/jorge/DATOS/TFG/datasets/PIE_clips',
+"""extract_pedestrian_dataset_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.pkl', input_path_dataset='/media/jorge/DATOS/TFG/datasets/PIE_clips',
                                output_path_instances='/media/jorge/DATOS/TFG/instances/PIE_pedestrians', output_path_frames='/media/jorge/DATOS/TFG/frames/PIE_frames',
-                               output_path_cuts='/media/jorge/DATOS/TFG/cuts/PIE_cuts', rate=0.10, n_frames=16, shape=(128, 128))
+                               output_path_cuts='/media/jorge/DATOS/TFG/cuts/PIE_cuts', rate=0.10, n_frames=16, shape=(128, 128))"""
+
+extract_pedestrian_dataset_PIE(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_dataset='/pub/experiments/jzafra/datasets/PIE_clips',
+                               output_path_instances='/pub/experiments/jzafra/instances/PIE_pedestrians', output_path_frames='/pub/experiments/jzafra/frames/PIE_frames',
+                               output_path_cuts='/pub/experiments/jzafra/cuts/PIE_cuts', rate=0.10, n_frames=16, shape=(128, 128))
 
 
 #pedestrian = np.load('/media/jorge/DATOS/TFG/datasets/instances/video_0001_0_1_2b.npy')
