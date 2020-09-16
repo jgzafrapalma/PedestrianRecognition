@@ -5,9 +5,6 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.45
 
-from FuncionesAuxiliares import extract_pedestrians_datasets
-from FuncionesAuxiliares import extract_Frames_Matriz
-from FuncionesAuxiliares import create_train_validation_test
 from FuncionesAuxiliares import extract_pedestrian_dataset_PIE
 
 #extract_pedestrians_datasets('/media/jorge/DATOS/TFG/datasets', './JAAD-JAAD_2.0/data_cache/jaad_database.pkl', 0.05, (128, 128))

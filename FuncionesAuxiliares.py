@@ -13,6 +13,8 @@ import argparse
 
 from tensorflow.keras.preprocessing.image import img_to_array
 
+import logging
+
 
 # Función para extraer un número de frames por cada video del conjunto de datos
 
@@ -583,6 +585,8 @@ def extract_pedestrians_datasets_JAAD(pathVideos, pathInstances, pathFrames, pat
 
 def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_path_instances, output_path_frames, output_path_cuts, rate, n_frames, shape=()):
 
+    logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
+
     PATH_instances = Path(output_path_instances)
 
     PATH_frames = Path(output_path_frames)
@@ -602,7 +606,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
         PATH_frames_set = Path(join(PATH_frames, set_video.name))
 
-        #logger.info("Accediendo al directorio %s" % set_video)
+        logging.info("Accediendo al directorio %s" % set_video)
 
         #En el directorio donde se almacenan los frames se crea una carpeta para cada set
         if not PATH_frames_set.exists():
@@ -612,7 +616,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
             if video.is_file():
 
-                #logger.info("Extrayendo peatones del video %s" % video)
+                logging.info("Extrayendo peatones del video %s" % video)
 
                 cap = cv2.VideoCapture(str(video))
 
@@ -652,7 +656,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                     else:
                         crossing_pedestrian.append(crossing)
 
-                #logger.success("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
+                logging.info("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
 
                 id_frame = 0
                 while cap.isOpened():
@@ -853,7 +857,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                 cap.release()
 
-                #logger.success("Peatones del video %s recortados con exito" % video)
+                logging.info("Peatones del video %s recortados con exito" % video)
 
                 for id_ped, cut_pedestrian in enumerate(cuts_pedestrian):
 
@@ -864,7 +868,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                     with open(join(output_path_instances, list_pedestrian[id_ped] + '.pkl'), 'wb') as output:
                         pickle.dump(dict_ped, output)
 
-                #logger.success("Instancias del video %s guardadas con exito" % video)
+                logging.info("Instancias del video %s guardadas con exito" % video)
 
 
 def extract_Frames_PIE(output_path_cuts, input_frames, n_frames_extracted, ID_set, ID_video, ID_pedestrian):
