@@ -75,7 +75,7 @@ class HyperModel_Shuffle_CONV3D(HyperModel):
 #!!!!!!COMPROBAR SI ES NECESARIA PASAR EL PARAMETROS TRAINING A LAS CAPAS DE CONVOLUCIÓN!!!!!!!!!!!
 """Hipermodelo utilizado para la optimización de los hiperparámetros de la capa de clasificación durante la transferencia de información,
 utilizando la tarea de pretexto Shuffle con un modelo de convolución 3D"""
-class HyperModel_FINAL_Shuffle_CONV3D_Regression_CL(HyperModel):
+class HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_CL(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
     def __init__(self, input_shape, num_classes, path_weights):
         """Se inicializan las variables de la clase"""
@@ -146,7 +146,7 @@ class HyperModel_FINAL_Shuffle_CONV3D_Regression_CL(HyperModel):
             )
         )
 
-        model.add(Dense(self.num_classes, activation='sigmoid', name='fc_2_final'))
+        model.add(Dense(self.num_classes, activation='softmax', name='fc_2_final'))
 
         optimizer = keras.optimizers.Adam(
             learning_rate=hp.Float(
@@ -156,12 +156,12 @@ class HyperModel_FINAL_Shuffle_CONV3D_Regression_CL(HyperModel):
 
         model.load_weights(self.path_weights, by_name=True)
 
-        model.compile(optimizer=optimizer, loss='mean_absolute_error', metrics=['mse'])
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
         return model
 
 """Hipermodelo utilizado para el ajuste del coeficiente de aprendizaje durante el ajuste fino."""
-class HyperModel_FINAL_Shuffle_CONV3D_Regression_FT(HyperModel):
+class HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_FT(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
     def __init__(self, input_shape, num_classes, path_weights, hyperparameters):
         """Se inicializan las variables de la clase"""
@@ -227,6 +227,6 @@ class HyperModel_FINAL_Shuffle_CONV3D_Regression_FT(HyperModel):
 
         model.load_weights(self.path_weights, by_name=True)
 
-        model.compile(optimizer=optimizer, loss='mean_absolute_error', metrics=['mse'])
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
         return model

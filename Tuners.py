@@ -69,7 +69,7 @@ class TunerHyperBandShuffle(kerastuner.tuners.Hyperband):
 
         super(TunerHyperBandShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
 
-class TunerBayesianFINALRegression(kerastuner.tuners.BayesianOptimization):
+class TunerBayesianFINALCrossingDetection(kerastuner.tuners.BayesianOptimization):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_frames,
                     verbose, epochs, callbacks):
 
@@ -77,20 +77,20 @@ class TunerBayesianFINALRegression(kerastuner.tuners.BayesianOptimization):
             'dim': dim,
             'path_instances': path_instances,
             'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': 1,
+            'n_clases': 2,
             'n_channels': 3,
             'n_frames': n_frames,
             'normalized': trial.hyperparameters.Boolean('normalized', default=True),
             'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
         }
 
-        train_generator = DataGenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
 
-        validation_generator = DataGenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
-        super(TunerBayesianFINALRegression, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerBayesianFINALCrossingDetection, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
 
-class TunerHyperBandFINALRegression(kerastuner.tuners.Hyperband):
+class TunerHyperBandFINALCrossingDetection(kerastuner.tuners.Hyperband):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_frames,
                   verbose, epochs, callbacks):
 
@@ -98,20 +98,20 @@ class TunerHyperBandFINALRegression(kerastuner.tuners.Hyperband):
             'dim': dim,
             'path_instances': path_instances,
             'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': 1,
+            'n_clases': 2,
             'n_channels': 3,
             'n_frames': n_frames,
             'normalized': trial.hyperparameters.Boolean('normalized', default=True),
             'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
         }
 
-        train_generator = DataGenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
 
-        validation_generator = DataGenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
-        super(TunerHyperBandFINALRegression, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerHyperBandFINALCrossingDetection, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
 
-class TunerRandomFINALRegression(kerastuner.tuners.RandomSearch):
+class TunerRandomFINALCrossingDetection(kerastuner.tuners.RandomSearch):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_frames,
                   verbose, epochs, callbacks):
 
@@ -119,15 +119,15 @@ class TunerRandomFINALRegression(kerastuner.tuners.RandomSearch):
             'dim': dim,
             'path_instances': path_instances,
             'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': 1,
+            'n_clases': 2,
             'n_channels': 3,
             'n_frames': n_frames,
             'normalized': trial.hyperparameters.Boolean('normalized', default=True),
             'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
         }
 
-        train_generator = DataGenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
+        train_generator = DataGenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
 
-        validation_generator = DataGenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+        validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
-        super(TunerRandomFINALRegression, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerRandomFINALCrossingDetection, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)

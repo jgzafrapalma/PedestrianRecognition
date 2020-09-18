@@ -69,7 +69,7 @@ def run_hyperparameter_tuning():
     model_name = config['Keras_Tuner']['model']
     tuner_type = config['Keras_Tuner']['tuner']['type']
     project_name = config['Keras_Tuner']['tuner']['project_name']
-    classification = config['Keras_Tuner']['classification']
+    type_model = config['Keras_Tuner']['type_model']
 
     path_instances = Path(join(config['Keras_Tuner']['path_instances'], dataset))
     path_id_instances = Path(join(config['Keras_Tuner']['path_id_instances'], dataset))
@@ -194,15 +194,15 @@ def run_hyperparameter_tuning():
 
         path_weights = config['Keras_Tuner']['Transfer_Learning']['path_weights_conv_layers']
 
-        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and not classification:
+        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and type_model == 'Crossing-detection':
 
-            hypermodel_cl = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_Regression_CL(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights)
+            hypermodel_cl = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_CL(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights)
 
         if tuner_type == 'Random_Search':
 
-            if not classification:
+            if type_model == 'Crossing-detection':
 
-                tuner = Tuners.TunerRandomFINALRegression(
+                tuner = Tuners.TunerRandomFINALCrossingDetection(
                     hypermodel_cl,
                     objective=config['Keras_Tuner']['tuner']['objetive'],
                     seed=config['Keras_Tuner']['tuner']['seed'],
@@ -215,9 +215,9 @@ def run_hyperparameter_tuning():
                 
         elif tuner_type == 'HyperBand':
 
-            if not classification:
+            if type_model == 'Crossing-detection':
 
-                tuner = Tuners.TunerHyperBandFINALRegression(
+                tuner = Tuners.TunerHyperBandFINALCrossingDetection(
                     hypermodel_cl,
                     objective=config['Keras_Tuner']['tuner']['objetive'],
                     seed=config['Keras_Tuner']['tuner']['seed'],
@@ -230,9 +230,9 @@ def run_hyperparameter_tuning():
                 
         else:
 
-            if not classification:
+            if type_model == 'Crossing-detection':
 
-                tuner = Tuners.TunerBayesianFINALRegression(
+                tuner = Tuners.TunerBayesianFINALCrossingDetection(
                     hypermodel_cl,
                     objective=config['Keras_Tuner']['tuner']['objetive'],
                     seed=config['Keras_Tuner']['tuner']['seed'],
@@ -244,6 +244,8 @@ def run_hyperparameter_tuning():
                 )
 
         earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+        #!!!!!!PONER reducelronplateau COMO CALLBACKS Y AJUSTAR SUS HIPERPARÁMETROS!!!!!!!!!!!!!!
 
         tuner.search_space_summary()
 
@@ -273,8 +275,8 @@ def run_hyperparameter_tuning():
 
         #Fine Tuning
 
-        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and not classification:
-            hypermodel_ft = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_Regression_FT(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights, hyperparameters=best_hp)
+        if pretext_task == 'Shuffle' and model_name == 'CONV3D' and type_model == 'Crossing-detection':
+            hypermodel_ft = HyperModels.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_FT(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights, hyperparameters=best_hp)
 
         if tuner_type == 'Random_Search':
 
@@ -326,9 +328,9 @@ def run_hyperparameter_tuning():
             'shuffle': best_hp['normalized'],
         }
 
-        if not classification:
-            train_generator = Datagenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
-            validation_generator = Datagenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+        if type_model == 'Crossing-detection':
+            train_generator = Datagenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
+            validation_generator = Datagenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
         earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 

@@ -3,7 +3,7 @@ Keras_Tuner:
   dataset: 'PIE_dataset'
   pretext_task: 'Shuffle'
   model: 'CONV3D'
-  classification: False
+  type_model: 'Crossing-detection'
   Transfer_Learning:
     activated: True
     path_weights_conv_layers: '/pub/experiments/jzafra/models/PIE_dataset/Shuffle/CONV3D/06092020-170054/weights.h5'
@@ -14,7 +14,7 @@ Keras_Tuner:
   epochs: 100
   n_frames: 16
   seed: 1
-  num_classes: 1
+  num_classes: 2
   random: False
   tuner:
     type: 'Bayesian_Optimization'
@@ -41,7 +41,7 @@ Transfer_Learning:
   pretext_task: 'Shuffle'
   model_name: 'CONV3D'
   input_model: '06092020-170054'
-  type_model: 'Regression'
+  type_model: 'Crossing-detection'
   path_weights: '/pub/experiments/jzafra/models'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
@@ -52,7 +52,7 @@ Transfer_Learning:
   random: False
   dim: !!python/tuple [128, 128]
   n_frames: 16
-  n_classes: 1
+  n_classes: 2
   channels: 3
   batch_size: 32
   normalized: True

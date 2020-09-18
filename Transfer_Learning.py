@@ -34,6 +34,7 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
+#########################################################################################################################
 
 from tensorflow import keras
 from tensorflow.keras.layers import Flatten
@@ -93,12 +94,6 @@ train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
 validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
-if type_model == 'Regression':
-
-    train_generator = DataGenerators.DataGeneratorFINALRegression(train_ids_instances, **params)
-
-    validation_generator = DataGenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
-
 
 ##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
 path_hyperparameters_cl = Path(config['Transfer_Learning']['path_hyperparameters_classification_layer'])
@@ -120,18 +115,20 @@ if pretext_task == 'Shuffle' and model_name == 'CONV3D':
 
     learning_rate_fine_tuning = hyperparameters_ft['learning_rate_fine_tuning']
 
+    if type_model == 'Crossing-detection':
+
+        train_generator = DataGenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
+
+        validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
+
+        #El modelo es definido con las capas convolucionales congeladas
+        model = models.model_FINAL_Shuffle_CONV3D_CrossingDetection((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 #######################################################################################################
 
 """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
 LA TAREA DE PRETEXTO""" 
 path_weights = Path(join(config['Transfer_Learning']['path_weights'], dataset, pretext_task, model_name, input_model, 'weights.h5'))
-
-if pretext_task == 'Shuffle' and model_name == 'CONV3D':
-
-    if type_model == 'Regression':
-        #El modelo es definido con las capas convolucionales congeladas
-        model = models.model_FINAL_Shuffle_CONV3D_Regression((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
 los pesos solo van a ser cargados en las capas de convolución"""
@@ -160,9 +157,10 @@ model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs
 
 model.trainable = True
 
-"""Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
-coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
-model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='mae', metrics=['mse'])
+if type_model == 'Crossing-detection':
+    """Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
+    coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
+    model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy'])
 
 history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
@@ -180,8 +178,10 @@ model.save(path_output_model / 'model.h5')
 
 model.save_weights(str(path_output_model / 'weights.h5'))
 
+
+
 """Inicialización del DataGenerator, en el constructor se inicializa el orden en el que se van a devolver las instancias del problema."""
-validation_generator = DataGenerators.DataGeneratorFINALRegression(validation_ids_instances, **params)
+validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
 """Se obtiene los identificadores de las intancias y se etiqueta en el orden en el que son insertadas en el modelo final"""
 id_instances_validation, y_validation = validation_generator.get_ID_instances_and_real_labels()

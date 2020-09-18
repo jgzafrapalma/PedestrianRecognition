@@ -41,7 +41,7 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
     return model
 
 #Modelo final de regresión cuya tarea de pretexto es Shuffle utilizando un modelo de convolución 3D
-def model_FINAL_Shuffle_CONV3D_Regression(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
+def model_FINAL_Shuffle_CONV3D_CrossingDetection(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
 
     model = Sequential()
 
@@ -81,12 +81,12 @@ def model_FINAL_Shuffle_CONV3D_Regression(the_input_shape, dropout_rate_1, dropo
 
     model.add(Dropout(dropout_rate_2, name='dropout_2_final'))
 
-    model.add(Dense(1, activation='sigmoid', name='fc_2_final'))
+    model.add(Dense(2, activation='softmax', name='fc_2_final'))
 
     #model.summary()
 
     optimizer = Adam(learning_rate=learning_rate)
 
-    model.compile(optimizer=optimizer, loss='mae', metrics=['mse'])
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
     return model

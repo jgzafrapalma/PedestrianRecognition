@@ -99,7 +99,7 @@ validation_generator = DataGeneratorShuffle(validation_ids_instances, **params)
 
 if config['Shuffle']['model_name'] == 'CONV3D':
 
-    model = models.Shuffle_model_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
+    model = models.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 #CALLBACKS
 

@@ -604,7 +604,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
     for set_video in PATH_dataset.iterdir():
 
-        PATH_frames_set = Path(join(PATH_frames, set_video.name))
+        PATH_frames_set = Path(PATH_frames / set_video.name)
 
         logging.info("Accediendo al directorio %s" % set_video)
 
@@ -621,19 +621,21 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                 cap = cv2.VideoCapture(str(video))
 
                 #Se crea una carpeta por cada video de cada set en la carpeta donde se almcenan los frames
-                PATH_frames_video = Path(join(PATH_frames_set, video.name))
+                PATH_frames_video = Path(PATH_frames_set / video.name)
 
                 if not PATH_frames_video.exists():
                     PATH_frames_video.mkdir()
 
                 width = data[set_video.name][video.stem]['width']
                 height = data[set_video.name][video.stem]['height']
+                
+                list_pedestrian = [ped for ped in list(data[set_video.name][video.stem]['ped_annotations']) if data[set_video.name][video.stem]['ped_annotations'][ped]['attributes']['crossing'] != -1]
 
-                list_pedestrian = list(data[set_video.name][video.stem]['ped_annotations'])
+                #list_pedestrian = list(data[set_video.name][video.stem]['ped_annotations'])
 
                 cuts_pedestrian = list()
 
-                intention_pedestrian = list()
+                #intention_pedestrian = list()
 
                 crossing_pedestrian = list()
 
@@ -642,20 +644,16 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                     crossing = data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['crossing']
 
-                    #Los casos irrelevantes son omitidos
-                    if crossing == -1:
-                        list_pedestrian.remove(id_ped)
-                    else:
-                        num_frames = len(data[set_video.name][video.stem]['ped_annotations'][id_ped]['frames'])
+                    num_frames = len(data[set_video.name][video.stem]['ped_annotations'][id_ped]['frames'])
 
-                        cuts_pedestrian.append(np.zeros((num_frames, shape[0], shape[1], 3)))
+                    cuts_pedestrian.append(np.zeros((num_frames, shape[0], shape[1], 3)))
 
-                        # Se rellena la lista con la probabilidad de la intencionalidad de cruzar de los distintos peatones (etiqueta a inferir)
-                        """intention_pedestrian.append(
-                            data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['intention_prob']
-                        )"""
-                        #Se rellena la lista con la etiqueta correspondiente si el peaton cruza la calzada o no
-                        crossing_pedestrian.append(crossing)
+                    # Se rellena la lista con la probabilidad de la intencionalidad de cruzar de los distintos peatones (etiqueta a inferir)
+                    """intention_pedestrian.append(
+                        data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['intention_prob']
+                    )"""
+                    #Se rellena la lista con la etiqueta correspondiente si el peaton cruza la calzada o no
+                    crossing_pedestrian.append(crossing)
 
                 logging.info("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
 
@@ -670,7 +668,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                     # Compruebo la existancia de todos los peatones en el frame id_frame
                     for id_ped, ped in enumerate(list_pedestrian):
 
-                        PATH_frames_ped = Path(join(PATH_frames_video, ped))
+                        PATH_frames_ped = Path(PATH_frames_video / ped)
 
                         #Se crea una carpeta por cada peaton del video donde se van a almacenar los frames
                         if not PATH_frames_ped.exists():
@@ -850,7 +848,7 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                             if shape:
                                 cut = cv2.resize(cut, (shape[1], shape[0]))
 
-                            cv2.imwrite(join(PATH_frames_ped, '%03d' % id_frame + '.jpg'), cut)
+                            cv2.imwrite(str(PATH_frames_ped / ('%03d.jpg' % id_frame)), cut)
 
                             cuts_pedestrian[id_ped][index_frame] = cut
 
@@ -892,22 +890,8 @@ def extract_Frames_PIE(output_path_cuts, input_frames, n_frames_extracted, ID_se
     # Lista donde se van a ir almacenando aquellos frames que se van a seleccionar
     frames = []
 
-    #Se crea el directorio donde se van a almacenar los recortes
-    PATH_cuts = Path(output_path_cuts)
-    if not PATH_cuts.exists():
-        PATH_cuts.mkdir()
-
-    PATH_set_cuts = Path(join(PATH_cuts, ID_set))
-    if not PATH_set_cuts.exists():
-        PATH_set_cuts.mkdir()
-
-    PATH_video_cuts = Path(join(PATH_set_cuts, ID_video))
-    if not PATH_video_cuts.exists():
-        PATH_video_cuts.mkdir()
-
-    PATH_ped_cuts = Path(join(PATH_video_cuts, ID_pedestrian))
-    if not PATH_ped_cuts.exists():
-        PATH_ped_cuts.mkdir()
+    PATH_cuts = Path(join(output_path_cuts, ID_set, ID_video, ID_pedestrian))
+    PATH_cuts.mkdir(parents=True, exist_ok=True)
 
     for id_frame in range(total_frames):
 
@@ -916,7 +900,7 @@ def extract_Frames_PIE(output_path_cuts, input_frames, n_frames_extracted, ID_se
             frames.append(input_frames[id_frame])
 
             # Se almacenan los frames del video para visualizar cuales han sido seleccionados en cada caso
-            cv2.imwrite(join(PATH_ped_cuts, str(id_frame) + '.jpg'), input_frames[id_frame])
+            cv2.imwrite(str(PATH_cuts / (str(id_frame) + '.jpg')), input_frames[id_frame])
 
         if len(frames) == n_frames_extracted:
             break
