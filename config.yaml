@@ -72,6 +72,23 @@ OrderPrediction:
   tensorboard_logs: '/media/jorge/DATOS/TFG/tensorboard'
   path_output_model: '/media/jorge/DATOS/TFG/models'
   #path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Shuffle/Bayesian_Optimization/CONV3D/04092020-213100.json'
+Performance_FinalModels:
+  dim: !!python/tuple [128, 128]
+  dataset: 'PIE_dataset'
+  path_instances: '/media/jorge/DATOS/TFG/instances'
+  path_id_instances: '/media/jorge/DATOS/TFG/ids_instances'
+  model_name: 'COV3D'
+  type_model: 'Crossing-Detection'
+  pretext_task: 'Shuffle'
+  input_model: ''
+  seed: 1
+  random: False
+  n_frames: 16
+  batch_size: 32
+  n_clases: 2
+  normalized: True
+  shuffle: True
+Performance_PretexTasks:
 
 
 
