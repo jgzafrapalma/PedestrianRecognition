@@ -16,58 +16,6 @@ from tensorflow.keras.preprocessing.image import img_to_array
 import logging
 
 
-# Función para extraer un número de frames por cada video del conjunto de datos
-
-def extractFrames(pathVideos, ID_video, ped, nframes, shape=()):
-    cap = cv2.VideoCapture(pathVideos + ID_video + '/' + ped + '/%3d.jpg')
-
-    # Numero total de frames del video
-    total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    original_total = total_frames
-
-    if total_frames % 2 != 0:
-        total_frames += 1
-
-    frame_step = math.floor(total_frames / (nframes - 1))
-
-    frame_step = max(1, frame_step)
-
-    # Lista donde se van a ir almacenando aquellos frames que se van a seleccionar
-    frames = []
-
-    id_frame = 0
-    while cap.isOpened():
-
-        ret, frame = cap.read()
-
-        if not ret:
-            break
-
-        id_frame += 1
-        if id_frame == 1 or id_frame % frame_step == 0 or id_frame == original_total:
-
-            # Si se introduce un shape se redimenciona el tamaño de los frames seleccionados
-            if shape:
-                frame = cv2.resize(frame, (shape[1], shape[0]))
-
-            #filename = "./datasets/frames/" + ID_video + "_" + str(id_frame) + ".jpg"
-
-            # Se almacenan los frames del video para visualizar cuales han sido seleccionados en cada caso
-            #cv2.imwrite(filename, frame)
-
-            # Se transforma la imagen a un array
-            frame = img_to_array(frame)
-
-            # Se añade a la lista de frames
-            frames.append(frame)
-
-        if len(frames) == nframes:
-            break
-
-    cap.release()
-
-    return np.array(frames)
-
 def extract_Frames_Matriz(pathInstances, ID_instance, n_frames_extracted):
 
     #Cargamos el peaton desde el fichero de datos binario de numpy
@@ -295,57 +243,56 @@ def read_instance_file_txt(path_file):
     return files
 
 
-
-
-
-#pathVideos: ruta donde se encuentran los videos
-#pathInsatnces: ruta donde se quiere almacenar las instancias que se van a generar
+#input_path_data: ruta donde se encuentra la información sobre el conjunto de datos (bboxing, labels, ...)
+#input_path_dataset: ruta donde se encuentran los videos
+#output_pathFrames: ruta donde se van a almacenar los frames del video
 #pathFrames: ruta donde se van a almacenar los frames del problema si la variable booleana frames esta activa
+def extract_pedestriansFrames_datasets_JAAD(input_path_data, input_path_dataset, output_path_frames, rate, shape=()):
 
-def extract_pedestrians_datasets_JAAD(pathVideos, pathInstances, pathFrames, pathData, rate, n_frames, shape=(), frames=True):
-
-    with open(pathData, 'rb') as f:
+    #Se abre el fichero de datos
+    with open(input_path_data, 'rb') as f:
         data = pickle.load(f)
 
-    if frames:
-        if not os.path.exists(pathFrames):
-            os.mkdir(pathFrames)
-
-    if not os.path.exists(pathInstances):
-        os.mkdir(pathInstances)
+    path_Videos = Path(input_path_dataset)
 
     #Se recorren todos los videos
-    for f in os.listdir(pathVideos):
-        if isfile(join(pathVideos, f)):
-            cap = cv2.VideoCapture(pathVideos + '/' + f)
+    for video in path_Videos.iterdir():
 
-            print(pathVideos + '/' + f)
+        if video.is_file():
 
-            #Nombre del fichero sin extención
-            f_no_ext = ".".join(f.split(".")[:-1])
+            cap = cv2.VideoCapture(str(video))
 
-            if frames:
-                if not os.path.exists(pathFrames + '/' + f_no_ext):
-                    os.mkdir(pathFrames + '/' + f_no_ext)
+            print(video)
 
-            width = data[f_no_ext]['width']
-            height = data[f_no_ext]['height']
+            width = data[video.stem]['width']
+            height = data[video.stem]['height']
 
             #Lista con los peatones (personas que interactuan con el conductor) del video f_no_ext
-            list_pedestrian = [ped for ped in list(data[f_no_ext]['ped_annotations']) if data[f_no_ext]['ped_annotations'][ped]['old_id'].find('pedestrian') != -1]
+            list_pedestrian = [ped for ped in list(data[video.stem]['ped_annotations']) if data[video.stem]['ped_annotations'][ped]['old_id'].find('pedestrian') != -1]
+
+            #Lista para llevar la cuenta del número de frames por cada peatón
+            indexes_frames_pedestrian = np.zeros(len(list_pedestrian))
+
+            #Lista donde se va a almacenar la ruta donde se van a almacenar los frames de cada peatón del video
+            list_path_Frames = list()
 
             #Lista donde se van a ir almacenando las matrices correspondientes a cada unos de los peatones del video f
-            cuts_pedestrian = list()
+            #cuts_pedestrian = list()
             #Lista donde se van a ir almacenando las etiquetas para cada uno de los peatones del video f
-            crossing_pedestrian = list()
+            #crossing_pedestrian = list()
 
-            # Se reserva espacio para almacenar los distintos frames recortados de cada uno de los peatones
+            # Se crean los directorios para almacenar los frames
             for id_ped in list_pedestrian:
                 #Numero de frames en los que aparece el peaton id_ped
-                num_frames = len(data[f_no_ext]['ped_annotations'][id_ped]['frames'])
-                cuts_pedestrian.append(np.zeros((num_frames, shape[0], shape[1], 3)))
+                #num_frames = len(data[video.stem]['ped_annotations'][id_ped]['frames'])
+                #cuts_pedestrian.append(np.zeros((num_frames, shape[0], shape[1], 3)))
                 #Por cada peaton en el video se tiene un vector para almacenar la etiqueta de si el peaton cruza o no
-                crossing_pedestrian.append(np.zeros(num_frames))
+                #crossing_pedestrian.append(np.zeros(num_frames))
+
+                #Se crean los directorios para almacenar los frames de los peatones de video.stem
+                path_Frames = Path(join(output_path_frames, video.stem, id_ped))
+                list_path_Frames.append(path_Frames)
+                path_Frames.mkdir(parents=True, exist_ok=True)
 
             id_frame = 0
             while cap.isOpened():
@@ -356,261 +303,315 @@ def extract_pedestrians_datasets_JAAD(pathVideos, pathInstances, pathFrames, pat
                 if not ret:
                     break
 
+                #Para el frame actual, recorto todos los peatones que se encuentren en el
                 for id_ped, ped in enumerate(list_pedestrian):
 
-                    if frames:
-                        if not os.path.exists(pathFrames + '/' + f_no_ext + '/' + ped):
-                            os.mkdir(pathFrames + '/' + f_no_ext + '/' + ped)
-
-                    #Compruebo si el peaton se encuentra en el frame actual
-                    list_frames = data[f_no_ext]['ped_annotations'][ped]['frames']
+                    #Obtengo los frames del video en los que se encuentra ped
+                    list_frames = data[video.stem]['ped_annotations'][ped]['frames']
+                    #Compruebo si el peaton se encuentra en el frame actual del video
                     if id_frame in list_frames:
                         #Obtengo la posición de la lista de frames del peaton en el que es encuentra en frame actual.
                         #(Va a servir para luego saber en que index consultar la bounding box)
                         index_frame = list_frames.index(id_frame)
                         #Lista con las coordendas de los dos puntos de la bounding box
-                        bbox = data[f_no_ext]['ped_annotations'][ped]['bbox'][index_frame]
+                        bbox = data[video.stem]['ped_annotations'][ped]['bbox'][index_frame]
 
-                        #Obtengo el valor que tiene el atributo cross para el frame index_frame (etiqueta sobre si va a cruzar o no el peatón)
-                        cross = data[f_no_ext]['ped_annotations'][ped]['behavior']['cross'][index_frame]
+                        #Se obtiene el recorte en el frame actual para el peaton id_ped
+                        cut = cut_reshape_frame_pedestrian(width, height, rate, frame, bbox, shape)
 
-                        diff_y = bbox[2] - bbox[0]
-                        diff_x = bbox[3] - bbox[1]
+                        #Se almacena el recorte en la ruta correspondente a id_ped
+                        cv2.imwrite(str(list_path_Frames[id_ped] / ('%03d' % indexes_frames_pedestrian[id_ped] + '.jpg')), cut)
+                        indexes_frames_pedestrian[id_ped] = indexes_frames_pedestrian[id_ped] + 1
 
-                        #Si la diferencia de la coordenada de x es mayor (Caso habitual)
-                        if diff_x >= diff_y:
+                        #cuts_pedestrian[id_ped][index_frame] = cut
 
-                            #Incremento que se va a realizar sobre el recorte tanto por la parte superior como
-                            #inferior de los fotogramas
-                            increment = math.floor(diff_x * rate)
-
-                            expected_size_cut = int((diff_x + 1) + 2*increment)
-
-                            #print("Expected_size_cut: %d" % expected_size_cut)
-
-                            #Se calcula la nueva posición que va a tener la coordenada x1
-                            new_x1 = bbox[1] - increment
-
-                            #Si pasa del marco superior de la imagen
-                            if new_x1 < 0:
-                                #En la imagen resultado donde se va a almacenar el recorte
-                                cut_x1 = new_x1 * (-1)
-                                #La nueva coordenada de x se establece en 0
-                                bbox[1] = 0
-                            else:
-                                bbox[1] = new_x1
-                                cut_x1 = 0
-
-                            new_x2 = bbox[3] + increment
-
-                            #Si pasa del marco inferior de la imagen
-                            if new_x2 > (height - 1):
-                                cut_x2 = (expected_size_cut - 1) - (new_x2 - (height - 1))
-                                bbox[3] = (height - 1)
-                            else:
-                                bbox[3] = new_x2
-                                cut_x2 = expected_size_cut - 1
-
-
-                            #La longitud que va a tener la parte horizontal debera de ser igual a la nueva diferencia
-                            #de las coordenadas x
-
-                            diff = (expected_size_cut - 1) - diff_y
-
-                            #Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
-                            if diff % 2 != 0:
-                                increment = math.floor(diff / 2)
-
-                                new_y1 = bbox[0] - increment
-
-                                #Se pasa del marco lateral izquierdo de la imagen
-                                if new_y1 < 0:
-                                    cut_y1 = new_y1 * (-1)
-                                    bbox[0] = 0
-                                else:
-                                    bbox[0] = new_y1
-                                    cut_y1 = 0
-
-
-                                new_y2 = bbox[2] + increment + 1
-
-                                if new_y2 > (width - 1):
-                                    # Cantidad que me salgo hacia la derecha de la imagen
-                                    cut_y2 = (expected_size_cut - 1) - (new_y2 - (width - 1))
-                                    bbox[2] = (width - 1)
-                                else:
-                                    bbox[2] = new_y2
-                                    cut_y2 = expected_size_cut - 1
-
-                            else:
-
-                                increment = diff / 2
-
-                                new_y1 = bbox[0] - increment
-
-                                # Se pasa del marco lateral izquierdo de la imagen
-                                if new_y1 < 0:
-                                    cut_y1 = new_y1 * (-1)
-                                    bbox[0] = 0
-                                else:
-                                    bbox[0] = new_y1
-                                    cut_y1 = 0
-
-                                new_y2 = bbox[2] + increment
-
-                                if new_y2 > (width - 1):
-                                    cut_y2 = (expected_size_cut - 1) - (new_y2 - (width - 1))
-                                    bbox[2] = (width - 1)
-                                else:
-                                    bbox[2] = new_y2
-                                    cut_y2 = expected_size_cut - 1
-
-                        else:
-
-                            increment = math.floor(diff_y * rate)
-
-                            expected_size_cut = int((diff_y + 1) + 2 * increment)
-
-                            # Se calcula la nueva posición que va a tener la coordenada y1
-                            new_y1 = bbox[0] - increment
-
-                            # Si pasa del marco lateral izquierdo
-                            if new_y1 < 0:
-                                cut_y1 = new_y1 * (-1)
-                                bbox[0] = 0
-                            else:
-                                bbox[0] = new_y1
-                                cut_y1 = 0
-
-                            # Se calcula la nueva posición que va a tener la coordenada y1
-                            new_y2 = bbox[2] + increment
-
-                            # Si pasa del marco lateral derecho
-                            if new_y2 > (width - 1):
-                                cut_y2 = (expected_size_cut - 1) - (new_y2 - (width - 1))
-                                bbox[2] = (width - 1)
-                            else:
-                                bbox[2] = new_y2
-                                cut_y2 = expected_size_cut - 1
-
-                            diff = (expected_size_cut - 1) - diff_x
-
-                            # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
-                            if diff % 2 != 0:
-                                increment = math.floor(diff / 2)
-
-                                new_x1 = bbox[1] - increment
-
-                                # Se pasa del marco lateral izquierdo de la imagen
-                                if new_x1 < 0:
-                                    cut_x1 = new_x1 * (-1)
-                                    bbox[1] = 0
-                                else:
-                                    bbox[1] = new_x1
-                                    cut_x1 = 0
-
-                                new_x2 = bbox[3] + increment + 1
-
-                                if new_x2 > (height - 1):
-                                    cut_x2 = (expected_size_cut - 1) - (new_x2 - (height - 1))
-                                    bbox[3] = (height - 1)
-                                else:
-                                    bbox[3] = new_x2
-                                    cut_x2 = expected_size_cut - 1
-                            else:
-
-                                increment = diff / 2
-
-                                new_x1 = bbox[1] - increment
-
-                                # Se pasa del marco lateral izquierdo de la imagen
-                                if new_x1 < 0:
-                                    cut_x1 = new_x1 * (-1)
-                                    bbox[1] = 0
-                                else:
-                                    bbox[1] = new_x1
-                                    cut_x1 = 0
-
-                                new_x2 = bbox[3] + increment
-
-                                if new_x2 > (height - 1):
-                                    cut_x2 = (expected_size_cut - 1) - (new_x2 - (height - 1))
-                                    bbox[3] = (height - 1)
-                                else:
-                                    bbox[3] = new_x2
-                                    cut_x2 = expected_size_cut - 1
-
-                        cut = np.zeros((expected_size_cut, expected_size_cut, 3))
-
-                        cut[int(cut_x1):int(cut_x2+1), int(cut_y1):int(cut_y2+1)] = frame[int(bbox[1]):int(bbox[3]+1), int(bbox[0]):int(bbox[2]+1)]
-
-                        if shape:
-                            cut = cv2.resize(cut, (shape[1], shape[0]))
-
-                        if frames:
-                            cv2.imwrite(pathFrames + '/' + f_no_ext + '/' + ped + '/' + '%03d' % id_frame + '.jpg', cut)
-
-                        cuts_pedestrian[id_ped][index_frame] = cut
-
-                        if cross:
-                            crossing_pedestrian[id_ped][index_frame] = 1
+                        #if cross:
+                            #crossing_pedestrian[id_ped][index_frame] = 1
 
                 id_frame += 1
 
             cap.release()
 
-            #instance = {}
+def cut_reshape_frame_pedestrian(width, height, rate, frame, bbox, shape):
 
-            for id_ped, cut_predestrian in enumerate(cuts_pedestrian):
+    diff_x = int(bbox[2]) - int(bbox[0]) + 1
+    diff_y = int(bbox[3]) - int(bbox[1]) + 1
 
-                output_frames, output_labels = extract_Frames_Labels_Matriz(cut_predestrian, crossing_pedestrian[id_ped], n_frames, f_no_ext, list_pedestrian[id_ped])
+    # Si la diferencia de la coordenada de x es mayor (Caso habitual)
+    if diff_x >= diff_y:
 
-                dict_ped = {'frames': output_frames, 'cross_labels': output_labels}
+        # Incremento que se va a realizar sobre el recorte tanto por la parte superior como
+        # inferior de los fotogramas
+        increment = math.floor(diff_x * rate)
 
-                # np.save(pathInstances + '/' + f_no_ext + '_' + list_pedestrian[id_ped] + '.npy', cuts_pedestrian[id_ped])
+        expected_size_cut = int(diff_x + 2 * increment)
 
-                #instance[list_pedestrian[id_ped]] = dict_ped
+        # Se calcula la nueva posición que va a tener la coordenada x1
+        new_x1 = int(bbox[0]) - increment
 
-                with open(pathInstances + '/' + list_pedestrian[id_ped] + '.pkl', 'wb') as output:
-                    pickle.dump(dict_ped, output)
+        # Si pasa del marco superior de la imagen
+        if new_x1 < 0:
+            # En la imagen resultado donde se va a almacenar el recorte
+            cut_x1 = new_x1 * (-1)
+            # La nueva coordenada de x se establece en 0
+            new_x1 = 0
+        else:
+            cut_x1 = 0
 
-            """if list_pedestrian:
+        new_x2 = int(bbox[2]) + increment
 
-                output = open(pathInstances + '/' + f_no_ext + '.pkl', 'wb')
+        # Si pasa del marco inferior de la imagen
+        if new_x2 > (width - 1):
+            cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
+            new_x2 = (width - 1)
+        else:
+            cut_x2 = expected_size_cut - 1
 
-                pickle.dump(instance, output)
+        # La longitud que va a tener la parte horizontal debera de ser igual a la nueva diferencia
+        # de las coordenadas x
 
-                output.close()"""
+        diff = expected_size_cut - diff_y
+
+        # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
+        if diff % 2 != 0:
+            increment = math.floor(diff / 2)
+
+            new_y1 = int(bbox[1]) - increment
+
+            # Se pasa del marco lateral izquierdo de la imagen
+            if new_y1 < 0:
+                cut_y1 = new_y1 * (-1)
+                new_y1 = 0
+            else:
+                cut_y1 = 0
+
+            new_y2 = int(bbox[3]) + increment + 1
+
+            if new_y2 > (height - 1):
+                # Cantidad que me salgo hacia la derecha de la imagen
+                cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
+                new_y2 = (height - 1)
+            else:
+                cut_y2 = expected_size_cut - 1
+
+        else:
+
+            increment = diff / 2
+
+            new_y1 = int(bbox[1]) - increment
+
+            # Se pasa del marco lateral izquierdo de la imagen
+            if new_y1 < 0:
+                cut_y1 = new_y1 * (-1)
+                new_y1 = 0
+            else:
+                cut_y1 = 0
+
+            new_y2 = int(bbox[3]) + increment
+
+            if new_y2 > (height - 1):
+                cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
+                new_y2 = (height - 1)
+            else:
+                cut_y2 = expected_size_cut - 1
+
+    else:
+
+        increment = math.floor(diff_y * rate)
+
+        expected_size_cut = int(diff_y + 2 * increment)
+
+        # Se calcula la nueva posición que va a tener la coordenada y1
+        new_y1 = int(bbox[1]) - increment
+
+        # Si pasa del marco lateral izquierdo
+        if new_y1 < 0:
+            cut_y1 = new_y1 * (-1)
+            new_y1 = 0
+        else:
+            cut_y1 = 0
+
+        # Se calcula la nueva posición que va a tener la coordenada y1
+        new_y2 = int(bbox[3]) + increment
+
+        # Si pasa del marco lateral derecho
+        if new_y2 > (height - 1):
+            cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
+            new_y2 = (height - 1)
+        else:
+            cut_y2 = expected_size_cut - 1
+
+        diff = expected_size_cut - diff_x
+
+        # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
+        if diff % 2 != 0:
+            increment = math.floor(diff / 2)
+
+            new_x1 = int(bbox[0]) - increment
+
+            # Se pasa del marco lateral izquierdo de la imagen
+            if new_x1 < 0:
+                cut_x1 = new_x1 * (-1)
+                new_x1 = 0
+            else:
+                cut_x1 = 0
+
+            new_x2 = int(bbox[2]) + increment + 1
+
+            if new_x2 > (width - 1):
+                cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
+                new_x2 = (width - 1)
+            else:
+                cut_x2 = expected_size_cut - 1
+
+        else:
+
+            increment = diff / 2
+
+            new_x1 = int(bbox[0]) - increment
+
+            # Se pasa del marco lateral izquierdo de la imagen
+            if new_x1 < 0:
+                cut_x1 = new_x1 * (-1)
+                new_x1 = 0
+            else:
+                cut_x1 = 0
+
+            new_x2 = int(bbox[2]) + increment
+
+            if new_x2 > (width - 1):
+                cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
+                new_x2 = (width - 1)
+            else:
+                cut_x2 = expected_size_cut - 1
+
+    cut = np.zeros((expected_size_cut, expected_size_cut, 3))
+
+    cut[int(cut_y1):int(cut_y2 + 1), int(cut_x1):int(cut_x2 + 1)] = frame[int(new_y1):int(new_y2 + 1), int(new_x1):int(new_x2 + 1)]
+
+    if shape:
+        cut = cv2.resize(cut, (shape[1], shape[0]))
+
+    return cut
 
 
-def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_path_instances, output_path_frames, output_path_cuts, rate, n_frames, shape=()):
+def create_instances_JAAD(input_path_data, input_path_frames, output_path_cuts, output_path_instances, n_frames):
+
+    #Se abre el fichero de datos
+    with open(input_path_data, 'rb') as file_descriptor:
+        data = pickle.load(file_descriptor)
+
+    #Ruta donde se encuentran los frames de cada peaton por video
+    Path_Frames = Path(input_path_frames)
+
+    #Se recorren todos los videos
+    for video in Path_Frames.iterdir():
+
+        print(video)
+
+        #Se recorren los peatones por cada video
+        for ped in video.iterdir():
+
+            #Número de frames de los que se van a calcular el flujo optico(número total de frames en los que aparece el peatón menos 1)
+            num_frames = len(data[video.stem]['ped_annotations'][ped.stem]['frames']) - 1
+
+            #Se obtiene la etiqueta de si el peatón esta cruzando o no
+            crossing = data[video.stem]['ped_annotations'][ped.stem]['attributes']['crossing']
+
+            #Vector para almacenar las magnitudes de los flujos opticos
+            magnitudes = np.zeros(num_frames)
+
+            #Se inicializa la lectura de los fotogramas del peatón
+            cap = cv2.VideoCapture(join(ped, '%03d.jpg'))
+
+            #Se obtiene el ancho y alto de los fotogramas
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            #Se reserva memoria para almacenar los fotogramas del peatón en los que se va a calcular el flujo optico
+            #Se almacenan los frames una vez que se van leyendo para luego ahorrar lecturas en disco
+            frames = np.zeros((num_frames, width, height, 3))
+
+            #Se lee el primer frame del peatón (este frame no será almacenado, la magnitud del flujo óptico es calculado del segundo frame en adelante
+            ret, first_frame = cap.read()
+
+            #Se calcula el frame actual pero en escala de grises
+            prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+
+            index_frame = 0
+            while cap.isOpened():
+
+                ret, frame = cap.read()
+
+                if not ret:
+                    break
+
+                #Se almacenan los frames del peaton
+                frames[index_frame] = frame
+
+                #Se convierte el frame actual a blanco y negro (necesario para calcular el flujo optico)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                #Se calcula el flujo optico
+                flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+                #Se calcula la magnitud del flujo óptico
+                magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+
+                #Se almacena la mediana de la magnitud del flujo óptico (para evitar outliers)
+                magnitudes[index_frame] = np.median(magnitude)
+
+                #Se actualiza el frame anterior para la siguiente iteración del bucle
+                prev_gray = gray
+
+                index_frame += 1
+
+            cap.release()
+
+            #Se obtienen los indeces de los frames con un valor de magnitud del flujo de movimiento mayor
+            indexes = (-magnitudes).argsort()[:n_frames]
+
+            #Se ordenan los indices obtenidos para hacer el recorte de los frames por orden
+            sort_indexes = np.sort(indexes)
+
+            #Se crea la carpeta para almacenar los recortes
+            Path_Cuts = Path(join(output_path_cuts, str(crossing), ped.stem))
+            Path_Cuts.mkdir(parents=True, exist_ok=True)
+
+            #Se reserva memoria para almacenar los frames que van a formar parte de la instancia
+            output_frames = np.zeros((n_frames, width, height, 3))
+
+            #Lectura de aquellos frames que van a formar parte de la instancia (mayor flujo óptico)
+            for id_out, index in enumerate(sort_indexes):
+                #Se almacenan los frames que van a estar en la instancia
+                output_frames[id_out] = frames[index]
+                #Se almacenan los recortes
+                cv2.imwrite(str(Path_Cuts / ('%03d' % (index + 1) + '.jpg')), frames[index])
+
+            #Se crea la instancia
+            instance = {'frames': output_frames, 'crossing': crossing}
+
+            Path_Instances = Path(join(output_path_instances, str(crossing)))
+            Path_Instances.mkdir(parents=True, exist_ok=True)
+
+            Path_Instances = Path_Instances / (ped.stem + '.pkl')
+
+            with Path_Instances.open('wb') as file_descriptor:
+                pickle.dump(instance, file_descriptor)
+
+def extract_pedestriansFrames_datasets_PIE(input_path_data, input_path_dataset, output_path_frames, rate, shape=()):
 
     logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
-    PATH_instances = Path(output_path_instances)
-
-    PATH_frames = Path(output_path_frames)
-
-    if not PATH_instances.exists():
-        PATH_instances.mkdir()
-
-    if not PATH_frames.exists():
-        PATH_frames.mkdir()
-
-    with open(input_path_data, 'rb') as input:
-        data = pickle.load(input)
+    #Se abre el fichero de datos
+    with open(input_path_data, 'rb') as file_descriptor:
+        data = pickle.load(file_descriptor)
 
     PATH_dataset = Path(input_path_dataset)
 
     for set_video in PATH_dataset.iterdir():
 
-        PATH_frames_set = Path(PATH_frames / set_video.name)
-
         logging.info("Accediendo al directorio %s" % set_video)
-
-        #En el directorio donde se almacenan los frames se crea una carpeta para cada set
-        if not PATH_frames_set.exists():
-            PATH_frames_set.mkdir()
 
         for video in set_video.iterdir():
 
@@ -620,42 +621,24 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                 cap = cv2.VideoCapture(str(video))
 
-                #Se crea una carpeta por cada video de cada set en la carpeta donde se almcenan los frames
-                PATH_frames_video = Path(PATH_frames_set / video.name)
-
-                if not PATH_frames_video.exists():
-                    PATH_frames_video.mkdir()
-
                 width = data[set_video.name][video.stem]['width']
                 height = data[set_video.name][video.stem]['height']
                 
-                list_pedestrian = [ped for ped in list(data[set_video.name][video.stem]['ped_annotations']) if data[set_video.name][video.stem]['ped_annotations'][ped]['attributes']['crossing'] != -1]
+                #list_pedestrian = [ped for ped in list(data[set_video.name][video.stem]['ped_annotations']) if data[set_video.name][video.stem]['ped_annotations'][ped]['attributes']['crossing'] != -1]
 
-                #list_pedestrian = list(data[set_video.name][video.stem]['ped_annotations'])
+                list_pedestrian = list(data[set_video.name][video.stem]['ped_annotations'])
 
-                cuts_pedestrian = list()
+                indexes_frames_pedestrian = np.zeros(len(list_pedestrian))
 
-                #intention_pedestrian = list()
-
-                crossing_pedestrian = list()
+                # Lista donde se va a almacenar la ruta donde se van a almacenar los frames de cada peatón del video
+                list_path_Frames = list()
 
                 #Se reserva memoria para almacenar los frames de cada uno de los peatones y se almacena la etiqueta de cada peaton
                 for id_ped in list_pedestrian:
 
-                    crossing = data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['crossing']
-
-                    num_frames = len(data[set_video.name][video.stem]['ped_annotations'][id_ped]['frames'])
-
-                    cuts_pedestrian.append(np.zeros((num_frames, shape[0], shape[1], 3)))
-
-                    # Se rellena la lista con la probabilidad de la intencionalidad de cruzar de los distintos peatones (etiqueta a inferir)
-                    """intention_pedestrian.append(
-                        data[set_video.name][video.stem]['ped_annotations'][id_ped]['attributes']['intention_prob']
-                    )"""
-                    #Se rellena la lista con la etiqueta correspondiente si el peaton cruza la calzada o no
-                    crossing_pedestrian.append(crossing)
-
-                logging.info("Memoria para almacenar los fotogramas de los peatones recortados reservada con exito")
+                    path_Frames = Path(join(output_path_frames, set_video.stem, video.stem, id_ped))
+                    list_path_Frames.append(path_Frames)
+                    path_Frames.mkdir(parents=True, exist_ok=True)
 
                 id_frame = 0
                 while cap.isOpened():
@@ -668,12 +651,6 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                     # Compruebo la existancia de todos los peatones en el frame id_frame
                     for id_ped, ped in enumerate(list_pedestrian):
 
-                        PATH_frames_ped = Path(PATH_frames_video / ped)
-
-                        #Se crea una carpeta por cada peaton del video donde se van a almacenar los frames
-                        if not PATH_frames_ped.exists():
-                            PATH_frames_ped.mkdir()
-
                         #Se obtiene la lista de frames del peatón ped
                         list_frames = data[set_video.name][video.stem]['ped_annotations'][ped]['frames']
                         #Se comprueba si el frame actual se encuentra en esta lista
@@ -683,174 +660,10 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
                             #Se obtiene el valor de la hitbox
                             bbox = data[set_video.name][video.stem]['ped_annotations'][ped]['bbox'][index_frame]
 
-                            #Se calculan las diferencias entre las coordenadas
-                            diff_x = int(bbox[2]) - int(bbox[0]) + 1
-                            diff_y = int(bbox[3]) - int(bbox[1]) + 1
+                            cut = cut_reshape_frame_pedestrian(width, height, rate, frame, bbox, shape)
 
-                            # Si la diferencia de la coordenada de x es mayor (Caso habitual)
-                            if diff_x >= diff_y:
-
-                                # Incremento que se va a realizar sobre el recorte tanto por la parte superior como
-                                # inferior de los fotogramas
-                                increment = math.floor(diff_x * rate)
-
-                                expected_size_cut = int(diff_x + 2 * increment)
-
-                                """Se calcula la nueva posición que va a tener la coordenada x1,
-                                increment será igual a la cantidad de pixeles en la que se amplia la imagen por la parte
-                                izquierda"""
-                                new_x1 = int(bbox[0]) - increment
-
-                                # Si pasa del marco izquierdo de la imagen
-                                if new_x1 < 0:
-                                    #Posición en la imagen final en la que se va a colocar el recorte
-                                    cut_x1 = new_x1 * (-1)
-                                    # La nueva coordenada de x se establece en 0
-                                    new_x1 = 0
-                                else:
-                                    """La imagen no se sale por el lateral izquierdo, por lo tanto, en la imagen final 
-                                    se empieza a escribir la imagen recortada desde la esquina superior izquierda"""
-                                    cut_x1 = 0
-
-                                new_x2 = int(bbox[2]) + increment
-
-                                """Si pasa del marco derecho de la imagen (1920 o superior, ya que el ultimo valor de pixel
-                                por la derecha es el 1919)"""
-                                if new_x2 > (width - 1):
-                                    """new_x2 - (width - 1) cantidad que se pasa por el lateral derecho,
-                                        cut_x2 es la posición final en la que se recorta la imagen"""
-                                    cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
-                                    new_x2 = (width - 1)
-                                else:
-                                    cut_x2 = expected_size_cut - 1
-
-                                # La longitud que va a tener la parte vertical debera de ser igual a la nueva diferencia
-                                # de las coordenadas x
-                                diff = expected_size_cut - diff_y
-
-                                # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
-                                if diff % 2 != 0:
-                                    increment = math.floor(diff / 2)
-
-                                    new_y1 = int(bbox[1]) - increment
-
-                                    # Se pasa del marco superior de la imagen
-                                    if new_y1 < 0:
-                                        cut_y1 = new_y1 * (-1)
-                                        new_y1 = 0
-                                    else:
-                                        cut_y1 = 0
-
-                                    new_y2 = int(bbox[3]) + increment + 1
-
-                                    if new_y2 > (height - 1):
-                                        # Cantidad que me salgo hacia la derecha de la imagen
-                                        cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
-                                        new_y2 = (height - 1)
-                                    else:
-                                        cut_y2 = expected_size_cut - 1
-
-                                else:
-
-                                    increment = diff / 2
-
-                                    new_y1 = int(bbox[1]) - increment
-
-                                    # Se pasa del marco superior de la imagen
-                                    if new_y1 < 0:
-                                        cut_y1 = new_y1 * (-1)
-                                        new_y1 = 0
-                                    else:
-                                        cut_y1 = 0
-
-                                    new_y2 = int(bbox[3]) + increment
-
-                                    if new_y2 > (height - 1):
-                                        cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
-                                        new_y2 = (height - 1)
-                                    else:
-                                        cut_y2 = expected_size_cut - 1
-
-                            else: # diff_y > diff_x
-
-                                increment = math.floor(diff_y * rate)
-
-                                expected_size_cut = int(diff_y + 2 * increment)
-
-                                # Se calcula la nueva posición que va a tener la coordenada y1
-                                new_y1 = int(bbox[1]) - increment
-
-                                # Si pasa del marco superior
-                                if new_y1 < 0:
-                                    cut_y1 = new_y1 * (-1)
-                                    new_y1 = 0
-                                else:
-                                    cut_y1 = 0
-
-                                # Se calcula la nueva posición que va a tener la coordenada y1
-                                new_y2 = int(bbox[3]) + increment
-
-                                # Si pasa del inferior
-                                if new_y2 > (height - 1):
-                                    cut_y2 = (expected_size_cut - 1) - (new_y2 - (height - 1))
-                                    new_y2 = (height - 1)
-                                else:
-                                    cut_y2 = expected_size_cut - 1
-
-                                diff = expected_size_cut - diff_x
-
-                                # Al ser esta diferencia un valor impar, por el lado derecho se va a incrementar en un pixel más
-                                if diff % 2 != 0:
-                                    increment = math.floor(diff / 2)
-
-                                    new_x1 = int(bbox[0]) - increment
-
-                                    # Se pasa del marco lateral izquierdo de la imagen
-                                    if new_x1 < 0:
-                                        cut_x1 = new_x1 * (-1)
-                                        new_x1 = 0
-                                    else:
-                                        cut_x1 = 0
-
-                                    new_x2 = int(bbox[2]) + increment + 1
-
-                                    if new_x2 > (width - 1):
-                                        cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
-                                        new_x2 = (width - 1)
-                                    else:
-                                        cut_x2 = expected_size_cut - 1
-
-                                else:
-
-                                    increment = diff / 2
-
-                                    new_x1 = int(bbox[0]) - increment
-
-                                    # Se pasa del marco lateral izquierdo de la imagen
-                                    if new_x1 < 0:
-                                        cut_x1 = new_x1 * (-1)
-                                        new_x1 = 0
-                                    else:
-                                        cut_x1 = 0
-
-                                    new_x2 = int(bbox[2]) + increment
-
-                                    if new_x2 > (width - 1):
-                                        cut_x2 = (expected_size_cut - 1) - (new_x2 - (width - 1))
-                                        new_x2 = (width - 1)
-                                    else:
-                                        cut_x2 = expected_size_cut - 1
-
-                            cut = np.zeros((expected_size_cut, expected_size_cut, 3))
-
-                            cut[int(cut_y1):int(cut_y2+1), int(cut_x1):int(cut_x2+1)] = frame[int(new_y1):int(new_y2+1), int(new_x1):int(new_x2+1)]
-
-                            if shape:
-                                cut = cv2.resize(cut, (shape[1], shape[0]))
-
-                            cv2.imwrite(str(PATH_frames_ped / ('%03d.jpg' % id_frame)), cut)
-
-                            cuts_pedestrian[id_ped][index_frame] = cut
+                            cv2.imwrite(str(list_path_Frames[id_ped] / ('%04d.jpg' % indexes_frames_pedestrian[id_ped])), cut)
+                            indexes_frames_pedestrian[id_ped] = indexes_frames_pedestrian[id_ped] + 1
 
                     id_frame += 1
 
@@ -858,17 +671,530 @@ def extract_pedestrian_dataset_PIE(input_path_data, input_path_dataset, output_p
 
                 logging.info("Peatones del video %s recortados con exito" % video)
 
-                for id_ped, cut_pedestrian in enumerate(cuts_pedestrian):
+def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, output_path_instances, n_frames):
 
-                    output_frames = extract_Frames_PIE(output_path_cuts, cut_pedestrian, n_frames, set_video.name, video.stem, list_pedestrian[id_ped])
+    logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
-                    #dict_ped = {'frames': output_frames, 'intention_prob': intention_pedestrian[id_ped], 'crossing': crossing_pedestrian[id_ped]}
-                    dict_ped = {'frames': output_frames, 'crossing': crossing_pedestrian[id_ped]}
+    # Se abre el fichero de datos
+    with open(input_path_data, 'rb') as file_descriptor:
+        data = pickle.load(file_descriptor)
 
-                    with open(join(output_path_instances, list_pedestrian[id_ped] + '.pkl'), 'wb') as output:
-                        pickle.dump(dict_ped, output)
+    # Ruta donde se encuentran los frames de cada peaton por video
+    Path_Frames = Path(input_path_frames)
 
-                logging.info("Instancias del video %s guardadas con exito" % video)
+    for set_video in Path_Frames.iterdir():
+
+        logging.info("Accediendo al directorio %s" % set_video)
+
+        for video in set_video.iterdir():
+
+            logging.info("Creando instancias del video %s" % video)
+
+            for ped in video.iterdir():
+
+                #Se obtiene la etiqueta de si el peatón esta cruzando o no
+                crossing = data[set_video.stem][video.stem]['ped_annotations'][ped.stem]['attributes']['crossing']
+
+                #Comprobar si ya existe la instancia
+                Path_Instance = Path(join(output_path_instances, str(crossing), (ped.stem + '.pkl')))
+
+                if not Path_Instance.exists():
+
+                    logging.info("Creando instancia %s" % Path_Instance.stem)
+
+                    # Número de frames de los que se van a calcular el flujo optico(número total de frames en los que aparece el peatón menos 1)
+                    num_frames = len(data[set_video.stem][video.stem]['ped_annotations'][ped.stem]['frames']) - 1
+
+                    # Vector para almacenar las magnitudes de los flujos opticos
+                    magnitudes = np.zeros(num_frames)
+
+                    #Se inicializa la lectura de los fotogramas del peatón
+                    cap = cv2.VideoCapture(join(ped, '%04d.jpg'))
+
+                    #Se obtiene el ancho y alto de los fotogramas
+                    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+                    #Se reserva memoria para almacenar los fotogramas del peatón en los que se va a calcular el flujo optico
+                    #Se almacenan los frames una vez que se van leyendo para luego ahorrar lecturas en disco
+                    frames = np.zeros((num_frames, width, height, 3))
+
+                    #Se lee el primer frame del peatón (este frame no será almacenado, la magnitud del flujo óptico es calculado del segundo frame en adelante
+                    ret, first_frame = cap.read()
+
+                    #Se calcula el frame actual pero en escala de grises
+                    prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+
+                    index_frame = 0
+                    while cap.isOpened():
+
+                        ret, frame = cap.read()
+
+                        if not ret:
+                            break
+
+                        #Se almacenan los frames del peaton
+                        frames[index_frame] = frame
+
+                        #Se convierte el frame actual a blanco y negro (necesario para calcular el flujo optico)
+                        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                        #Se calcula el flujo optico
+                        flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+                        #Se calcula la magnitud del flujo óptico
+                        magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+
+                        #Se almacena la mediana de la magnitud del flujo óptico (para evitar outliers)
+                        magnitudes[index_frame] = np.median(magnitude)
+
+                        #Se actualiza el frame anterior para la siguiente iteración del bucle
+                        prev_gray = gray
+
+                        index_frame += 1
+
+                    cap.release()
+
+                    #Se obtienen los indeces de los frames con un valor de magnitud del flujo de movimiento mayor
+                    indexes = (-magnitudes).argsort()[:n_frames]
+
+                    #Se ordenan los indices obtenidos para hacer el recorte de los frames por orden
+                    sort_indexes = np.sort(indexes)
+
+                    #Se crea la carpeta para almacenar los recortes
+                    Path_Cuts = Path(join(output_path_cuts, str(crossing), ped.stem))
+                    Path_Cuts.mkdir(parents=True, exist_ok=True)
+
+                    #Se reserva memoria para almacenar los frames que van a formar parte de la instancia
+                    output_frames = np.zeros((n_frames, width, height, 3))
+
+                    #Lectura de aquellos frames que van a formar parte de la instancia (mayor flujo óptico)
+                    for id_out, index in enumerate(sort_indexes):
+                        #Se almacenan los frames que van a estar en la instancia
+                        output_frames[id_out] = frames[index]
+                        #Se almacenan los recortes
+                        cv2.imwrite(str(Path_Cuts / ('%05d' % (index + 1) + '.jpg')), frames[index])
+
+                    #Se crea la instancia
+                    instance = {'frames': output_frames, 'crossing': crossing}
+
+                    Path_Instances = Path(join(output_path_instances, str(crossing)))
+                    Path_Instances.mkdir(parents=True, exist_ok=True)
+
+                    Path_Instances = Path_Instances / (ped.stem + '.pkl')
+
+                    with Path_Instances.open('wb') as file_descriptor:
+                        pickle.dump(instance, file_descriptor)
+
+                    logging.info("Instancia %s creada con exito" % Path_Instance.stem)
+
+                else:
+
+                    logging.info("La instancia %s no se ha creado porque ya existe" % Path_Instance.stem)
+
+
+# Función para extraer un número de frames por cada video del conjunto de datos
+def extractFrames(pathFrames, nframes):
+
+    cap = cv2.VideoCapture(str(pathFrames))
+
+    # Numero total de frames del video
+    total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    # Se obtiene el ancho y alto de los fotogramas
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    original_total = total_frames
+
+    if total_frames % 2 != 0:
+        total_frames += 1
+
+    frame_step = math.floor(total_frames / (nframes - 1))
+
+    frame_step = max(1, frame_step)
+
+    # Se reserva memoria para almacenar los frames que van a formar parte de la instancia
+    output_frames = np.zeros((nframes, width, height, 3))
+    index = 0
+
+    id_frame = 0
+    while cap.isOpened():
+
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        id_frame += 1
+        if id_frame == 1 or id_frame % frame_step == 0 or id_frame == original_total - 10:
+
+            output_frames[index] = frame
+            index += 1
+
+        if index == nframes:
+            break
+
+    cap.release()
+
+    return output_frames
+
+
+# Función para extraer un número de frames por cada video del conjunto de datos
+def extractFramesOpticalFlow(pathFrames, nframes):
+
+    cap = cv2.VideoCapture(str(pathFrames))
+
+    # Número de frames de los que se van a calcular el flujo optico(número total de frames en los que aparece el peatón menos 1)
+    num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1
+
+    # Vector para almacenar las magnitudes de los flujos opticos
+    magnitudes = np.zeros(num_frames)
+
+    # Se obtiene el ancho y alto de los fotogramas
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Se reserva memoria para almacenar los fotogramas del peatón en los que se va a calcular el flujo optico
+    # Se almacenan los frames una vez que se van leyendo para luego ahorrar lecturas en disco
+    frames = np.zeros((num_frames, width, height, 3))
+
+    # Se lee el primer frame del peatón (este frame no será almacenado, la magnitud del flujo óptico es calculado del segundo frame en adelante
+    ret, first_frame = cap.read()
+
+    # Se calcula el frame actual pero en escala de grises
+    prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+
+    index_frame = 0
+    while cap.isOpened():
+
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        # Se almacenan los frames del peaton
+        frames[index_frame] = frame
+
+        # Se convierte el frame actual a blanco y negro (necesario para calcular el flujo optico)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Se calcula el flujo optico
+        flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+        # Se calcula la magnitud del flujo óptico
+        magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+
+        # Se almacena la mediana de la magnitud del flujo óptico (para evitar outliers)
+        magnitudes[index_frame] = np.median(magnitude)
+
+        # Se actualiza el frame anterior para la siguiente iteración del bucle
+        prev_gray = gray
+
+        index_frame += 1
+
+    cap.release()
+
+    # Se obtienen los indeces de los frames con un valor de magnitud del flujo de movimiento mayor
+    indexes = (-magnitudes).argsort()[:nframes]
+
+    # Se ordenan los indices obtenidos para hacer el recorte de los frames por orden
+    sort_indexes = np.sort(indexes)
+
+    # Se reserva memoria para almacenar los frames que van a formar parte de la instancia
+    output_frames = np.zeros((nframes, width, height, 3))
+
+    # Lectura de aquellos frames que van a formar parte de la instancia (mayor flujo óptico)
+    for id_out, index in enumerate(sort_indexes):
+        # Se almacenan los frames que van a estar en la instancia
+        output_frames[id_out] = frames[index]
+
+    return output_frames
+
+
+def create_instances_PIE_OrderPrediction(input_path_frames, output_path_cuts, output_path_instances, optical_flow):
+
+    logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
+
+    # Ruta donde se encuentran los frames de cada peaton por video
+    Path_Frames = Path(input_path_frames)
+
+    for set_video in Path_Frames.iterdir():
+
+        logging.info("Accediendo al directorio %s" % set_video)
+
+        for video in set_video.iterdir():
+
+            logging.info("Creando instancias del video %s" % video)
+
+            for ped in video.iterdir():
+
+                Path_Ped = Path(join(ped, '%04d.jpg'))
+
+                #logging.info("Creando instancia %s" % Path_Instance.stem)
+
+                if optical_flow:
+
+                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'OpticalFlow', ped.stem))
+
+                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'OpticalFlow', ped.stem))
+
+                    output_frames = extractFramesOpticalFlow(Path_Ped, 4)
+
+                else:
+
+                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'NotOpticalFlow', ped.stem))
+
+                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'NotOpticalFlow', ped.stem))
+
+                    output_frames = extractFrames(Path_Ped, 4)
+
+
+                #CALCULO DE LAS PERMUTACIONES
+
+                Path_Instances.mkdir(parents=True, exist_ok=True)
+
+                Path_Cuts.mkdir(parents=True, exist_ok=True)
+
+                #Clase 0 (vector sin permutación) {a, b, c, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_0p.pkl')
+
+                instance = {'frames': output_frames, 'class': 0}
+
+                #Se almacena la instancia correspondiente a la primera permutación
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+
+                Path_Cut = Path_Cuts / '0p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(output_frames):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 1 (una permutación) {a, b, d, c}
+
+                Path_Instance = Path_Instances / (ped.stem + '_1p.pkl')
+
+                permutation_1 = permutation_vector(output_frames, 2, 3)
+
+                instance = {'frames': permutation_1, 'class': 1}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+
+                Path_Cut = Path_Cuts / '1p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_1):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 2 (una permutación) {a, d, c, b}
+
+                Path_Instance = Path_Instances / (ped.stem + '_2p.pkl')
+
+                permutation_2 = permutation_vector(output_frames, 1, 3)
+
+                instance = {'frames': permutation_2, 'class': 2}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '2p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_2):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 3 (una permutación) {a, c, b, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_3p.pkl')
+
+                permutation_3 = permutation_vector(output_frames, 1, 2)
+
+                instance = {'frames': permutation_3, 'class': 3}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '3p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_3):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 4 (una permutación) {c, b, a, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_4p.pkl')
+
+                permutation_4 = permutation_vector(output_frames, 0, 2)
+
+                instance = {'frames': permutation_4, 'class': 4}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '4p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_4):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 5 (una permutación) {b, a, c, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_5p.pkl')
+
+                permutation_5 = permutation_vector(output_frames, 0, 1)
+
+                instance = {'frames': permutation_5, 'class': 5}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '5p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_5):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 6 (una permutación) {a, c, d, b}
+
+                Path_Instance = Path_Instances / (ped.stem + '_6p.pkl')
+
+                permutation_6 = permutation_vector(permutation_1, 1, 3)
+
+                instance = {'frames': permutation_6, 'class': 6}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '6p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_6):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 7 (una permutación) {a, d, b, c}
+
+                Path_Instance = Path_Instances / (ped.stem + '_7p.pkl')
+
+                permutation_7 = permutation_vector(permutation_2, 2, 3)
+
+                instance = {'frames': permutation_7, 'class': 7}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '7p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_7):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 8 (una permutación) {c, a, b, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_8p.pkl')
+
+                permutation_8 = permutation_vector(permutation_3, 0, 1)
+
+                instance = {'frames': permutation_8, 'class': 8}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '8p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_8):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 9 (una permutación) {b, c, a, d}
+
+                Path_Instance = Path_Instances / (ped.stem + '_9p.pkl')
+
+                permutation_9 = permutation_vector(permutation_4, 0, 1)
+
+                instance = {'frames': permutation_9, 'class': 9}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '9p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_9):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 10 (una permutación) {b, a, d, c}
+
+                Path_Instance = Path_Instances / (ped.stem + '_10p.pkl')
+
+                permutation_10 = permutation_vector(permutation_5, 2, 3)
+
+                instance = {'frames': permutation_10, 'class': 10}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '10p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_10):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                #Clase 11 (una permutación) {b, d, a, c}
+
+                Path_Instance = Path_Instances / (ped.stem + '_11p.pkl')
+
+                permutation_11 = permutation_vector(permutation_7, 0, 2)
+
+                instance = {'frames': permutation_11, 'class': 11}
+
+                with Path_Instance.open('wb') as file_descriptor:
+                    pickle.dump(instance, file_descriptor)
+
+                #Se almacenan los recortes correspondientes a la permutación
+                Path_Cut = Path_Cuts / '11p'
+
+                Path_Cut.mkdir(parents=True, exist_ok=True)
+
+                for index, frame in enumerate(permutation_11):
+                    cv2.imwrite(str(Path_Cut / ('%01d' % (index) + '.jpg')), frame)
+
+                logging.info("Permutaciones(instancias) para el peatón %s creadas con exitos" % ped.stem)
+
+
+def permutation_vector(v, pos_1, pos_2):
+
+    v_aux = v.copy()
+
+    v_aux[pos_1], v_aux[pos_2] = v_aux[pos_2], v_aux[pos_1]
+
+    return v_aux
 
 
 def extract_Frames_PIE(output_path_cuts, input_frames, n_frames_extracted, ID_set, ID_video, ID_pedestrian):
