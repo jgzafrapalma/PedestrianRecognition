@@ -51,6 +51,8 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 from datetime import datetime
 
+from sklearn.metrics import confusion_matrix
+
 import DataGenerators
 
 import models
@@ -113,7 +115,7 @@ if pretext_task == 'Shuffle' and model_name == 'CONV3D':
     unit = hyperparameters_cl['unit']
     learning_rate = hyperparameters_cl['learning_rate']
 
-    learning_rate_fine_tuning = hyperparameters_ft['learning_rate_fine_tuning']
+    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
 
     if type_model == 'Crossing-detection':
 
@@ -177,3 +179,15 @@ np.save(path_output_model / 'history.npy', history.history)
 model.save(path_output_model / 'model.h5')
 
 model.save_weights(str(path_output_model / 'weights.h5'))
+
+
+y_predictions = model.predict(x=validation_generator)
+
+"""Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
+
+print(confusion_matrix(y_validation, y_predictions))
+
+with open('predictions.txt', 'w') as filehandle:
+    for id_instance, y_real, y_pred in zip(id_instances_validation, y_validation, y_predictions):
+        filehandle.write("%s %f %f\n" % (id_instance, y_real, y_pred))

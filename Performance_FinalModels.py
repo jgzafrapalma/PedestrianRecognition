@@ -57,7 +57,8 @@ pretext_task = config['Performance_FinalModels']['pretext_task']
 model_name = config['Performance_FinalModels']['model_name']
 input_model = config['Performance_FinalModels']['input_model']
 #Ruta donde se encuentran las instancias que van a ser utilizadas para obtener las predicciones del modelo final
-path_instances = Path(join(config['Performance_FinalModels']['path_instances'], dataset, type_model, pretext_task))
+#path_instances = Path(join(config['Performance_FinalModels']['path_instances'], dataset, type_model, pretext_task))
+path_instances = Path(join(config['Performance_FinalModels']['path_instances'], dataset))
 path_ids_instances = Path(join(config['Performance_FinalModels']['path_id_instances'], dataset))
 
 #Variables utilizadas por el DataGenerator
@@ -77,7 +78,7 @@ params = {'dim': dim,
           'n_frames': n_frames,
           'n_channels': 3,
           'normalized': normalized,
-          'Shuffle': shuffle}
+          'shuffle': shuffle}
 
 #Se utiliza el DataGenerator correspondiente a la tarea de pretexto
 if type_model == 'Crossing-Detection':
@@ -85,15 +86,15 @@ if type_model == 'Crossing-Detection':
     validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
 #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-path_model = Path(join(config['Performance_FinalModels']['path_model'], dataset, type_model, model_name, input_model))
+path_model = Path(join(config['Performance_FinalModels']['path_model'], dataset, 'Transfer_Learning', pretext_task, model_name, input_model, 'model.h5'))
 
 #Se carga el modelo final
 model = load_model(path_model)
 
-"""Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
-id_instances_validation, y_validation = validation_generator.get_ID_instances_and_real_labels()
+y_predictions = model.predict(x=validation_generator)
 
-y_predictions = model.predict(validation_generator)
+"""Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
 
 print(confusion_matrix(y_validation, y_predictions))
 

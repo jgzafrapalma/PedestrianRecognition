@@ -54,11 +54,11 @@ Transfer_Learning:
   n_frames: 16
   n_classes: 2
   channels: 3
-  batch_size: 32
+  batch_size: 8
   normalized: True
   shuffle: True
-  path_hyperparameters_classification_layer: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Classification_Layer/14072020-165700.json'
-  path_hyperparameters_fine_tuning: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Fine_Tuning/14072020-165700.json'
+  path_hyperparameters_classification_layer: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Classification_Layer/14092020-130900.json'
+  path_hyperparameters_fine_tuning: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Fine_Tuning/14092020-130900.json'
 OrderPrediction:
   dim: !!python/tuple [128, 128]
   dataset: 'PIE_dataset'
@@ -75,16 +75,17 @@ OrderPrediction:
 Performance_FinalModels:
   dim: !!python/tuple [128, 128]
   dataset: 'PIE_dataset'
-  path_instances: '/media/jorge/DATOS/TFG/instances'
-  path_id_instances: '/media/jorge/DATOS/TFG/ids_instances'
-  model_name: 'COV3D'
+  path_instances: '/pub/experiments/jzafra/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
+  path_model: '/pub/experiments/jzafra/models'
+  model_name: 'CONV3D'
   type_model: 'Crossing-Detection'
   pretext_task: 'Shuffle'
-  input_model: ''
+  input_model: '07102020-171736'
   seed: 1
   random: False
   n_frames: 16
-  batch_size: 32
+  batch_size: 8
   n_clases: 2
   normalized: True
   shuffle: True

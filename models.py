@@ -4,32 +4,167 @@ from tensorflow.keras.optimizers import Adam
 import tensorflow.keras as keras
 
 
+
+
+
+
+##########################################################################################################
+############################################  BASE MODELS  ###############################################
+##########################################################################################################
+
+
+
+class CaffeNet(Model):
+
+    def __init__(self, input_shape):
+        super(CaffeNet, self).__init__()
+
+        #1th Convolutional Layers
+        self.Conv2D_1 = Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
+                     activation='relu', input_shape=input_shape, name='Conv2D_1_CaffeNet')
+        self.MaxPooling2D_1 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_1_CaffeNet')
+        self.BatchNormalization_1 = BatchNormalization(name='BatchNormalization_1_CaffeNet')
+
+        #2th Convolutional Layers
+        self.Conv2D_2 = Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='Conv2D_2_CaffeNet')
+        self.MaxPooling2D_2 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_2_CaffeNet')
+        self.BatchNormalization_2 = BatchNormalization(name='BatchNormalization_2_CaffeNet')
+
+        #3th Convolutional Layers
+        self.Conv2D_3 = Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_3_CaffeNet')
+
+        #4th Convolutional Layers
+        self.Conv2D_4 = Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_4_CaffeNet')
+
+        #5th Convolutional Layers
+        self.Conv2D_5 = Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_5_CaffeNet')
+        self.MaxPooling2D_3 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_3_CaffeNet')
+
+    def call(self, inputs, training=True):
+        #1th Convolutional Layers
+        x = self.Conv2D_1(inputs)
+        x = self.MaxPooling2D_1(x)
+        x = self.BatchNormalization(x, training)
+
+        #2th Convolutional Layers
+        x = self.Conv2D_2(x)
+        x = self.MaxPooling2D_2(x)
+        x = self.BatchNormalization_2(x, training)
+
+        #3th Convolutional Layers
+        x = self.Conv2D_3(x)
+
+        #4th Convolutional Layers
+        x = self.Conv2D_4(x)
+
+        #5th Convolutional Layers
+        x = self.Conv2D_5(x)
+        outputs = self.MaxPooling2D_3(x)
+
+        return outputs
+
+
+
+class CONV3D(Model):
+
+    def __init__(self, input_shape):
+        super(CONV3D, self).__init__()
+
+        #1th Convolutional Layer
+        self.Conv3D_1 = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+                    activation='relu', input_shape=input_shape, name='Conv3D_1_CONV3D')
+
+        #2th Convolutional Layer
+        self.Conv3D_2 = Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+                    activation='relu', name='Conv3D_2_CONV3D')
+
+
+
+"""def basemodel_CaffeNet(the_input_shape):
+
+    basemodel = Sequential()
+
+    #1th Convolutional Layer
+    basemodel.add(Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
+                     activation='relu', input_shape=the_input_shape, name='conv2d_1_CaffeNet'))
+    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
+    basemodel.add(BatchNormalization())
+
+    #2th Convolutional Layer
+    basemodel.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='conv2d_2_CaffeNet'))
+    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
+    basemodel.add(BatchNormalization())
+
+    #3th Convolutional Layer
+    basemodel.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='conv2d_3_CaffeNet'))
+
+    #4th Convolutional Layer
+    basemodel.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='conv2d_4_CaffeNet'))
+
+    #5th Convolutional Layer
+    basemodel.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='conv2d_5_CaffeNet'))
+    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
+
+    return basemodel"""
+
+
+
+def basemodel_CONV3D(the_input_shape):
+
+    basemodel = Sequential()
+
+    basemodel.add(Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+              activation='relu', input_shape=the_input_shape, name='conv3d_1_Conv3D'))
+
+    basemodel.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+              activation='relu', name='conv3d_2_Conv3D'))
+
+    basemodel.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+              activation='relu', name='conv3d_3_Conv3D'))
+
+    basemodel.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last',
+              activation='relu', name='conv3d_1_Conv3D'))
+
+    return basemodel
+
+
+
+##########################################################################################################
+###################################  PRETEXT TASK SHUFFLE  ###############################################
+##########################################################################################################
+
+
 #Modelo para la tarea de pretexto de reconocer frames desordenados
 def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
 
-    model = Sequential()
 
-    model.add(Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', input_shape=the_input_shape, name='conv3d_1_shuffle'))
+    #Se define la entrada del modelo
+    inputs = Input(the_input_shape)
 
-    model.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_2_shuffle'))
+    #Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
+    x = basemodel_CONV3D(inputs, training=True)
 
-    model.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_3_shuffle'))
+    #Se definen las capas de clasificación del modelo
+    x = Dropout(dropout_rate_1, name='dropout_1_shuffle')(x)
 
-    model.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_1_shuffle'))
+    features = Flatten(name='flatten_shuffle')(x)
 
-    model.add(Dropout(dropout_rate_1, name='dropout_1_shuffle'))
+    x = Dense(units=units_dense_layer, activation=dense_activation, name='fc_1_shuffle')(features)
 
-    model.add(Flatten(), name='flatten_shuffle')
+    x = Dropout(dropout_rate_2, name='dropout_2_shuffle')(x)
 
-    model.add(Dense(units=units_dense_layer, activation=dense_activation, name='fc_1_shuffle'))
+    outputs = Dense(2, activation='softmax', name='fc_2_shuffle')(x)
 
-    model.add(Dropout(dropout_rate_2, name='dropout_2_shuffle'))
-
-    model.add(Dense(2, activation='softmax', name='fc_2_shuffle'))
+    #Se define el modelo
+    model = Model(inputs, outputs)
 
     model.summary()
 
@@ -39,7 +174,6 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
 
     return model
 
-#Modelo final de regresión cuya tarea de pretexto es Shuffle utilizando un modelo de convolución 3D
 def model_FINAL_Shuffle_CONV3D_CrossingDetection(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
 
     model = Sequential()
@@ -91,14 +225,24 @@ def model_FINAL_Shuffle_CONV3D_CrossingDetection(the_input_shape, dropout_rate_1
     return model
 
 
+
+
+##########################################################################################################
+##################################  PRETEXT TASK ORDER PREDICTION  #######################################
+##########################################################################################################
+
+
+
 def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
 
+    
     #Se definen las 4 entradas del modelo
     input_1 = Input(shape=the_input_shape)
     input_2 = Input(shape=the_input_shape)
     input_3 = Input(shape=the_input_shape)
     input_4 = Input(shape=the_input_shape)
 
+    """
     model = Sequential()
 
     #1th Convolutional Layer
@@ -124,15 +268,23 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
     #5th Convolutional Layer
     model.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
                      activation='relu', name='conv2d_5_OrderPrediction'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))"""
 
-    model.add(Flatten())
+    base_model = CaffeNet(the_input_shape)
+
+    #Las 4 entradas son pasadas a través del modelo base (calculo de las distintas convoluciones)
+    output_1 = base_model(input_1)
+    output_2 = base_model(input_2)
+    output_3 = base_model(input_3)
+    output_4 = base_model(input_4)
+
+    flatten_1 = Flatten(name='Flatten_1_OrderPrediction')
 
     #Se obtienen los vectores de características de las 4 entradas
-    features_1 = model(input_1)
-    features_2 = model(input_2)
-    features_3 = model(input_3)
-    features_4 = model(input_4)
+    features_1 = flatten_1(output_1)
+    features_2 = flatten_1(output_2)
+    features_3 = flatten_1(output_3)
+    features_4 = flatten_1(output_4)
 
     #Se añade una capa customizada que permite realizar la contatenación de dos vectores de características
 
