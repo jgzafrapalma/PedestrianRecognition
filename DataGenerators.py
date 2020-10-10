@@ -16,6 +16,7 @@ import pickle
 ##########################################################################################################
 
 
+
 class DataGeneratorShuffle(Sequence):
     def __init__(self, list_IDs, path_instances, n_frames, batch_size=32, dim=(32, 32, 32), n_channels=1, n_clases=10, shuffle=True, normalized=True, step_swaps=5):
         self.dim = dim
@@ -55,7 +56,7 @@ class DataGeneratorShuffle(Sequence):
         X = np.empty((self.batch_size, self.n_frames, *self.dim, self.n_channels))
         y = np.empty(self.batch_size, dtype=int)
 
-        i = 0 #Variable utilizada como contador del indice en el que se estan almacenando las intancias
+        i = 0 # Variable utilizada como contador del indice en el que se estan almacenando las intancias
         for ID_instance in list_IDs_temp:
 
             #print(ID_instance)

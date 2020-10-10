@@ -1,8 +1,8 @@
 #LIMITAR CPU AL 45%
 import os
 import tensorflow as tf
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.45
 
@@ -61,13 +61,16 @@ path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
 epochs = config['Shuffle']['epochs']
 n_frames = config['Shuffle']['n_frames']
 
+#Se carga la ruta en la que se almacena los resultados de tensorboard
 tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time)))
 
+#Se carga la ruta en la que se encuentra el fichero con los hiperparámetros
 path_hyperparameters = Path(config['Shuffle']['path_hyperparameters'])
 
 with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
 
+#Se cargan los hiperparámetros
 batch_size = hyperparameters['batch_size']
 dense_activation = hyperparameters['dense_activation']
 dropout_rate_1 = hyperparameters['dropout_rate_1']
@@ -87,7 +90,6 @@ params = {'dim': dim,
           'normalized': normalized,
           'shuffle': shuffle,
           'step_swaps': step_swaps}
-
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
