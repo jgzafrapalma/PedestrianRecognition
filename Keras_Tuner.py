@@ -64,16 +64,21 @@ def run_hyperparameter_tuning():
 
     #logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
-    dataset = config['Keras_Tuner']['dataset']
+    dataset = config['Hyperparameters_Optimization_Pretext_Tasks']['dataset']
+    pretext_task = config['Hyperparameters_Optimization_Pretext_Tasks']['pretext_task']
+    type_model = config['Hyperparameters_Optimization_Pretext_Tasks']['type_model']
+    data_sampling = config['Hyperparameters_Optimization_Pretext_Tasks']['type_model']
 
-    pretext_task = config['Keras_Tuner']['pretext_task']
-    model_name = config['Keras_Tuner']['model']
+    path_instances = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_instances'], dataset, pretext_task, data_sampling))
+    path_id_instances = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_id_instances'], dataset))
+
+
+
     tuner_type = config['Keras_Tuner']['tuner']['type']
     project_name = config['Keras_Tuner']['tuner']['project_name']
-    type_model = config['Keras_Tuner']['type_model']
+    #type_model = config['Keras_Tuner']['type_model']
 
-    path_instances = Path(join(config['Keras_Tuner']['path_instances'], dataset))
-    path_id_instances = Path(join(config['Keras_Tuner']['path_id_instances'], dataset))
+
 
     #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
     train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
@@ -180,7 +185,8 @@ def run_hyperparameter_tuning():
         #Se guardan los hiperparámetros
         with (path_output_hyperparameters / (project_name + '.json')).open('w') as filehandle:
             json.dump(best_hp, filehandle)
-                
+
+    # Tuner Transfer Learning          
     else:
 
         #AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO

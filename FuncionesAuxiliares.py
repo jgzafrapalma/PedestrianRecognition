@@ -249,6 +249,8 @@ def extractFrames(pathFrames, nframes):
         if index == nframes:
             break
 
+        id_frame += 1
+
     cap.release()
 
     return output_frames
@@ -795,9 +797,7 @@ def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, o
 
             for ped in video.iterdir():
 
-                Path_Ped = Path(join(ped, '%04d.jpg'))
-
-                logging.info("Creando instancia %s" % Path_Instance.stem)
+                Path_Ped = Path(join(str(ped), '%04d.jpg'))
 
                 #Se obtiene la etiqueta de si el peatón esta cruzando o no
                 crossing = data[set_video.stem][video.stem]['ped_annotations'][ped.stem]['attributes']['crossing']
@@ -820,6 +820,8 @@ def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, o
 
                         if not Path_Instance.exists():
 
+                            logging.info("Creando instancia %s" % Path_Instance.stem)
+
                             output_frames = extractFramesOpticalFlow(Path_Ped, n_frames)
 
                             # Se crea la instancia
@@ -829,7 +831,7 @@ def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, o
                                 pickle.dump(instance, file_descriptor)
 
                             for index, frame in enumerate(output_frames):
-                                cv2.imwrite(str(Path_Cuts / ('%02d' % (index) + '.jpg')), frame)
+                                cv2.imwrite(str(Path_Cuts / ('%01d' % (index) + '.jpg')), frame)
 
                             logging.info("Instancia %s creada con exito" % Path_Instance.stem)
 
@@ -861,7 +863,7 @@ def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, o
                                 pickle.dump(instance, file_descriptor)
 
                             for index, frame in enumerate(output_frames):
-                                cv2.imwrite(str(Path_Cuts / ('%02d' % (index) + '.jpg')), frame)
+                                cv2.imwrite(str(Path_Cuts / ('%01d' % (index) + '.jpg')), frame)
 
                             logging.info("Instancia %s creada con exito" % Path_Instance.stem)
 
@@ -948,7 +950,7 @@ def create_instances_PIE_OrderPrediction(input_path_frames, output_path_cuts, ou
 
             for ped in video.iterdir():
 
-                Path_Ped = Path(join(ped, '%04d.jpg'))
+                Path_Ped = Path(join(str(ped), '%04d.jpg'))
 
                 #logging.info("Creando instancia %s" % Path_Instance.stem)
 
