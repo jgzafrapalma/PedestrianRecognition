@@ -15,9 +15,9 @@ with open('config.yaml', 'r') as file_descriptor:
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
 
-if not config['Keras_Tuner']['random']:
+if not config['Hyperparameters_Optimization_Pretext_Tasks']['random']:
 
-    SEED = config['Keras_Tuner']['seed']
+    SEED = config['Hyperparameters_Optimization_Pretext_Tasks']['seed']
     from numpy.random import seed
     seed(SEED)
     import tensorflow as tf
@@ -62,7 +62,7 @@ import json
 dataset = config['Hyperparameters_Optimization_Pretext_Tasks']['dataset']
 pretext_task = config['Hyperparameters_Optimization_Pretext_Tasks']['pretext_task']
 type_model = config['Hyperparameters_Optimization_Pretext_Tasks']['type_model']
-data_sampling = config['Hyperparameters_Optimization_Pretext_Tasks']['type_model']
+data_sampling = config['Hyperparameters_Optimization_Pretext_Tasks']['data_sampling']
 
 path_instances = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_instances'], dataset, pretext_task, data_sampling))
 path_id_instances = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_id_instances'], dataset))
@@ -79,13 +79,13 @@ project_name = config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['pr
 dim = config['Hyperparameters_Optimization_Pretext_Tasks']['dim']
 epochs = config['Hyperparameters_Optimization_Pretext_Tasks']['epochs']
 n_frames = config['Hyperparameters_Optimization_Pretext_Tasks']['n_frames']
-num_classes = config['Hyperparameters_Optimization_Pretext_Tasks']['num_classes']
+n_classes = config['Hyperparameters_Optimization_Pretext_Tasks']['n_classes']
 n_channels = config['Hyperparameters_Optimization_Pretext_Tasks']['n_channels']
 
 
-path_output_results = Path(join(config['Keras_Tuner']['path_dir_results'], dataset, pretext_task, data_sampling,tuner_type, type_model))
+path_output_results = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_dir_results'], dataset, pretext_task, data_sampling, tuner_type, type_model))
 
-path_output_hyperparameters = Path(join(config['Keras_Tuner']['path_hyperparameters'], dataset, pretext_task, data_sampling, tuner_type, type_model))
+path_output_hyperparameters = Path(join(config['Hyperparameters_Optimization_Pretext_Tasks']['path_hyperparameters'], dataset, pretext_task, data_sampling, tuner_type, type_model))
 
 #Se crean los directorios donde almacenar los resultados
 path_output_results.mkdir(parents=True, exist_ok=True)
@@ -95,10 +95,10 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 #SE DEFINE EL TUNER
 if pretext_task == 'Shuffle':
     if type_model == 'CONV3D':
-        hypermodel = HyperModels_Pretext_Tasks.HyperModelShuffleCONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes)
+        hypermodel = HyperModels_Pretext_Tasks.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
 elif pretext_task == 'OrderPrediction':
     if type_model == 'SIAMESE':
-        hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes)
+        hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
 
 
 
@@ -156,7 +156,7 @@ tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, num_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 

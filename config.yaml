@@ -20,7 +20,7 @@ Hyperparameters_Optimization_Pretext_Tasks:
     seed: 1
     num_initial_points: 5
     max_trials: 100
-    project_name: '14092020-130900'
+    project_name: '11102020-174000'
 Hyperparameters_Optimization_Downstream_Tasks:
   #Transfer_Learning:
   #  activated: True
