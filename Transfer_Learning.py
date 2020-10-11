@@ -53,7 +53,7 @@ from datetime import datetime
 
 from sklearn.metrics import confusion_matrix
 
-import DataGenerators
+import DataGenerators_Pretext_Tasks
 
 import models
 
@@ -119,9 +119,9 @@ if pretext_task == 'Shuffle' and model_name == 'CONV3D':
 
     if type_model == 'Crossing-detection':
 
-        train_generator = DataGenerators.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
+        train_generator = DataGenerators_Pretext_Tasks.DataGeneratorFINALCrossingDetection(train_ids_instances, **params)
 
-        validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
+        validation_generator = DataGenerators_Pretext_Tasks.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
         #El modelo es definido con las capas convolucionales congeladas
         model = models.model_FINAL_Shuffle_CONV3D_CrossingDetection((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)

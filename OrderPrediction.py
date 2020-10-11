@@ -37,7 +37,7 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 from models import model_OrderPrediction_SIAMESE
-from DataGenerators import DataGeneratorOrderPrediction
+from DataGenerators_Pretext_Tasks import DataGeneratorOrderPrediction
 from pathlib import Path
 from os.path import join
 import json

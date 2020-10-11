@@ -4,10 +4,6 @@ Hyperparameters_Optimization_Pretext_Tasks:
   pretext_task: 'Shuffle'
   type_model: 'CONV3D'
   data_sampling: 'Distributed' # OpticalFlow
-  #Transfer_Learning:
-  #  activated: True
-  #  downstream_task: 'Crossing-detection'
-  #  path_weights_conv_layers: '/pub/experiments/jzafra/models/PIE_dataset/Shuffle/CONV3D/06092020-170054/weights.h5'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'
@@ -15,7 +11,8 @@ Hyperparameters_Optimization_Pretext_Tasks:
   epochs: 100
   n_frames: 16
   seed: 1
-  num_classes: 2
+  n_classes: 2
+  n_channels: 3
   random: False
   tuner:
     type: 'Bayesian_Optimization'
@@ -24,6 +21,12 @@ Hyperparameters_Optimization_Pretext_Tasks:
     num_initial_points: 5
     max_trials: 100
     project_name: '14092020-130900'
+Hyperparameters_Optimization_Downstream_Tasks:
+  #Transfer_Learning:
+  #  activated: True
+  #  downstream_task: 'Crossing-detection'
+  #  path_weights_conv_layers: '/pub/experiments/jzafra/models/PIE_dataset/Shuffle/CONV3D/06092020-170054/weights.h5'
+
 Shuffle:
   dim: !!python/tuple [128, 128]
   dataset: 'PIE_dataset'

@@ -322,7 +322,7 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
     Features_24 = concatenate([features_2, features_4])
     Features_34 = concatenate([features_3, features_4])
 
-    dense1 = Dense(units=512, activation='relu', name='fc_1_OrderPrediction')
+    dense1 = Dense(units=512, activation='relu', name='FC_1_OrderPrediction')
 
     RelationShip_12 = dense1(Features_12)
     RelationShip_13 = dense1(Features_13)
@@ -335,7 +335,7 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
 
     Features_Final = concatenate([RelationShip_12, RelationShip_13, RelationShip_14, RelationShip_23, RelationShip_24, RelationShip_34])
 
-    prediction = Dense(units=12, activation='softmax', name='fc_final_OrderPrediction')(Features_Final)
+    prediction = Dense(units=12, activation='softmax', name='FC_Final_OrderPrediction')(Features_Final)
 
     siamese_model = Model(inputs=[input_1, input_2, input_3, input_4], outputs=prediction)
 

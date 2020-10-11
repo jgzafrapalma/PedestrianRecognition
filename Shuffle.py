@@ -37,7 +37,7 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 import models
-from DataGenerators import DataGeneratorShuffle
+from DataGenerators_Pretext_Tasks import DataGeneratorShuffle
 from pathlib import Path
 from os.path import join
 import json

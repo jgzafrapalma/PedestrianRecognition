@@ -37,7 +37,7 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 
-import DataGenerators
+import DataGenerators_Pretext_Tasks
 
 from FuncionesAuxiliares import read_instance_file_txt
 from os.path import join
@@ -83,7 +83,7 @@ params = {'dim': dim,
 #Se utiliza el DataGenerator correspondiente a la tarea de pretexto
 if type_model == 'Crossing-Detection':
     """Inicialización del DataGenerator, en el constructor se inicializa el orden en el que se van a devolver las instancias del problema."""
-    validation_generator = DataGenerators.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
+    validation_generator = DataGenerators_Pretext_Tasks.DataGeneratorFINALCrossingDetection(validation_ids_instances, **params)
 
 #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
 path_model = Path(join(config['Performance_FinalModels']['path_model'], dataset, 'Transfer_Learning', pretext_task, model_name, input_model, 'model.h5'))
