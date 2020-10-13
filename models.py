@@ -12,12 +12,12 @@ from tensorflow.keras.optimizers import Adam
 
 class CaffeNet(Model):
 
-    def __init__(self, input_shape):
+    def __init__(self, the_input_shape):
         super(CaffeNet, self).__init__()
 
         # 1th Convolutional Layers
         self.Conv2D_1 = Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
-                     activation='relu', input_shape=input_shape, name='Conv2D_1_CaffeNet')
+                     activation='relu', input_shape=the_input_shape, name='Conv2D_1_CaffeNet')
         self.MaxPooling2D_1 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_1_CaffeNet')
         self.BatchNormalization_1 = BatchNormalization(name='BatchNormalization_1_CaffeNet')
 
@@ -74,19 +74,19 @@ class CONV3D(Model):
 
         # 1th Convolutional Layer
         self.Conv3D_1 = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-                    activation='relu', input_shape=the_input_shape, name='Conv3D_1_CONV3D')
+                            activation='relu', input_shape=the_input_shape, name='Conv3D_1_CONV3D')
 
         # 2th Convolutional Layer
         self.Conv3D_2 = Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-                    activation='relu', name='Conv3D_2_CONV3D')
+                            activation='relu', name='Conv3D_2_CONV3D')
 
         # 3th Convolutional Layer
         self.Conv3D_3 = Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-               activation='relu', name='Conv3D_3_CONV3D')
+                            activation='relu', name='Conv3D_3_CONV3D')
 
         # 4th Convolutional Layer
         self.Conv3D_4 = Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-               activation='relu', name='Conv3D_4_CONV3D')
+                            activation='relu', name='Conv3D_4_CONV3D')
 
     def call(self, inputs, training=True):
         # 1th Convolutional Layer
@@ -147,7 +147,7 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
 
 
 def model_FINAL_Shuffle_CONV3D_CrossingDetection(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
-
+    """
     model = Sequential()
 
     conv3d_1_shuffle = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
@@ -176,19 +176,34 @@ def model_FINAL_Shuffle_CONV3D_CrossingDetection(the_input_shape, dropout_rate_1
 
     conv3d_4_shuffle.trainable = False
 
-    model.add(conv3d_4_shuffle)
+    model.add(conv3d_4_shuffle)"""
 
-    model.add(Dropout(dropout_rate_1, name='dropout_1_final'))
+    #Se define la entrada del modelo
+    inputs = Input(the_input_shape)
 
-    model.add(Flatten(name='flatten_final'))
+    # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
+    basemodel = CONV3D(the_input_shape)
 
-    model.add(Dense(units=units_dense_layer, activation=dense_activation, name='fc_1_final'))
+    #Se congela el modelo base para que sus pesos no sean entrenables
+    basemodel.trainable = False
 
-    model.add(Dropout(dropout_rate_2, name='dropout_2_final'))
+    # El modelo base se pone en modo inferencia
+    x = basemodel(inputs, training=False)
 
-    model.add(Dense(2, activation='softmax', name='fc_2_final'))
+    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(x)
 
-    #model.summary()
+    x = Flatten(name='Flatten_FINAL')(x)
+
+    x = Dense(units=units_dense_layer, activation=dense_activation, name='FC_1_FINAL')(x)
+
+    x = Dropout(dropout_rate_2, name='Dropout_2_FINAL')(x)
+
+    outputs = Dense(2, activation='softmax', name='FC_2_Final')(x)
+
+    #Se define el modelo
+    model = Model(inputs, outputs)
+
+    model.summary()
 
     optimizer = Adam(learning_rate=learning_rate)
 

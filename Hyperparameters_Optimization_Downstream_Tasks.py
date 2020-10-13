@@ -15,9 +15,9 @@ with open('config.yaml', 'r') as file_descriptor:
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
 
-if not config['Keras_Tuner']['random']:
+if not config['Hyperparameters_Optimization_Downstream_Tasks']['random']:
 
-    SEED = config['Keras_Tuner']['seed']
+    SEED = config['Hyperparameters_Optimization_Downstream_Tasks']['seed']
     from numpy.random import seed
     seed(SEED)
     import tensorflow as tf
@@ -35,14 +35,14 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-import HyperModels_Pretext_Tasks
+import HyperModels_Transfer_Learning
 from FuncionesAuxiliares import read_instance_file_txt
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.callbacks import TensorBoard
 
-import Tuners_Pretext_Tasks
+import Tuners_Transfer_Learning
 
 from kerastuner.tuners import BayesianOptimization, Hyperband, RandomSearch
 
@@ -61,34 +61,41 @@ from pathlib import Path
 import json
 
 
+dataset = config['Hyperparameters_Optimization_Downstream_Tasks']['dataset']
+pretext_task = config['Hyperparameters_Optimization_Downstream_Tasks']['pretext_task']
+type_model = config['Hyperparameters_Optimization_Downstream_Tasks']['type_model']
+data_sampling = config['Hyperparameters_Optimization_Downstream_Tasks']['data_sampling']
+downstream_task = config['Hyperparameters_Optimization_Downstream_Tasks']['downstream_task']
 
+n_frames = config['Hyperparameters_Optimization_Downstream_Tasks']['n_frames']
 
+path_instances = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks'], dataset, downstream_task, str(n_frames) + '_frames', data_sampling))
 
+path_id_instances = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks']['path_id_instances'], dataset))
 
+train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
+validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
+tuner_type = config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['type']
+project_name = config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['project_name']
+tuner_type_pretext_task = config['Hyperparameters_Optimization_Downstream_Tasks']['tuner_type_pretext_task']
+project_name_pretext_task = config['Hyperparameters_Optimization_Downstream_Tasks']['project_name_pretext_task']
 
-
-
-
+dim = config['Hyperparameters_Optimization_Downstream_Tasks']['dim']
+epochs = config['Hyperparameters_Optimization_Downstream_Tasks']['epochs']
+n_classes = config['Hyperparameters_Optimization_Downstream_Tasks']['n_classes']
+n_channels = config['Hyperparameters_Optimization_Downstream_Tasks']['n_channels']
 
 
 # AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO
 
-path_output_results_CL = Path(
-    join(config['Keras_Tuner']['path_dir_results'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name,
-         'Classification_Layer'))
+path_output_results_CL = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks']['path_dir_results'], dataset, 'Transfer_Learning', downstream_task, pretext_task, tuner_type, type_model, 'Classification_Layer'))
 
-path_output_results_FT = Path(
-    join(config['Keras_Tuner']['path_dir_results'], dataset, 'Transfer_Learning', pretext_task, tuner_type, model_name,
-         'Fine_Tuning'))
+path_output_results_FT = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks']['path_dir_results'], dataset, 'Transfer_Learning', downstream_task, pretext_task, tuner_type, type_model, 'Fine_Tuning'))
 
-path_output_hyperparameters_CL = Path(
-    join(config['Keras_Tuner']['path_hyperparameters'], dataset, 'Transfer_Learning', pretext_task, tuner_type,
-         model_name, 'Classification_Layer'))
+path_output_hyperparameters_CL = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks']['path_hyperparameters'], dataset, 'Transfer_Learning', downstream_task, pretext_task, tuner_type, type_model, 'Classification_Layer'))
 
-path_output_hyperparameters_FT = Path(
-    join(config['Keras_Tuner']['path_hyperparameters'], dataset, 'Transfer_Learning', pretext_task, tuner_type,
-         model_name, 'Fine_Tuning'))
+path_output_hyperparameters_FT = Path(join(config['Hyperparameters_Optimization_Downstream_Tasks']['path_hyperparameters'], dataset, 'Transfer_Learning', downstream_task, pretext_task, tuner_type, type_model, 'Fine_Tuning'))
 
 path_output_results_CL.mkdir(parents=True, exist_ok=True)
 
@@ -98,21 +105,35 @@ path_output_hyperparameters_CL.mkdir(parents=True, exist_ok=True)
 
 path_output_hyperparameters_FT.mkdir(parents=True, exist_ok=True)
 
-path_weights = config['Keras_Tuner']['Transfer_Learning']['path_weights_conv_layers']
+#Ruta en la que se encuentran los pesos que se van a cargar en la capa convolucional del modelo
+path_weights = Path(config['Hyperparameters_Optimization_Downstream_Tasks']['path_weights'], dataset, pretext_task, data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task)
 
-if pretext_task == 'Shuffle' and model_name == 'CONV3D' and type_model == 'Crossing-detection':
-    hypermodel_cl = HyperModels_Pretext_Tasks.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_CL(
-        input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights)
+if pretext_task == 'Shuffle':
+
+    if type_model == 'CONV3D':
+
+        if downstream_task == 'Crossing-detection':
+
+            hypermodel_cl = HyperModels_Transfer_Learning.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes, path_weights=path_weights)
+
+elif pretext_task == 'OrderPrediction':
+
+    if type_model == 'SIAMESE':
+
+        if downstream_task == 'Crossing-detection':
+
+            hypermodel_cl = HyperModels_Transfer_Learning.HyperModel_FINAL_OrderPrediction_SIAMESE_CrossingDetection_CL(the_input_shape=(128, 128, 3), num_classes=n_classes, path_weights=path_weights)
+
 
 if tuner_type == 'Random_Search':
 
     if type_model == 'Crossing-detection':
-        tuner = Tuners_Pretext_Tasks.TunerRandomFINALCrossingDetection(
+        tuner = Tuners_Transfer_Learning.TunerRandomFINALCrossingDetection(
             hypermodel_cl,
-            objective=config['Keras_Tuner']['tuner']['objetive'],
-            seed=config['Keras_Tuner']['tuner']['seed'],
-            max_trials=config['Keras_Tuner']['tuner']['max_trials'],
-            executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+            max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+            executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
             directory=path_output_results_CL,
             project_name=project_name,
             overwrite=False
@@ -121,12 +142,12 @@ if tuner_type == 'Random_Search':
 elif tuner_type == 'HyperBand':
 
     if type_model == 'Crossing-detection':
-        tuner = Tuners_Pretext_Tasks.TunerHyperBandFINALCrossingDetection(
+        tuner = Tuners_Transfer_Learning.TunerHyperBandFINALCrossingDetection(
             hypermodel_cl,
-            objective=config['Keras_Tuner']['tuner']['objetive'],
-            seed=config['Keras_Tuner']['tuner']['seed'],
-            max_epochs=config['Keras_Tuner']['tuner']['max_epochs'],
-            executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+            max_epochs=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_epochs'],
+            executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
             directory=path_output_results_CL,
             project_name=project_name,
             overwrite=False
@@ -135,12 +156,12 @@ elif tuner_type == 'HyperBand':
 else:
 
     if type_model == 'Crossing-detection':
-        tuner = Tuners_Pretext_Tasks.TunerBayesianFINALCrossingDetection(
+        tuner = Tuners_Transfer_Learning.TunerBayesianFINALCrossingDetection(
             hypermodel_cl,
-            objective=config['Keras_Tuner']['tuner']['objetive'],
-            seed=config['Keras_Tuner']['tuner']['seed'],
-            max_trials=config['Keras_Tuner']['tuner']['max_trials'],
-            num_initial_points=config['Keras_Tuner']['tuner']['num_initial_points'],
+            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+            max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+            num_initial_points=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['num_initial_points'],
             directory=path_output_results_CL,
             project_name=project_name,
             overwrite=False
@@ -158,8 +179,13 @@ tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, 1, epochs,
-             [earlystopping, reducelronplateau])
+if pretext_task == 'Shuffle':
+
+    tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+
+elif pretext_task == 'OrderPrediction':
+
+    tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 

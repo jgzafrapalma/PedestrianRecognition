@@ -14,6 +14,7 @@ from tensorflow.keras.optimizers import Adam
 ##########################################################################################################
 
 
+
 class HyperModel_Shuffle_CONV3D(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
     def __init__(self, input_shape, num_classes):
@@ -77,17 +78,17 @@ class HyperModel_Shuffle_CONV3D(HyperModel):
 
 
 
-##########################################################################################################
-##################################  PRETEXT TASK ORDER PREDICTION  #######################################
-##########################################################################################################
+########################################################################################################################
+##########################################  PRETEXT TASK ORDER PREDICTION  #############################################
+########################################################################################################################
 
 
 
 class HyperModel_OrderPrediction_SIAMESE(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
-    def __init__(self, input_shape, num_classes):
+    def __init__(self, the_input_shape, num_classes):
         """Se inicializan las variables de la clase"""
-        self.the_input_shape = input_shape
+        self.the_input_shape = the_input_shape
         self.num_classes = num_classes
     """Función en la que se define el modelo del que se quieren optimizar las hiperparámetros"""
     def build(self, hp):
