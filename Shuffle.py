@@ -58,10 +58,10 @@ dataset = config['Shuffle']['dataset']
 type_model = config['Shuffle']['type_model']
 data_sampling = config['Shuffle']['data_sampling']
 tuner_type = config['Shuffle']['tuner_type']
-hyperparameters = config['Shuffle']['input_model']
+id_hyperparameters = config['Shuffle']['id_hyperparameters']
 
 
-path_instances = Path(join(config['Shuffle']['path_instances'], dataset))
+path_instances = Path(join(config['Shuffle']['path_instances'], dataset, 'Shuffle', data_sampling))
 path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
 epochs = config['Shuffle']['epochs']
 n_frames = config['Shuffle']['n_frames']
@@ -70,10 +70,10 @@ n_channels = config['Shuffle']['n_channels']
 
 #Se carga la ruta en la que se almacena los resultados de tensorboard
 #tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, date_time)))
-tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters)))
+tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters)))
 
 #Se carga la ruta en la que se encuentra el fichero con los hiperparámetros
-path_hyperparameters = Path(join(config['Shuffle']['path_hyperparameters'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters + '.json'))
+path_hyperparameters = Path(join(config['Shuffle']['path_hyperparameters'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters + '.json'))
 
 with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
@@ -129,13 +129,13 @@ history = model.fit(x=train_generator, validation_data=validation_generator, epo
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters))
+path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)
 
 np.save(path_output_model / 'history.npy', history.history)
 
-model.save(path_output_model / 'model.h5')
+#model.save(path_output_model / 'model.h5')
 
 model.save_weights(str(path_output_model / 'weights.h5'))

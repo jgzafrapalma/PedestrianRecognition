@@ -4,10 +4,10 @@ Hyperparameters_Optimization_Pretext_Tasks:
   pretext_task: 'Shuffle'
   type_model: 'CONV3D'
   data_sampling: 'Distributed' # OpticalFlow
-  path_instances: '/media/jorge/DATOS/TFG/instances/'#'/pub/experiments/jzafra/instances/'
-  path_id_instances: '/media/jorge/DATOS/TFG/ids_instances/'
-  path_dir_results: '/media/jorge/DATOS/TFG/tuner_keras_results'
-  path_hyperparameters: '/media/jorge/DATOS/TFG/hyperparameters'
+  path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/' 
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
+  path_dir_results: '/pub/experiments/jzafra/tuner_keras_results' #'/media/jorge/DATOS/TFG/tuner_keras_results'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters' #'/media/jorge/DATOS/TFG/hyperparameters'
   epochs: 100
   n_frames: 16
   seed: 1
@@ -15,12 +15,19 @@ Hyperparameters_Optimization_Pretext_Tasks:
   n_channels: 3
   random: False
   tuner:
-    type: 'Bayesian_Optimization'
+    type: 'Random_Search'
     objetive: val_loss
     seed: 1
-    num_initial_points: 5
+    executions_per_trial: 2
     max_trials: 100
     project_name: '11102020-174000'
+  #tuner:
+    #type: 'Random_Search'
+    #objetive: val_loss
+    #seed: 1
+    #num_initial_points: 5
+    #max_trials: 100
+    #project_name: '11102020-174000'
 Hyperparameters_Optimization_Downstream_Tasks:
   #Transfer_Learning:
   #  activated: True
