@@ -32,12 +32,12 @@ Shuffle:
   type_model: 'CONV3D'
   data_sampling: 'Distributed'
   tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
-  hyperparameters: '11102020-174000'
+  id_hyperparameters: '11102020-174000'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
-  tensorboard_logs: '/pub/experiments/jzafra/tensorboard'
-  path_output_model: '/pub/experiments/jzafra/models'
+  tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
+  path_output_model: '/pub/experiments/jzafra/models/'
   epochs: 100
   n_frames: 16
   seed: 1

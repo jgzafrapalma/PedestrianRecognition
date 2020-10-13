@@ -67,12 +67,12 @@ class CaffeNet(Model):
 
 class CONV3D(Model):
 
-    def __init__(self, input_shape):
+    def __init__(self):
         super(CONV3D, self).__init__()
 
         # 1th Convolutional Layer
         self.Conv3D_1 = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-                    activation='relu', input_shape=input_shape, name='Conv3D_1_CONV3D')
+                    activation='relu', name='Conv3D_1_CONV3D')
 
         # 2th Convolutional Layer
         self.Conv3D_2 = Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
@@ -116,7 +116,7 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
     inputs = Input(the_input_shape)
 
     # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
-    basemodel = CONV3D(the_input_shape)
+    basemodel = CONV3D()
 
     x = basemodel(inputs, training=True)
 

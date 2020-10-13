@@ -74,7 +74,7 @@ class DataGeneratorShuffle(Sequence):
 
             #Normalización de los frames
             if self.normalized:
-                cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
+                frames = frames * 1 / 255
 
             #Se almacenan los frames ordenados y su etiqueta
             X[i, ] = frames
@@ -234,7 +234,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
+                    frames = frames * 1 / 255
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -259,7 +259,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
+                    frames = frames * 1 / 255
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -327,7 +327,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
+                    frames = frames * 1 / 255
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -352,7 +352,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 # Normalización de los frames
                 if self.normalized:
-                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
+                    frames = frames * 1 / 255
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
