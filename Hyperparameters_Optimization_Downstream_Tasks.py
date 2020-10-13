@@ -108,6 +108,7 @@ path_output_hyperparameters_FT.mkdir(parents=True, exist_ok=True)
 #Ruta en la que se encuentran los pesos que se van a cargar en la capa convolucional del modelo
 path_weights = Path(config['Hyperparameters_Optimization_Downstream_Tasks']['path_weights'], dataset, pretext_task, data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task)
 
+#DEFINICIÓN DEL HIPERMODELO EN FUNCIÓN DE LA TAREA DE PRETEXTO, EL TIPO DE MODELO Y DEL MODELO FINAL
 if pretext_task == 'Shuffle':
 
     if type_model == 'CONV3D':
@@ -125,50 +126,98 @@ elif pretext_task == 'OrderPrediction':
             hypermodel_cl = HyperModels_Transfer_Learning.HyperModel_FINAL_OrderPrediction_SIAMESE_CrossingDetection_CL(the_input_shape=(128, 128, 3), num_classes=n_classes, path_weights=path_weights)
 
 
+#SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
 if tuner_type == 'Random_Search':
 
-    if type_model == 'Crossing-detection':
-        tuner = Tuners_Transfer_Learning.TunerRandomFINALCrossingDetection(
-            hypermodel_cl,
-            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
-            max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
-            executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
-            directory=path_output_results_CL,
-            project_name=project_name,
-            overwrite=False
-        )
+    if downstream_task == 'Crossing-detection':
+
+        if pretext_task == 'Shuffle':
+
+            tuner = Tuners_Transfer_Learning.TunerRandomFINALCrossingDetectionShuffle(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+                executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
+
+        elif pretext_task == 'OrderPrediction':
+
+            tuner = Tuners_Transfer_Learning.TunerRandomFINALCrossingDetectionOrderPrediction(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+                executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
 
 elif tuner_type == 'HyperBand':
 
-    if type_model == 'Crossing-detection':
-        tuner = Tuners_Transfer_Learning.TunerHyperBandFINALCrossingDetection(
-            hypermodel_cl,
-            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
-            max_epochs=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_epochs'],
-            executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
-            directory=path_output_results_CL,
-            project_name=project_name,
-            overwrite=False
-        )
+    if downstream_task == 'Crossing-detection':
+
+        if pretext_task == 'Shuffle':
+
+            tuner = Tuners_Transfer_Learning.TunerHyperBandFINALCrossingDetectionShuffle(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_epochs=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_epochs'],
+                executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
+
+        elif pretext_task == 'OrderPrediction':
+
+            tuner = Tuners_Transfer_Learning.TunerHyperBandFINALCrossingDetectionOrderPrediction(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_epochs=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_epochs'],
+                executions_per_trial=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['executions_per_trial'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
 
 else:
 
-    if type_model == 'Crossing-detection':
-        tuner = Tuners_Transfer_Learning.TunerBayesianFINALCrossingDetection(
-            hypermodel_cl,
-            objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
-            max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
-            num_initial_points=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['num_initial_points'],
-            directory=path_output_results_CL,
-            project_name=project_name,
-            overwrite=False
-        )
+    if downstream_task == 'Crossing-detection':
 
-earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min',
-                              restore_best_weights=True)
+        if pretext_task == 'Shuffle':
+
+            tuner = Tuners_Transfer_Learning.TunerBayesianFINALCrossingDetectionShuffle(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+                num_initial_points=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['num_initial_points'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
+
+        elif pretext_task == 'OrderPrediction':
+
+            tuner = Tuners_Transfer_Learning.TunerBayesianFINALCrossingDetectionOrderPrediction(
+                hypermodel_cl,
+                objective=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['objetive'],
+                seed=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['seed'],
+                max_trials=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['max_trials'],
+                num_initial_points=config['Hyperparameters_Optimization_Downstream_Tasks']['tuner']['num_initial_points'],
+                directory=path_output_results_CL,
+                project_name=project_name,
+                overwrite=False
+            )
+
+earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
 reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min',
                                       min_delta=0.0001, cooldown=0, min_lr=0)
@@ -208,10 +257,13 @@ with (path_output_hyperparameters_CL / (project_name + '.json')).open('w') as fi
 
 # Fine Tuning
 
-if pretext_task == 'Shuffle' and model_name == 'CONV3D' and type_model == 'Crossing-detection':
-    hypermodel_ft = HyperModels_Pretext_Tasks.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_FT(
-        input_shape=(n_frames, dim[0], dim[1], 3), num_classes=num_classes, path_weights=path_weights,
-        hyperparameters=best_hp)
+if pretext_task == 'Shuffle':
+
+    if type_model == 'CONV3D':
+
+        if downstream_task == 'Crossing-detection':
+
+            hypermodel_ft = HyperModels_Transfer_Learning.HyperModel_FINAL_Shuffle_CONV3D_CrossingDetection_FT(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes, path_weights=path_weights, hyperparameters=best_hp)
 
 if tuner_type == 'Random_Search':
 
@@ -256,8 +308,8 @@ params = {
     'dim': dim,
     'path_instances': path_instances,
     'batch_size': best_hp['batch_size'],
-    'n_clases': num_classes,
-    'n_channels': 3,
+    'n_clases': n_classes,
+    'n_channels': n_channels,
     'n_frames': n_frames,
     'normalized': best_hp['normalized'],
     'shuffle': best_hp['normalized'],

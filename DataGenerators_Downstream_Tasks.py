@@ -96,14 +96,13 @@ class DataGeneratorFINALCrossingDetectionShuffe(Sequence):
 
 
 class DataGeneratorFINALCrossingDetectionOrderPrediction(Sequence):
-    def __init__(self, list_IDs, path_instances, n_frames, batch_size=32, dim=(128, 128, 32), n_channels=2, n_clases=1, shuffle=True, normalized=True):
+    def __init__(self, list_IDs, path_instances, batch_size=32, dim=(128, 128, 32), n_channels=3, n_clases=2, shuffle=True, normalized=True):
         self.dim = dim
         self.batch_size = batch_size
         self.list_IDs = list_IDs
         self.n_channels = n_channels
         self.n_classes = n_clases
         self.shuffle = shuffle
-        self.n_frames = n_frames
         self.normalized = normalized
         self.path_instances = path_instances
         self.on_epoch_end()
