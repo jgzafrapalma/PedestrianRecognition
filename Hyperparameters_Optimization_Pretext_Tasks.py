@@ -92,60 +92,83 @@ path_output_results.mkdir(parents=True, exist_ok=True)
 #Se crean los directorios para almacenar los hiperparametros
 path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 
-#SE DEFINE EL TUNER
-if pretext_task == 'Shuffle':
-    if type_model == 'CONV3D':
-        hypermodel = HyperModels_Pretext_Tasks.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
-elif pretext_task == 'OrderPrediction':
-    if type_model == 'SIAMESE':
-        hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
-
 
 
 if tuner_type == 'Random_Search':
 
     if pretext_task == 'Shuffle':
 
-        tuner = Tuners_Pretext_Tasks.TunerRandomShuffle(
-            hypermodel,
-            objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
-            max_trials=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_trials'],
-            executions_per_trial=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['executions_per_trial'],
-            directory=path_output_results,
-            project_name=project_name,
-            overwrite=False
-        )
+        if type_model == 'CONV3D':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    elif pretext_task == 'OrderPrediction':
+
+        if type_model == 'SIAMESE':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    tuner = Tuners_Pretext_Tasks.TunerRandomShuffle(
+        hypermodel,
+        objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
+        seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
+        max_trials=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_trials'],
+        executions_per_trial=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['executions_per_trial'],
+        directory=path_output_results,
+        project_name=project_name,
+        overwrite=False
+    )
 
 elif tuner_type == 'HyperBand':
 
     if pretext_task == 'Shuffle':
 
-        tuner = Tuners_Pretext_Tasks.TunerHyperBandShuffle(
-            hypermodel,
-            objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
-            max_epochs=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_epochs'],
-            executions_per_trial=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['executions_per_trial'],
-            directory=path_output_results,
-            project_name=project_name,
-            overwrite=False
-        )
+        if type_model == 'CONV3D':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    elif pretext_task == 'OrderPrediction':
+
+        if type_model == 'SIAMESE':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    tuner = Tuners_Pretext_Tasks.TunerHyperBandShuffle(
+        hypermodel,
+        objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
+        seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
+        max_epochs=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_epochs'],
+        executions_per_trial=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['executions_per_trial'],
+        directory=path_output_results,
+        project_name=project_name,
+        overwrite=False
+    )
 
 else:
 
     if pretext_task == 'Shuffle':
 
-        tuner = Tuners_Pretext_Tasks.TunerBayesianShuffle(
-            hypermodel,
-            objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
-            seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
-            max_trials=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_trials'],
-            num_initial_points=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['num_initial_points'],
-            directory=path_output_results,
-            project_name=project_name,
-            overwrite=False
-        )
+        if type_model == 'CONV3D':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    elif pretext_task == 'OrderPrediction':
+
+        if type_model == 'SIAMESE':
+
+            hypermodel = HyperModels_Pretext_Tasks.HyperModel_OrderPrediction_SIAMESE(input_shape=(n_frames, dim[0], dim[1], 3), num_classes=n_classes)
+
+    tuner = Tuners_Pretext_Tasks.TunerBayesianShuffle(
+        hypermodel,
+        objective=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['objetive'],
+        seed=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['seed'],
+        max_trials=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['max_trials'],
+        num_initial_points=config['Hyperparameters_Optimization_Pretext_Tasks']['tuner']['num_initial_points'],
+        directory=path_output_results,
+        project_name=project_name,
+        overwrite=False
+    )
+
 
 #SE LLEVA A CABO LA BUSQUEDA DE LOS MEJORES HIPERPARÁMETROS
 earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
@@ -156,7 +179,13 @@ tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+if pretext_task == 'Shuffle':
+
+    tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+
+elif pretext_task == 'OrderPrediction':
+
+    tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 

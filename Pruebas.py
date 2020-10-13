@@ -49,11 +49,17 @@ output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=
 create_instances_PIE(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset', 
 output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=16, optical_flow=False)"""
 
+create_instances_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.pkl', input_path_frames='/media/jorge/DATOS/TFG/frames/PIE_dataset', output_path_cuts='/media/jorge/DATOS/TFG/cuts/PIE_dataset',
+output_path_instances='/media/jorge/DATOS/TFG/instances/PIE_dataset', n_frames=16, optical_flow=True)
+
+create_instances_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.pkl', input_path_frames='/media/jorge/DATOS/TFG/frames/PIE_dataset', output_path_cuts='/media/jorge/DATOS/TFG/cuts/PIE_dataset',
+output_path_instances='/media/jorge/DATOS/TFG/instances/PIE_dataset', n_frames=16, optical_flow=False)
 
 
-create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
-output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=False)
 
-create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
-output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=True)
+"""create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
+output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=False)"""
+
+"""create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
+output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=True)"""
 

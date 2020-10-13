@@ -2,18 +2,20 @@ import numpy as np
 from tensorflow.keras.utils import Sequence
 from FuncionesAuxiliares import ShuffleFrames
 from tensorflow.keras.utils import to_categorical
+import cv2
+import pickle
 
 from pathlib import Path
-
 from os.path import join
 from os.path import splitext
 
-import pickle
 
 
-##########################################################################################################
-###################################  PRETEXT TASK SHUFFLE  ###############################################
-##########################################################################################################
+
+
+########################################################################################################################
+#############################################  PRETEXT TASK SHUFFLE  ###################################################
+########################################################################################################################
 
 
 
@@ -72,7 +74,7 @@ class DataGeneratorShuffle(Sequence):
 
             #Normalización de los frames
             if self.normalized:
-                frames = frames * 1 / 255
+                cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
             #Se almacenan los frames ordenados y su etiqueta
             X[i, ] = frames
@@ -106,13 +108,14 @@ class DataGeneratorShuffle(Sequence):
 
 
 
-##########################################################################################################
-##################################  PRETEXT TASK ORDER PREDICTION  #######################################
-##########################################################################################################
+########################################################################################################################
+########################################  PRETEXT TASK ORDER PREDICTION  ###############################################
+########################################################################################################################
+
 
 
 class DataGeneratorOrderPrediction(Sequence):
-    def __init__(self, list_IDs, path_instances, batch_size=32, dim=(32, 32, 32), n_channels=1, n_clases=10, normalized=True, opticalFlow=False, n_epochs=100, shuffle=True):
+    def __init__(self, list_IDs, path_instances, batch_size=32, dim=(32, 32, 32), n_channels=1, n_clases=10, shuffle=True, normalized=True, n_epochs=100):
         self.dim = dim
         self.batch_size = batch_size
         self.n_channels = n_channels
@@ -121,8 +124,6 @@ class DataGeneratorOrderPrediction(Sequence):
         self.shuffle = shuffle
         #Ruta donde se encuentran las instancias
         self.path_instances = path_instances
-
-        self.opticalFlow = opticalFlow
 
         #Lista con el nombre de los peatones que forman parte del conjunto de entrenamiento
         self.list_IDs = list_IDs
@@ -211,15 +212,6 @@ class DataGeneratorOrderPrediction(Sequence):
                 #Se elimina de la lista de peatones disponibles el peatón seleccionado
                 self.restant_pedestrians.remove(ped)
 
-                if self.opticalFlow:
-
-                    PathInstance = Path(join(self.path_instances, 'OrderPrediction', 'OpticalFlow', ped_noext))
-
-                else:
-
-                    PathInstance = Path(join(self.path_instances, 'OrderPrediction', 'NotOpticalFlow', ped_noext))
-
-
                 #Se obtienen las clases disponibles del peatón seleccionado
                 classes = self.restant_classes_pedestrians[ped]
 
@@ -230,6 +222,9 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 classes.remove(clas)
 
+
+                PathInstance = Path(join(self.path_instances, ped_noext))
+
                 #Se carga del disco duro la instancia correspondiente al peatón 'ped' y la clase 'clas' y se almacena en el batch
 
                 with (PathInstance / (ped_noext + '_' + str(clas) + 'p.pkl')).open('rb') as input:
@@ -239,7 +234,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    frames = frames * 1 / 255
+                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -264,7 +259,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    frames = frames * 1 / 255
+                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -312,15 +307,6 @@ class DataGeneratorOrderPrediction(Sequence):
                 #Se elimina de la lista de peatones disponibles el peatón seleccionado
                 self.restant_pedestrians.remove(ped)
 
-                if self.opticalFlow:
-
-                    PathInstance = Path(join(self.path_instances, 'OrderPrediction', 'OpticalFlow', ped_noext))
-
-                else:
-
-                    PathInstance = Path(join(self.path_instances, 'OrderPrediction', 'NotOpticalFlow', ped_noext))
-
-
                 #Se obtienen las clases disponibles del peatón seleccionado
                 classes = self.restant_classes_pedestrians[ped]
 
@@ -331,6 +317,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 classes.remove(clas)
 
+                PathInstance = Path(join(self.path_instances, ped_noext))
                 #Se carga del disco duro la instancia correspondiente al peatón 'ped' y la clase 'clas' y se almacena en el batch
 
                 with (PathInstance / (ped_noext + '_' + str(clas) + 'p.pkl')).open('rb') as input:
@@ -340,7 +327,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 #Normalización de los frames
                 if self.normalized:
-                    frames = frames * 1 / 255
+                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]
@@ -365,7 +352,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
                 # Normalización de los frames
                 if self.normalized:
-                    frames = frames * 1 / 255
+                    cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
                 X1[index_batch, ] = frames[0]
                 X2[index_batch, ] = frames[1]

@@ -1,10 +1,6 @@
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Conv3D, Flatten, Dropout, Dense, Conv2D, MaxPooling2D, BatchNormalization, Input, concatenate
 from tensorflow.keras.optimizers import Adam
-import tensorflow.keras as keras
-
-
-
 
 
 
@@ -104,58 +100,6 @@ class CONV3D(Model):
         outputs = self.Conv3D_4(x)
 
         return outputs
-
-
-"""def basemodel_CaffeNet(the_input_shape):
-
-    basemodel = Sequential()
-
-    #1th Convolutional Layer
-    basemodel.add(Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
-                     activation='relu', input_shape=the_input_shape, name='conv2d_1_CaffeNet'))
-    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
-    basemodel.add(BatchNormalization())
-
-    #2th Convolutional Layer
-    basemodel.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_2_CaffeNet'))
-    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
-    basemodel.add(BatchNormalization())
-
-    #3th Convolutional Layer
-    basemodel.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_3_CaffeNet'))
-
-    #4th Convolutional Layer
-    basemodel.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_4_CaffeNet'))
-
-    #5th Convolutional Layer
-    basemodel.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_5_CaffeNet'))
-    basemodel.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
-
-    return basemodel"""
-
-
-
-"""def basemodel_CONV3D(the_input_shape):
-
-    basemodel = Sequential()
-
-    basemodel.add(Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', input_shape=the_input_shape, name='conv3d_1_Conv3D'))
-
-    basemodel.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_2_Conv3D'))
-
-    basemodel.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_3_Conv3D'))
-
-    basemodel.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last',
-              activation='relu', name='conv3d_1_Conv3D'))
-
-    return basemodel"""
 
 
 
@@ -266,34 +210,6 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
     input_2 = Input(shape=the_input_shape)
     input_3 = Input(shape=the_input_shape)
     input_4 = Input(shape=the_input_shape)
-
-    """
-    model = Sequential()
-
-    #1th Convolutional Layer
-    model.add(Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
-                     activation='relu', input_shape=the_input_shape, name='conv2d_1_OrderPrediction'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
-    model.add(BatchNormalization())
-
-    #2th Convolutional Layer
-    model.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_2_OrderPrediction'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))
-    model.add(BatchNormalization())
-
-    #3th Convolutional Layer
-    model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_3_OrderPrediction'))
-
-    #4th Convolutional Layer
-    model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_4_OrderPrediction'))
-
-    #5th Convolutional Layer
-    model.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
-                     activation='relu', name='conv2d_5_OrderPrediction'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last'))"""
 
     base_model = CaffeNet(the_input_shape)
 

@@ -1,11 +1,19 @@
-##########################################################################################################
-###########################################  FINAL MODELS  ###############################################
-##########################################################################################################
+import numpy as np
+from tensorflow.keras.utils import Sequence
+from tensorflow.keras.utils import to_categorical
+import cv2
+import pickle
+
+
+
+########################################################################################################################
+#############################################  CROSSING DETECTION ######################################################
+########################################################################################################################
 
 
 
 class DataGeneratorFINALCrossingDetection(Sequence):
-    def __init__(self, list_IDs, path_instances, n_frames, batch_size=32, dim=(128, 128, 32), n_channels=1, n_clases=1, shuffle=True, normalized=True):
+    def __init__(self, list_IDs, path_instances, n_frames, batch_size=32, dim=(128, 128, 32), n_channels=2, n_clases=1, shuffle=True, normalized=True):
         self.dim = dim
         self.batch_size = batch_size
         self.list_IDs = list_IDs
@@ -25,7 +33,7 @@ class DataGeneratorFINALCrossingDetection(Sequence):
     def __data_generation(self, list_IDs_temp):
 
         X = np.empty((self.batch_size, self.n_frames, *self.dim, self.n_channels))
-        y = np.empty(self.batch_size, dtype=float)
+        y = np.empty(self.batch_size, dtype=int)
 
         for i, ID_instance in enumerate(list_IDs_temp):
 
@@ -40,7 +48,7 @@ class DataGeneratorFINALCrossingDetection(Sequence):
 
             #Normalización de los frames
             if self.normalized:
-                frames = frames * 1 / 255
+                cv2.normalize(frames, frames, 0, 255, cv2.NORM_MINMAX)
 
             #Se almacenan los frames ordenados y su etiqueta
             X[i, ] = frames

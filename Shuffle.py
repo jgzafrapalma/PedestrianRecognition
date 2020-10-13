@@ -41,7 +41,7 @@ from DataGenerators_Pretext_Tasks import DataGeneratorShuffle
 from pathlib import Path
 from os.path import join
 import json
-from datetime import datetime
+#from datetime import datetime
 import numpy as np
 
 from FuncionesAuxiliares import read_instance_file_txt
@@ -50,42 +50,45 @@ from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
-date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
+#date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
 
 #Se cargan las variables necesarias del fichero de configuración
 dim = config['Shuffle']['dim']
 dataset = config['Shuffle']['dataset']
-model_name = config['Shuffle']['model_name']
+type_model = config['Shuffle']['type_model']
+data_sampling = config['Shuffle']['data_sampling']
+tuner_type = config['Shuffle']['tuner_type']
+hyperparameters = config['Shuffle']['input_model']
+
+
 path_instances = Path(join(config['Shuffle']['path_instances'], dataset))
 path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
 epochs = config['Shuffle']['epochs']
 n_frames = config['Shuffle']['n_frames']
+n_classes = config['Shuffle']['n_classes']
+n_channels = config['Shuffle']['n_channels']
 
 #Se carga la ruta en la que se almacena los resultados de tensorboard
-tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', model_name, date_time)))
+#tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, date_time)))
+tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters)))
 
 #Se carga la ruta en la que se encuentra el fichero con los hiperparámetros
-path_hyperparameters = Path(config['Shuffle']['path_hyperparameters'])
+path_hyperparameters = Path(join(config['Shuffle']['path_hyperparameters'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters + '.json'))
 
 with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
 
-#Se cargan los hiperparámetros
+#Se cargan los hiperparámetros necesarios en el DataGenerator
 batch_size = hyperparameters['batch_size']
-dense_activation = hyperparameters['dense_activation']
-dropout_rate_1 = hyperparameters['dropout_rate_1']
-dropout_rate_2 = hyperparameters['dropout_rate_2']
-learning_rate = hyperparameters['learning_rate']
 normalized = hyperparameters['normalized']
 shuffle = hyperparameters['shuffle']
 step_swaps = hyperparameters['step_swaps']
-unit = hyperparameters['unit']
 
 params = {'dim': dim,
           'path_instances': path_instances,
           'batch_size': batch_size,
-          'n_clases': 2,
-          'n_channels': 3,
+          'n_clases': n_classes,
+          'n_channels': n_channels,
           'n_frames': n_frames,
           'normalized': normalized,
           'shuffle': shuffle,
@@ -99,7 +102,14 @@ train_generator = DataGeneratorShuffle(train_ids_instances, **params)
 
 validation_generator = DataGeneratorShuffle(validation_ids_instances, **params)
 
-if config['Shuffle']['model_name'] == 'CONV3D':
+if type_model == 'CONV3D':
+
+    #Se obtienen los hiperparametros para el modelo de convoluciones 3D
+    dense_activation = hyperparameters['dense_activation']
+    dropout_rate_1 = hyperparameters['dropout_rate_1']
+    dropout_rate_2 = hyperparameters['dropout_rate_2']
+    learning_rate = hyperparameters['learning_rate']
+    unit = hyperparameters['unit']
 
     model = models.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
@@ -119,7 +129,7 @@ history = model.fit(x=train_generator, validation_data=validation_generator, epo
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', model_name, date_time))
+path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, hyperparameters))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)
