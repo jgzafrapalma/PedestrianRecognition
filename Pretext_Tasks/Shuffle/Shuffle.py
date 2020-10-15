@@ -1,5 +1,5 @@
 #LIMITAR CPU AL 45%
-import os
+import os, sys
 import tensorflow as tf
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -9,7 +9,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('config.yaml', 'r') as file_descriptor:
+with open('../../config.yaml', 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -36,13 +36,22 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-import models
-from DataGenerators_Pretext_Tasks import DataGeneratorShuffle
-from pathlib import Path
+
+#Se añade el directorio utilities a sys.path para que pueda ser usaado por el comando import
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
+sys.path.append(os.path.join(rootdir, 'utilities'))
+
+
 from os.path import join
 import json
-#from datetime import datetime
 import numpy as np
+from pathlib import Path
+#from datetime import datetime
+
+import models_Shuffle
+import DataGenerators_Shuffle
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -63,6 +72,8 @@ id_hyperparameters = config['Shuffle']['id_hyperparameters']
 
 path_instances = Path(join(config['Shuffle']['path_instances'], dataset, 'Shuffle', data_sampling))
 path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
+
+
 epochs = config['Shuffle']['epochs']
 n_frames = config['Shuffle']['n_frames']
 n_classes = config['Shuffle']['n_classes']
@@ -98,9 +109,9 @@ train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
 validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
-train_generator = DataGeneratorShuffle(train_ids_instances, **params)
+train_generator = DataGenerators_Shuffle.DataGeneratorShuffle(train_ids_instances, **params)
 
-validation_generator = DataGeneratorShuffle(validation_ids_instances, **params)
+validation_generator = DataGenerators_Shuffle.DataGeneratorShuffle(validation_ids_instances, **params)
 
 if type_model == 'CONV3D':
 
@@ -111,7 +122,7 @@ if type_model == 'CONV3D':
     learning_rate = hyperparameters['learning_rate']
     unit = hyperparameters['unit']
 
-    model = models.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
+    model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 #CALLBACKS
 

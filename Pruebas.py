@@ -5,7 +5,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.45
 
-from FuncionesAuxiliares import extract_pedestriansFrames_datasets_PIE, create_train_validation_test, extract_pedestriansFrames_datasets_JAAD, create_instances_JAAD, create_instances_PIE_OrderPrediction, create_instances_PIE
+from utilities.FuncionesAuxiliares import create_instances_PIE
 
 
 

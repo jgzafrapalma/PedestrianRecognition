@@ -39,7 +39,7 @@ session = InteractiveSession(config=configProto)
 
 import DataGenerators_Pretext_Tasks
 
-from FuncionesAuxiliares import read_instance_file_txt
+from utilities.FuncionesAuxiliares import read_instance_file_txt
 from os.path import join
 from pathlib import Path
 
