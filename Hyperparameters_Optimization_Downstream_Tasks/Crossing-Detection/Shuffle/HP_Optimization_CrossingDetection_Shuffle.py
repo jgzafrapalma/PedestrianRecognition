@@ -70,7 +70,7 @@ data_sampling = config['HP_Optimization_CrossingDetection_Shuffle']['data_sampli
 
 n_frames = config['HP_Optimization_CrossingDetection_Shuffle']['n_frames']
 
-path_instances = Path(join(config['HP_Optimization_CrossingDetection_Shuffle'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
+path_instances = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_instances'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
 
 path_id_instances = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_id_instances'], dataset))
 
@@ -107,7 +107,7 @@ path_output_hyperparameters_CL.mkdir(parents=True, exist_ok=True)
 path_output_hyperparameters_FT.mkdir(parents=True, exist_ok=True)
 
 #Ruta en la que se encuentran los pesos que se van a cargar en la capa convolucional del modelo
-path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task)
+path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'weights.h5')
 
 
 if type_model == 'CONV3D':
@@ -206,7 +206,7 @@ if type_model == 'CONV3D':
         'n_channels': n_channels,
         'n_frames': n_frames,
         'normalized': best_hp['normalized'],
-        'shuffle': best_hp['normalized'],
+        'shuffle': best_hp['shuffle'],
     }
 
     train_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(train_ids_instances, **params)
@@ -238,10 +238,10 @@ if tuner_type == 'Random_Search':
 
     tuner = RandomSearch(
         hypermodel_ft,
-        objective=config['Keras_Tuner']['tuner']['objetive'],
-        seed=config['Keras_Tuner']['tuner']['seed'],
-        max_trials=config['Keras_Tuner']['tuner']['max_trials'],
-        executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+        objective=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['objetive'],
+        seed=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['seed'],
+        max_trials=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['max_trials'],
+        executions_per_trial=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['executions_per_trial'],
         directory=path_output_results_FT,
         project_name=project_name,
         overwrite=False
@@ -251,10 +251,10 @@ elif tuner_type == 'HyperBand':
 
     tuner = Hyperband(
         hypermodel_ft,
-        objective=config['Keras_Tuner']['tuner']['objetive'],
-        seed=config['Keras_Tuner']['tuner']['seed'],
-        max_epochs=config['Keras_Tuner']['tuner']['max_epochs'],
-        executions_per_trial=config['Keras_Tuner']['tuner']['executions_per_trial'],
+        objective=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['objetive'],
+        seed=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['seed'],
+        max_epochs=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['max_epochs'],
+        executions_per_trial=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['executions_per_trial'],
         directory=path_output_results_FT,
         project_name=project_name,
         overwrite=False
@@ -264,10 +264,10 @@ else:
 
     tuner = BayesianOptimization(
         hypermodel_ft,
-        objective=config['Keras_Tuner']['tuner']['objetive'],
-        seed=config['Keras_Tuner']['tuner']['seed'],
-        max_trials=config['Keras_Tuner']['tuner']['max_trials'],
-        num_initial_points=config['Keras_Tuner']['tuner']['num_initial_points'],
+        objective=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['objetive'],
+        seed=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['seed'],
+        max_trials=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['max_trials'],
+        num_initial_points=config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['num_initial_points'],
         directory=path_output_results_FT,
         project_name=project_name,
         overwrite=False

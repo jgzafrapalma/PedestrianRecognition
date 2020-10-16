@@ -9,7 +9,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('config.yaml', 'r') as file_descriptor:
+with open('../../../config.yaml', 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -63,19 +63,20 @@ type_model = config['Transfer_Learning_CrossingDetection_Shuffle']['type_model']
 project_name = config['Transfer_Learning_CrossingDetection_Shuffle']['project_name']
 tuner_type = config['Transfer_Learning_CrossingDetection_Shuffle']['tuner_type']
 data_sampling = config['Transfer_Learning_CrossingDetection_Shuffle']['data_sampling']
+n_frames = config['Transfer_Learning_CrossingDetection_Shuffle']['n_frames']
 
-path_instances = Path(join(config['Transfer_Learning']['path_instances'], dataset))
-path_id_instances = Path(join(config['Transfer_Learning']['path_id_instances'], dataset))
 
-dim = config['Transfer_Learning']['dim']
-n_frames = config['Transfer_Learning']['n_frames']
-n_classes = config['Transfer_Learning']['n_classes']
-channels = config['Transfer_Learning']['channels']
-epochs = config['Transfer_Learning']['epochs']
+path_instances = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_instances'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
+path_id_instances = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_id_instances'], dataset))
+
+dim = config['Transfer_Learning_CrossingDetection_Shuffle']['dim']
+n_classes = config['Transfer_Learning_CrossingDetection_Shuffle']['n_classes']
+channels = config['Transfer_Learning_CrossingDetection_Shuffle']['channels']
+epochs = config['Transfer_Learning_CrossingDetection_Shuffle']['epochs']
 
 #date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
 
-tensorboard_logs = str(Path(join(config['Transfer_Learning']['tensorboard_logs'], dataset, 'Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name)))
+tensorboard_logs = str(Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name)))
 
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
@@ -84,9 +85,9 @@ validation_ids_instances = read_instance_file_txt(path_id_instances / 'validatio
 
 
 ##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
-path_hyperparameters_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+path_hyperparameters_CL = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-path_hyperparameters_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+path_hyperparameters_FT = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
 
 with path_hyperparameters_CL.open('r') as file_descriptor:
@@ -125,13 +126,13 @@ train_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossing
 validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
 #El modelo es definido con las capas convolucionales congeladas
-model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D_((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
+model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 #######################################################################################################
 
 """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
 LA TAREA DE PRETEXTO"""
-path_weights = Path(join(config['Transfer_Learning']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+path_weights = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
 """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
 los pesos solo van a ser cargados en las capas de convolución"""
@@ -146,7 +147,7 @@ tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_imag
 
 earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
-reducelronplateau = ReduceLROnPlateau(monitor='val_mse', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
+reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
 
 keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
 
@@ -160,18 +161,18 @@ model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs
 
 model.trainable = True
 
-model.summary()
-
 """Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
 coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
 model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy'])
+
+model.summary()
 
 history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
 
 #GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
 
-path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name))
+path_output_model = Path(join(config['Transfer_Learning_CrossingDetection_Shuffle']['path_output_model'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)

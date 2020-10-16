@@ -111,13 +111,14 @@ Transfer_Learning_CrossingDetection_Shuffle:
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
   data_sampling: 'Distributed' # OpticalFlow
-  project_name: '06092020-170054'
+  project_name: '11102020-174000'
   tuner_type: 'Bayesian_Optimization'
   path_weights: '/pub/experiments/jzafra/models/'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
   path_output_model: '/pub/experiments/jzafra/models/'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
   epochs: 100
   seed: 1
   random: False
@@ -125,23 +126,22 @@ Transfer_Learning_CrossingDetection_Shuffle:
   n_frames: 16
   n_classes: 2
   channels: 3
-Performance_FinalModels:
+Performance_CrossingDetection_Shuffle:
   dim: !!python/tuple [128, 128]
   dataset: 'PIE_dataset'
+  data_sampling: 'Distributed'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
-  path_model: '/pub/experiments/jzafra/models'
-  model_name: 'CONV3D'
-  type_model: 'Crossing-Detection'
-  pretext_task: 'Shuffle'
-  input_model: '07102020-171736'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
+  path_weights: '/pub/experiments/jzafra/models/'
+  type_model: 'CONV3D'
+  project_name: '11102020-174000'
+  tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
   n_frames: 16
-  batch_size: 8
   n_clases: 2
-  normalized: True
-  shuffle: True
+  n_channels: 3
 Performance_PretexTasks:
 
 #Hyperparameters_Optimization_Pretext_Tasks:

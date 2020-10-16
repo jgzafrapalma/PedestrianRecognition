@@ -14,7 +14,7 @@ from tensorflow.keras.optimizers import Adam
 
 
 
-def model_CrossingDetection_Shuffle_CONV3D_(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
+def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
 
 
     # Se define la entrada del modelo

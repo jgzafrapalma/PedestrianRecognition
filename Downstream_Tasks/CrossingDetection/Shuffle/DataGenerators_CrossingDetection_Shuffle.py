@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow.keras.utils import Sequence
 from tensorflow.keras.utils import to_categorical
 import pickle
-
+import math
 
 
 class DataGeneratorCrossingDetectionShuffe(Sequence):
@@ -25,8 +25,8 @@ class DataGeneratorCrossingDetectionShuffe(Sequence):
 
     def __data_generation(self, list_IDs_temp):
 
-        X = np.empty((self.batch_size, self.n_frames, *self.dim, self.n_channels))
-        y = np.empty(self.batch_size, dtype=int)
+        X = np.empty((len(list_IDs_temp), self.n_frames, *self.dim, self.n_channels))
+        y = np.empty(len(list_IDs_temp), dtype=int)
 
         for i, ID_instance in enumerate(list_IDs_temp):
 
@@ -77,4 +77,4 @@ class DataGeneratorCrossingDetectionShuffe(Sequence):
         return ID_instances, to_categorical(real_labels, num_classes=self.n_classes)
 
     def __len__(self):
-        return int(np.floor(len(self.list_IDs) / self.batch_size))
+        return int(math.ceil(len(self.list_IDs) / self.batch_size))

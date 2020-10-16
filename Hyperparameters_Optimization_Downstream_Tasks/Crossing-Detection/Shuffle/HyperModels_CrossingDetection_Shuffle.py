@@ -6,7 +6,7 @@ parentparentdir = os.path.dirname(parentdir)
 rootdir = os.path.dirname(parentparentdir)
 sys.path.append(os.path.join(rootdir, 'base_models'))
 
-from base_model import CONV3D
+from base_models import CONV3D
 
 from kerastuner import HyperModel
 
@@ -79,7 +79,7 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_CL(HyperModel):
             )
         )
 
-        model.load_weights(self.path_weights, by_name=True)
+        model.load_weights(str(self.path_weights), by_name=True)
 
         model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
@@ -143,7 +143,7 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_FT(HyperModel):
             )
         )
 
-        model.load_weights(self.path_weights, by_name=True)
+        model.load_weights(str(self.path_weights), by_name=True)
 
         model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
