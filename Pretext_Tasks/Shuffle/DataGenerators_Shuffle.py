@@ -1,6 +1,7 @@
 from tensorflow.keras.utils import Sequence, to_categorical
 import numpy as np
 import pickle
+import math
 
 #Falta una función Auxiliar
 from FuncionesAuxiliares_Shuffle import ShuffleFrames
@@ -41,8 +42,8 @@ class DataGeneratorShuffle(Sequence):
         """Se reserva espacio para almacenar las instancias del batch actual y las etiquetas de esas instancias.
         En un mismo batch se almacenan los frames ordenados de una instancia y en la siguientes posición los mismos
         frames pero desordenados."""
-        X = np.empty((self.batch_size, self.n_frames, *self.dim, self.n_channels))
-        y = np.empty(self.batch_size, dtype=int)
+        X = np.empty((len(list_IDs_temp), self.n_frames, *self.dim, self.n_channels))
+        y = np.empty(len(list_IDs_temp), dtype=int)
 
         i = 0 # Variable utilizada como contador del indice en el que se estan almacenando las intancias
         for ID_instance in list_IDs_temp:
@@ -90,4 +91,4 @@ class DataGeneratorShuffle(Sequence):
         return X, y
 
     def __len__(self):
-        return int(np.floor(len(self.list_IDs) * 2 / self.batch_size))
+        return int(math.ceil(len(self.list_IDs) * 2 / self.batch_size))

@@ -93,6 +93,10 @@ if type_model == 'CONV3D':
 
     hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
 
+elif type_model == 'C3D':
+
+    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
+
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
 
