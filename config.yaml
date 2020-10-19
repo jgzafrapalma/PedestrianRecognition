@@ -1,12 +1,12 @@
 Hyperparameters_Optimization_Shuffle:
   dim: !!python/tuple [ 128, 128 ]
   dataset: 'PIE_dataset'
-  type_model: 'CONV3D'
+  type_model: 'C3D'
   data_sampling: 'Distributed' # OpticalFlow
-  path_instances: '/media/jorge/DATOS/TFG/instances/'               #'/pub/experiments/jzafra/instances/'
-  path_id_instances: '/media/jorge/DATOS/TFG/ids_instances/'        #'/pub/experiments/jzafra/ids_instances/'
-  path_dir_results: '/media/jorge/DATOS/TFG/tuner_keras_results'    #'/pub/experiments/jzafra/tuner_keras_results'
-  path_hyperparameters: '/media/jorge/DATOS/TFG/hyperparameters'    #'/pub/experiments/jzafra/hyperparameters'
+  path_instances: '/pub/experiments/jzafra/instances/'              # '/media/jorge/DATOS/TFG/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'       # '/media/jorge/DATOS/TFG/ids_instances/'
+  path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'   # '/media/jorge/DATOS/TFG/tuner_keras_results'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters'   # '/media/jorge/DATOS/TFG/hyperparameters'
   epochs: 100
   n_frames: 16
   seed: 1

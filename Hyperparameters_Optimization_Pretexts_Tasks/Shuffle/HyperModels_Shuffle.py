@@ -141,7 +141,7 @@ class HyperModel_Shuffle_C3D(HyperModel):
 
         optimizer = Adam(
             learning_rate=hp.Float(
-                "learning_rate", min_value=1e-5, max_value=1e-1, sampling="LOG", default=1e-3
+                "learning_rate", min_value=1e-4, max_value=1e-2, sampling="LOG", default=1e-3
             )
         )
 

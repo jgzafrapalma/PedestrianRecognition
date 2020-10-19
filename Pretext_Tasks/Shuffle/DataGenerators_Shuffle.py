@@ -1,7 +1,6 @@
 from tensorflow.keras.utils import Sequence, to_categorical
 import numpy as np
 import pickle
-import math
 
 #Falta una función Auxiliar
 from FuncionesAuxiliares_Shuffle import ShuffleFrames
@@ -91,4 +90,4 @@ class DataGeneratorShuffle(Sequence):
         return X, y
 
     def __len__(self):
-        return int(math.ceil(len(self.list_IDs) * 2 / self.batch_size))
+        return int(np.floor(len(self.list_IDs) * 2 / self.batch_size))

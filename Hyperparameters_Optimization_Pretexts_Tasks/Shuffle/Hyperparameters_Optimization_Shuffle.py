@@ -36,7 +36,8 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
-rootdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 from os.path import join
@@ -91,11 +92,11 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 #SE DEFINE EL HYPERMODELO EN FUNCIÓN DEL TIPO DE MODELO
 if type_model == 'CONV3D':
 
-    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
 
 elif type_model == 'C3D':
 
-    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
 
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
