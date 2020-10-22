@@ -11,7 +11,7 @@ sys.path.append(os.path.join(rootdir, 'base_models'))
 
 from CaffeNet import CaffeNet
 
-def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
+def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_dense_layers_2, learning_rate):
     # Se definen las 4 entradas del modelo
     input_1 = Input(shape=the_input_shape)
     input_2 = Input(shape=the_input_shape)
@@ -26,17 +26,21 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
     output_3 = base_model(input_3)
     output_4 = base_model(input_4)
 
-    flatten_1 = Flatten(name='Flatten_1_OrderPrediction')
+    flatten = Flatten(name='Flatten_OrderPrediction')
 
     # Se obtienen los vectores de características de las 4 entradas
-    features_1 = flatten_1(output_1)
-    features_2 = flatten_1(output_2)
-    features_3 = flatten_1(output_3)
-    features_4 = flatten_1(output_4)
+    features_1 = flatten(output_1)
+    features_2 = flatten(output_2)
+    features_3 = flatten(output_3)
+    features_4 = flatten(output_4)
 
-    # Se añade una capa customizada que permite realizar la contatenación de dos vectores de características
+    # Capa densa utilizada para resumir las caracteristicas extraidas de las capas convolucionales para cada frame
+    dense_1 = Dense(units=units_dense_layers_1, activation='relu', name='FC_1_OrderPrediction')
 
-    # Concatenate_Features = Lambda(lambda tensors: keras.backend.concatenate((tensors[0], tensors[1])))
+    features_1 = dense_1(features_1)
+    features_2 = dense_1(features_2)
+    features_3 = dense_1(features_3)
+    features_4 = dense_1(features_4)
 
     Features_12 = concatenate([features_1, features_2])
     Features_13 = concatenate([features_1, features_3])
@@ -45,19 +49,19 @@ def model_OrderPrediction_SIAMESE(the_input_shape, learning_rate):
     Features_24 = concatenate([features_2, features_4])
     Features_34 = concatenate([features_3, features_4])
 
-    dense1 = Dense(units=512, activation='relu', name='FC_1_OrderPrediction')
+    # Capa densa que aprende la relación entre las características de los distintos fotogramas
+    dense_2 = Dense(units=units_dense_layers_2, activation='relu', name='FC_2_OrderPrediction')
 
-    RelationShip_12 = dense1(Features_12)
-    RelationShip_13 = dense1(Features_13)
-    RelationShip_14 = dense1(Features_14)
-    RelationShip_23 = dense1(Features_23)
-    RelationShip_24 = dense1(Features_24)
-    RelationShip_34 = dense1(Features_34)
+    RelationShip_1_2 = dense_2(Features_12)
+    RelationShip_1_3 = dense_2(Features_13)
+    RelationShip_1_4 = dense_2(Features_14)
+    RelationShip_2_3 = dense_2(Features_23)
+    RelationShip_2_4 = dense_2(Features_24)
+    RelationShip_3_4 = dense_2(Features_34)
 
-    # Concatenate_RelationShips = Lambda(lambda tensors: keras.backend.concatenate((tensors[0], tensors[1], tensors[2], tensors[3], tensors[4], tensors[5])))
-
+    # Concatenación de todas las relaciones
     Features_Final = concatenate(
-        [RelationShip_12, RelationShip_13, RelationShip_14, RelationShip_23, RelationShip_24, RelationShip_34])
+        [RelationShip_1_2, RelationShip_1_3, RelationShip_1_4, RelationShip_2_3, RelationShip_2_4, RelationShip_3_4])
 
     prediction = Dense(units=12, activation='softmax', name='FC_Final_OrderPrediction')(Features_Final)
 

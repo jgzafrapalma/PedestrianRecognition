@@ -9,7 +9,11 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('../../config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -37,9 +41,6 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 #Se añade el directorio utilities a sys.path para que pueda ser usaado por el comando import
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 from os.path import join
@@ -48,8 +49,7 @@ import numpy as np
 from pathlib import Path
 #from datetime import datetime
 
-import models_OrderPrediction
-import DataGenerator_OrderPrediction
+import DataGenerator_OrderPrediction, models_OrderPrediction
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -65,7 +65,7 @@ dataset = config['OrderPrediction']['dataset']
 type_model = config['OrderPrediction']['type_model']
 data_sampling = config['OrderPrediction']['data_sampling']
 tuner_type = config['OrderPrediction']['tuner_type']
-id_hyperparameters = config['OrderPrediction']['id_hyperparameters']
+project_name = config['OrderPrediction']['project_name']
 
 
 path_instances = Path(join(config['OrderPrediction']['path_instances'], dataset, 'OrderPrediction', data_sampling))
@@ -76,10 +76,10 @@ epochs = config['OrderPrediction']['epochs']
 n_classes = config['OrderPrediction']['n_classes']
 n_channels = config['OrderPrediction']['n_channels']
 
-tensorboard_logs = str(Path(join(config['OrderPrediction']['tensorboard_logs'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, id_hyperparameters)))
+tensorboard_logs = str(Path(join(config['OrderPrediction']['tensorboard_logs'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, project_name)))
 
 #Se carga la ruta en la que se encuentra el fichero con los hiperparámetros
-path_hyperparameters = Path(join(config['OrderPrediction']['path_hyperparameters'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, id_hyperparameters + '.json'))
+path_hyperparameters = Path(join(config['OrderPrediction']['path_hyperparameters'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, project_name + '.json'))
 
 with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
@@ -108,9 +108,11 @@ validation_generator = DataGenerator_OrderPrediction.DataGeneratorOrderPredictio
 
 if type_model == 'SIAMESE':
 
+    units_dense_layers_1 = hyperparameters['units_dense_layers_1']
+    units_dense_layers_2 = hyperparameters['units_dense_layers_2']
     learning_rate = hyperparameters['learning_rate']
 
-    model = models_OrderPrediction.model_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), learning_rate)
+    model = models_OrderPrediction.model_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), units_dense_layers_1, units_dense_layers_2, learning_rate)
 
 #CALLBACKS
 
@@ -128,7 +130,7 @@ history = model.fit(x=train_generator, validation_data=validation_generator, epo
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['OrderPrediction']['path_output_model'], dataset, 'OrderPrediction', data_sampling, tuner_type, id_hyperparameters))
+path_output_model = Path(join(config['OrderPrediction']['path_output_model'], dataset, 'OrderPrediction', data_sampling, tuner_type, project_name))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)

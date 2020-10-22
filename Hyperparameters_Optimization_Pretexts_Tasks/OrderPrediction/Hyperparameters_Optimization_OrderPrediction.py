@@ -9,7 +9,10 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('../../config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+rootdir = os.path.dirname(currentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
@@ -35,8 +38,6 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-rootdir = os.path.dirname(currentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 from os.path import join
@@ -46,7 +47,7 @@ from pathlib import Path
 import json
 #import logging
 
-import HyperModels_Shuffle, Tuners_Shuffle
+import HyperModels_OrderPrediction, Tuners_OrderPrediction
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -91,12 +92,12 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 #SE DEFINE EL HYPERMODELO EN FUNCIÓN DEL TIPO DE MODELO
 if type_model == 'SIAMESE':
 
-    hypermodel = HyperModels_Shuffle.HyperModel_OrderPrediction_SIAMESE(the_input_shape=(dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_OrderPrediction.HyperModel_OrderPrediction_SIAMESE(the_input_shape=(dim[0], dim[1], n_channels), num_classes=n_classes)
 
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
 
-    tuner = Tuners_Shuffle.TunerRandomShuffle(
+    tuner = Tuners_OrderPrediction.TunerRandomShuffle(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],
@@ -109,7 +110,7 @@ if tuner_type == 'Random_Search':
 
 elif tuner_type == 'HyperBand':
 
-    tuner = Tuners_Shuffle.TunerHyperBandShuffle(
+    tuner = Tuners_OrderPrediction.TunerHyperBandShuffle(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],
@@ -122,7 +123,7 @@ elif tuner_type == 'HyperBand':
 
 else:
 
-    tuner = Tuners_Shuffle.TunerBayesianShuffle(
+    tuner = Tuners_OrderPrediction.TunerBayesianShuffle(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],

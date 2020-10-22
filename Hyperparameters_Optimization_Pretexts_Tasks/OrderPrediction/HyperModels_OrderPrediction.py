@@ -46,6 +46,20 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
         features_3 = flatten_1(output_3)
         features_4 = flatten_1(output_4)
 
+        # Capa densa utilizada para resumir las caracteristicas extraidas de las capas convolucionales para cada frame
+        dense_1 = Dense(
+            units=hp.Int(
+                "units_dense_layers_1", min_value=512, max_value=4096, step=512, default=512
+            ),
+            activation='relu',
+            name='FC_1_OrderPrediction'
+        )
+
+        features_1 = dense_1(features_1)
+        features_2 = dense_1(features_2)
+        features_3 = dense_1(features_3)
+        features_4 = dense_1(features_4)
+
         Features_12 = concatenate([features_1, features_2])
         Features_13 = concatenate([features_1, features_3])
         Features_14 = concatenate([features_1, features_4])
@@ -53,24 +67,25 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
         Features_24 = concatenate([features_2, features_4])
         Features_34 = concatenate([features_3, features_4])
 
-        dense1 = Dense(
+        # Capa densa que aprende la relación entre las características de los distintos fotogramas
+        dense_2 = Dense(
             units=hp.Int(
-                "unit", min_value=32, max_value=512, step=32, default=64
+                "units_dense_layers_2", min_value=512, max_value=4096, step=512, default=512
             ),
-            activation=hp.Choice(
-                "dense_activation", values=["relu", "tanh", "sigmoid"], default="relu"
-            ),
-            name='FC_1_OrderPrediction'
+            activation='relu',
+            name='FC_2_OrderPrediction'
         )
 
-        RelationShip_12 = dense1(Features_12)
-        RelationShip_13 = dense1(Features_13)
-        RelationShip_14 = dense1(Features_14)
-        RelationShip_23 = dense1(Features_23)
-        RelationShip_24 = dense1(Features_24)
-        RelationShip_34 = dense1(Features_34)
+        RelationShip_1_2 = dense_2(Features_12)
+        RelationShip_1_3 = dense_2(Features_13)
+        RelationShip_1_4 = dense_2(Features_14)
+        RelationShip_2_3 = dense_2(Features_23)
+        RelationShip_2_4 = dense_2(Features_24)
+        RelationShip_3_4 = dense_2(Features_34)
 
-        Features_Final = concatenate([RelationShip_12, RelationShip_13, RelationShip_14, RelationShip_23, RelationShip_24, RelationShip_34])
+        # Concatenación de todas las relaciones
+        Features_Final = concatenate(
+            [RelationShip_1_2, RelationShip_1_3, RelationShip_1_4, RelationShip_2_3, RelationShip_2_4, RelationShip_3_4])
 
         prediction = Dense(units=self.num_classes, activation='softmax', name='FC_Final_OrderPrediction')(Features_Final)
 

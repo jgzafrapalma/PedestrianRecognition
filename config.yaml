@@ -37,7 +37,7 @@ Hyperparameters_Optimization_OrderPrediction:
   n_channels: 3
   random: False
   tuner:
-    type: 'Random_Search'
+    type: 'Bayesian_Optimization'
     objetive: val_loss
     seed: 1
     executions_per_trial: 2           #Random_Search, HyperBand
@@ -51,7 +51,7 @@ Shuffle:
   type_model: 'C3D'
   data_sampling: 'Distributed'
   tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
-  id_hyperparameters: '11102020-174000'
+  project_name: '11102020-174000'
   path_instances: '/pub/experiments/jzafra/instances/'              #'/media/jorge/DATOS/TFG/instances/'             
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/media/jorge/DATOS/TFG/ids_instances/'      
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'  #'/media/jorge/DATOS/TFG/hyperparameters/'
@@ -69,7 +69,7 @@ OrderPrediction:
   type_model: 'SIAMESE'
   data_sampling: 'Distributed'
   tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
-  id_hyperparameters: '11102020-174000'
+  project_name: '11102020-174000'
   path_instances: '/media/jorge/DATOS/TFG/instances/'             #'/pub/experiments/jzafra/instances/'
   path_id_instances: '/media/jorge/DATOS/TFG/ids_instances/'      #'/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/media/jorge/DATOS/TFG/hyperparameters/' #'/pub/experiments/jzafra/hyperparameters/'

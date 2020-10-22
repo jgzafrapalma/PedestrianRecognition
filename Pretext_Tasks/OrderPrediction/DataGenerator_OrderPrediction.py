@@ -28,9 +28,9 @@ class DataGeneratorOrderPrediction(Sequence):
         self.curriculum_learning_level = 1
 
         #Número de epocas necesarías para pasar el nivel 1 de dificultad de puzzle al nivel 2
-        self.change_level1_to_level2 = n_epochs * 40
+        self.change_level1_to_level2 = n_epochs * 25
         # Número de epocas necesarías para pasar el nivel 2 de dificultad de puzzle al nivel 3
-        self.change_level2_to_level3 = n_epochs * 30
+        self.change_level2_to_level3 = n_epochs * 35
 
         self.n_epochs = -1 #Llevar la cuenta del número de epocas que se han ejecutado
 
@@ -286,8 +286,8 @@ class DataGeneratorOrderPrediction(Sequence):
     def __len__(self):
 
         if self.curriculum_learning_level == 1:
-            return int(np.floor(len(self.list_IDs) * 6 / self.batch_size))
+            return int(np.ceil(len(self.list_IDs) * 6 / self.batch_size))
         elif self.curriculum_learning_level == 2:
-            return int(np.floor(len(self.list_IDs) * 4 / self.batch_size))
+            return int(np.ceil(len(self.list_IDs) * 4 / self.batch_size))
         else:
-            return int(np.floor(len(self.list_IDs) * 2 / self.batch_size))
+            return int(np.ceil(len(self.list_IDs) * 2 / self.batch_size))
