@@ -19,7 +19,7 @@ class TunerBayesianCrossingDetectionShuffle(kerastuner.tuners.BayesianOptimizati
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32], default=32),
             'n_clases': n_classes,
             'n_channels': n_channels,
             'n_frames': n_frames,
@@ -40,7 +40,7 @@ class TunerHyperBandCrossingDetectionShuffle(kerastuner.tuners.Hyperband):
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32], default=32),
             'n_clases': n_classes,
             'n_channels': n_channels,
             'n_frames': n_frames,
@@ -61,7 +61,7 @@ class TunerRandomCrossingDetectionShuffle(kerastuner.tuners.RandomSearch):
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32], default=32),
             'n_clases': n_classes,
             'n_channels': n_channels,
             'n_frames': n_frames,

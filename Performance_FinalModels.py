@@ -88,37 +88,45 @@ with path_hyperparameters_FT.open('r') as file_descriptor:
     hyperparameters_ft = json.load(file_descriptor)
 
 
+learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+
+
+params = {'dim': dim,
+          'path_instances': path_instances,
+          'batch_size': hyperparameters_cl['batch_size'],
+          'n_clases': n_classes,
+          'n_channels': n_channels,
+          'n_frames': n_frames,
+          'normalized': hyperparameters_cl['normalized'],
+          'shuffle': hyperparameters_cl['shuffle']}
+
 
 validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
+
+validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
 
 if type_model == 'CONV3D':
 
-    batch_size = hyperparameters_cl['batch_size']
-    normalized = hyperparameters_cl['normalized']
-    shuffle = hyperparameters_cl['shuffle']
 
     dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
     dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
     dense_activation = hyperparameters_cl['dense_activation']
     unit = hyperparameters_cl['unit']
 
-    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate_fine_tuning)
 
 
-params = {'dim': dim,
-          'path_instances': path_instances,
-          'batch_size': batch_size,
-          'n_clases': n_classes,
-          'n_channels': n_channels,
-          'n_frames': n_frames,
-          'normalized': normalized,
-          'shuffle': shuffle}
+elif type_model == 'C3D':
 
-validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
+    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+    units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
+    units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
+    learning_rate = hyperparameters_cl['learning_rate']
 
-#El modelo es definido con las capas convolucionales congeladas
-model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate_fine_tuning)
+    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
+
 
 #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
 path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))

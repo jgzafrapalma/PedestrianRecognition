@@ -45,7 +45,7 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
 
     return model
 
-def model_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layers_1, units_dense_layers_2, learning_rate):
+def model_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate):
 
     #Se define la entrada del modelo
     inputs = Input(the_input_shape)
@@ -57,11 +57,11 @@ def model_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_act
 
     features = Flatten(name='Flatten_Shuffle')(x)
 
-    x = Dense(units=units_dense_layers_1, activation=dense_activation, name='FC_1_Shuffle')(features)
+    x = Dense(units=units_dense_layers_1, activation='relu', name='FC_1_Shuffle')(features)
 
     x = Dropout(dropout_rate_1, name='Dropout_1_Shuffle')(x)
 
-    x = Dense(units=units_dense_layers_2, activation=dense_activation, name='FC_2_Shuffle')(x)
+    x = Dense(units=units_dense_layers_2, activation='relu', name='FC_2_Shuffle')(x)
 
     x = Dropout(dropout_rate_2, name='Dropout_2_Shuffle')(x)
 

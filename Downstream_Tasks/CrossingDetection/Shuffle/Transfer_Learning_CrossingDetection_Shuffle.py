@@ -71,7 +71,7 @@ path_id_instances = Path(join(config['Transfer_Learning_CrossingDetection_Shuffl
 
 dim = config['Transfer_Learning_CrossingDetection_Shuffle']['dim']
 n_classes = config['Transfer_Learning_CrossingDetection_Shuffle']['n_classes']
-channels = config['Transfer_Learning_CrossingDetection_Shuffle']['channels']
+n_channels = config['Transfer_Learning_CrossingDetection_Shuffle']['n_channels']
 epochs = config['Transfer_Learning_CrossingDetection_Shuffle']['epochs']
 
 #date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
@@ -97,11 +97,24 @@ with path_hyperparameters_FT.open('r') as file_descriptor:
     hyperparameters_ft = json.load(file_descriptor)
 
 
-if type_model == 'CONV3D':
+learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
 
-    batch_size = hyperparameters_cl['batch_size']
-    normalized = hyperparameters_cl['normalized']
-    shuffle = hyperparameters_cl['shuffle']
+
+params = {'dim': dim,
+          'path_instances': path_instances,
+          'batch_size': hyperparameters_cl['batch_size'],
+          'n_clases': n_classes,
+          'n_channels': n_channels,
+          'n_frames': n_frames,
+          'normalized': hyperparameters_cl['normalized'],
+          'shuffle': hyperparameters_cl['shuffle']}
+
+train_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(train_ids_instances, **params)
+
+validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
+
+
+if type_model == 'CONV3D':
 
     dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
     dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
@@ -109,24 +122,21 @@ if type_model == 'CONV3D':
     unit = hyperparameters_cl['unit']
     learning_rate = hyperparameters_cl['learning_rate']
 
-    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+    #El modelo es definido con las capas convolucionales congeladas
+    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
 
-params = {'dim': dim,
-          'path_instances': path_instances,
-          'batch_size': batch_size,
-          'n_clases': n_classes,
-          'n_channels': channels,
-          'n_frames': n_frames,
-          'normalized': normalized,
-          'shuffle': shuffle}
+elif type_model == 'C3D':
 
-train_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(train_ids_instances, **params)
+    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+    units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
+    units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
+    learning_rate = hyperparameters_cl['learning_rate']
 
-validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
+    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
 
-#El modelo es definido con las capas convolucionales congeladas
-model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
+    
 
 #######################################################################################################
 

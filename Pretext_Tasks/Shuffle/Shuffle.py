@@ -124,6 +124,20 @@ if type_model == 'CONV3D':
 
     model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
 
+elif type_model == 'C3D':
+
+    dense_activation = hyperparameters['dense_activation']
+    dropout_rate_1 = hyperparameters['dropout_rate_1']
+    dropout_rate_2 = hyperparameters['dropout_rate_2']
+    learning_rate = hyperparameters['learning_rate']
+
+    units_dense_layers_1 = hyperparameters['units_dense_layers_1']
+    units_dense_layers_2 = hyperparameters['units_dense_layers_2']
+
+    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layers_1, units_dense_layers_2, learning_rate)
+
+
+
 #CALLBACKS
 
 tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_images=True)

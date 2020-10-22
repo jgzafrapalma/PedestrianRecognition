@@ -41,8 +41,8 @@ class DataGeneratorShuffle(Sequence):
         """Se reserva espacio para almacenar las instancias del batch actual y las etiquetas de esas instancias.
         En un mismo batch se almacenan los frames ordenados de una instancia y en la siguientes posición los mismos
         frames pero desordenados."""
-        X = np.empty((len(list_IDs_temp), self.n_frames, *self.dim, self.n_channels))
-        y = np.empty(len(list_IDs_temp), dtype=int)
+        X = np.empty((len(list_IDs_temp)*2, self.n_frames, *self.dim, self.n_channels))
+        y = np.empty(len(list_IDs_temp)*2, dtype=int)
 
         i = 0 # Variable utilizada como contador del indice en el que se estan almacenando las intancias
         for ID_instance in list_IDs_temp:

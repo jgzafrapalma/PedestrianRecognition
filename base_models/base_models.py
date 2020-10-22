@@ -107,40 +107,40 @@ class C3D(Model):
         self.the_input_shape = the_input_shape
 
         # 1th Convolutional Layers
-        self.Conv1a = Conv3D(64, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv1a = Conv3D(16, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', input_shape=the_input_shape, name='Conv1a_C3D')
         #self.BatchNormalization_1 = BatchNormalization(name='BatchNormalization_1_C3D')
         self.Pool1 = MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2), padding='valid', data_format='channels_last', name='Pool1_C3D')
 
         # 2th Convolutional Layers
-        self.Conv2a = Conv3D(128, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv2a = Conv3D(32, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv2a_C3D')
         #self.BatchNormalization_2 = BatchNormalization(name='BatchNormalization_2_C3D')
         self.Pool2 = MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), padding='valid', data_format='channels_last', name='Pool2_C3D')
 
         # 3th Convolutional Layers
-        self.Conv3a = Conv3D(256, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv3a = Conv3D(64, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv3a_C3D')
         #self.BatchNormalization_3 = BatchNormalization(name='BatchNormalization_3_C3D')
-        self.Conv3b = Conv3D(256, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv3b = Conv3D(64, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv3b_C3D')
         #self.BatchNormalization_4 = BatchNormalization(name='BatchNormalization_4_C3D')
         self.Pool3 = MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), padding='valid', data_format='channels_last', name='Pool3_C3D')
 
         # 4th Convolutional Layers
-        self.Conv4a = Conv3D(512, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv4a = Conv3D(128, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv4a_C3D')
         #self.BatchNormalization_5 = BatchNormalization(name='BatchNormalization_5_C3D')
-        self.Conv4b = Conv3D(512, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv4b = Conv3D(128, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv4b_C3D')
         #self.BatchNormalization_6 = BatchNormalization(name='BatchNormalization_6_C3D')
         self.Pool4 = MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), padding='valid', data_format='channels_last', name='Pool4_C3D')
 
         # 5th Convolutional Layers
-        self.Conv5a = Conv3D(512, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv5a = Conv3D(128, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv5a_C3D')
         #self.BatchNormalization_7 = BatchNormalization(name='BatchNormalization_7_C3D')
-        self.Conv5b = Conv3D(512, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
+        self.Conv5b = Conv3D(128, (3, 3, 3), strides=(1, 1, 1), padding='same', data_format='channels_last',
                              activation='relu', name='Conv5b_C3D')
         #self.BatchNormalization_8 = BatchNormalization(name='BatchNormalization_8_C3D')
         self.Pool5 = MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), padding='valid', data_format='channels_last', name='Pool5_C3D')
