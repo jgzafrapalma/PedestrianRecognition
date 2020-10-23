@@ -53,7 +53,7 @@ class TunerRandomOrderPrediction(kerastuner.tuners.RandomSearch):
 
         validation_generator = DataGenerators_OrderPrediction.DataGeneratorOrderPrediction(validation_ids_instances, **params)
 
-        super(TunerRandomOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerRandomOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)
 
 class TunerHyperBandOrderPrediction(kerastuner.tuners.Hyperband):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_classes,
@@ -74,4 +74,4 @@ class TunerHyperBandOrderPrediction(kerastuner.tuners.Hyperband):
 
         validation_generator = DataGenerators_OrderPrediction.DataGeneratorOrderPrediction(validation_ids_instances, **params)
 
-        super(TunerHyperBandOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerHyperBandOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)

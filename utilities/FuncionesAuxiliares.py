@@ -956,7 +956,7 @@ def create_instances_PIE_OrderPrediction(input_path_frames, output_path_cuts, ou
 
                 if optical_flow:
 
-                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'OpticalFlow', ped.stem))
+                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'OpticalFlow'))
 
                     Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'OpticalFlow', ped.stem))
 
@@ -964,7 +964,7 @@ def create_instances_PIE_OrderPrediction(input_path_frames, output_path_cuts, ou
 
                 else:
 
-                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'Distributed', ped.stem))
+                    Path_Instances = Path(join(output_path_instances, 'OrderPrediction', 'Distributed'))
 
                     Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'Distributed', ped.stem))
 
@@ -977,7 +977,6 @@ def create_instances_PIE_OrderPrediction(input_path_frames, output_path_cuts, ou
                 create_permutations_OrderPrediction(Path_Instances, Path_Cuts, ped, output_frames)
 
                 logging.info("Permutaciones(instancias) para el peatón %s creadas con exitos" % ped.stem)
-
 
 
 def create_permutations_OrderPrediction(Path_Instances, Path_Cuts, ped, output_frames):

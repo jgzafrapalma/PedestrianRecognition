@@ -20,91 +20,131 @@ class DataGeneratorOrderPrediction(Sequence):
         #Lista con el nombre de los peatones que forman parte del conjunto de entrenamiento
         self.list_IDs = list_IDs
 
+        #Se crea un diccionario utilizado para ver las clases que quedan por ser seleccionadas de cada peatón
+        self.restant_classes_pedestrians = dict([(ped, [0, 1, 2, 3, 4, 5]) for ped in self.list_IDs])
+
+        self.class_epoch = 6
+
+        #Lista que contiene las intancias con las que se va a entrenar cada epoca
         self.list_IDs_epoch = list()
 
-        for _ in range(6):
+        #Obtención de una lista con las instancias que se van a utilizar para entrenar la primera epoca
+        while len(self.list_IDs_epoch) != (len(self.list_IDs) * self.class_epoch):
 
             aux = self.list_IDs.copy()
 
-            self.list_IDs_epoch.extend(aux)
+            sf(aux)
 
+            for ped in aux:
 
-        #Lista con los peatones disponibles a la hora de ir rellenando los batches
-        #self.restant_pedestrians = self.list_IDs.copy()
+                if self.restant_classes_pedestrians[ped] != []:
 
-        #Se crea un diccionario utilizado para ver las clases que quedan por ser seleccionadas de cada peatón
-        self.restant_classes_pedestrians = dict([(ped, [0, 1, 2, 3, 4, 5]) for ped in self.list_IDs])
+                    ped_noext = splitext(ped)[0]
+
+                    # Del peatón seleccionado se selecciona de manera aleatoria una de sus clases
+                    pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
+
+                    class1 = self.restant_classes_pedestrians[ped][pos_class]
+
+                    self.restant_classes_pedestrians[ped].remove(class1)
+
+                    pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
+
+                    class2 = self.restant_classes_pedestrians[ped][pos_class]
+
+                    self.restant_classes_pedestrians[ped].remove(class2)
+
+                    self.list_IDs_epoch.append((ped_noext + '_' + str(class1) + 'p.pkl'))
+                    self.list_IDs_epoch.append((ped_noext + '_' + str(class2) + 'p.pkl'))
 
         self.curriculum_learning_level = 1
 
         #Número de epocas necesarías para pasar el nivel 1 de dificultad de puzzle al nivel 2
-        self.change_level1_to_level2 = n_epochs * 25
+        self.change_level1_to_level2 = int(n_epochs * 0.25)
         # Número de epocas necesarías para pasar el nivel 2 de dificultad de puzzle al nivel 3
-        self.change_level2_to_level3 = n_epochs * 35
+        self.change_level2_to_level3 = int(n_epochs * 0.35)
 
-        self.n_epochs = -1 #Llevar la cuenta del número de epocas que se han ejecutado
-
-        self.on_epoch_end()
+        self.n_epochs = 0 #Llevar la cuenta del número de epocas que se han ejecutado
 
     def on_epoch_end(self):
 
         self.n_epochs += 1 # Número de epocas que se llevan ejecutadas
 
-        #Se comprueba si han pasado el número de epocas necesarias para pasar del nivel 1 al nivel 2, para la siguiente época
-        if self.n_epochs == self.change_level1_to_level2:
-            self.restant_classes_pedestrians = dict([(ped, [6, 7, 8, 9]) for ped in self.list_IDs])
-            self.curriculum_learning_level = 2
-        elif self.n_epochs == self.change_level2_to_level3:
+        #Cuando se esta en el último nivel de dificultad no hay que comprobar nada
+        if self.curriculum_learning_level == 1:
+
+            #Se comprueba si han pasado el número de epocas necesarias para pasar del nivel 1 al nivel 2, para la siguiente época
+            if self.n_epochs == self.change_level1_to_level2:
+                self.restant_classes_pedestrians = dict([(ped, [6, 7, 8, 9]) for ped in self.list_IDs])
+                self.curriculum_learning_level = 2
+                self.class_epoch = 4
+            else:
+                self.restant_classes_pedestrians = dict([(ped, [0, 1, 2, 3, 4, 5]) for ped in self.list_IDs])
+
+        elif self.curriculum_learning_level == 2:
+
+            if self.n_epochs == self.change_level2_to_level3:
+                self.restant_classes_pedestrians = dict([(ped, [10, 11]) for ped in self.list_IDs])
+                self.curriculum_learning_level = 3
+                self.class_epoch = 2
+            else:
+                self.restant_classes_pedestrians = dict([(ped, [6, 7, 8, 9]) for ped in self.list_IDs])
+
+        else:
             self.restant_classes_pedestrians = dict([(ped, [10, 11]) for ped in self.list_IDs])
-            self.curriculum_learning_level = 3
 
-        #Al terminar una época la lista de restances debería de volver a ser reasignada con todos los peatones de entrenamiento
 
-        #self.restant_pedestrians = self.list_IDs.copy()
+        #Al terminar una época la lista de restances debería de volver a ser reasignada
 
         self.list_IDs_epoch = list()
 
-        for _ in range(6):
+        #Obtención de una lista con las instancias que se van a utilizar para entrenar la primera epoca
+        while len(self.list_IDs_epoch) != (len(self.list_IDs) * self.class_epoch):
 
             aux = self.list_IDs.copy()
 
-            self.list_IDs_epoch.extend(aux)
+            sf(aux)
+
+            for ped in aux:
+
+                if self.restant_classes_pedestrians[ped] != []:
+
+                    ped_noext = splitext(ped)[0]
+
+                    # Del peatón seleccionado se selecciona de manera aleatoria una de sus clases
+                    pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
+
+                    class1 = self.restant_classes_pedestrians[ped][pos_class]
+
+                    self.restant_classes_pedestrians[ped].remove(class1)
+
+                    pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
+
+                    class2 = self.restant_classes_pedestrians[ped][pos_class]
+
+                    self.restant_classes_pedestrians[ped].remove(class2)
+
+                    self.list_IDs_epoch.append((ped_noext + '_' + str(class1) + 'p.pkl'))
+                    self.list_IDs_epoch.append((ped_noext + '_' + str(class2) + 'p.pkl'))
 
 
     def __data_generation(self, list_IDs_temp):
 
         """Se reserva espacio para almacenar las instancias del batch actual y las etiquetas de esas instancias."""
-        X1 = np.empty((len(list_IDs_temp)*2, *self.dim, self.n_channels))
-        X2 = np.empty((len(list_IDs_temp)*2, *self.dim, self.n_channels))
-        X3 = np.empty((len(list_IDs_temp)*2, *self.dim, self.n_channels))
-        X4 = np.empty((len(list_IDs_temp)*2, *self.dim, self.n_channels))
-        y = np.empty(len(list_IDs_temp)*2, dtype=int)
+        X1 = np.empty((len(list_IDs_temp), *self.dim, self.n_channels))
+        X2 = np.empty((len(list_IDs_temp), *self.dim, self.n_channels))
+        X3 = np.empty((len(list_IDs_temp), *self.dim, self.n_channels))
+        X4 = np.empty((len(list_IDs_temp), *self.dim, self.n_channels))
+        y = np.empty(len(list_IDs_temp), dtype=int)
 
+        for index_batch, ped in enumerate(list_IDs_temp):
 
-        #Indice en del batch en el que se van a escribir las instancias
-        index_batch = 0
+            PathInstance = Path(join(self.path_instances, ped))
 
-        for ped in list_IDs_temp:
+            with PathInstance.open('rb') as file_descriptor:
+                instance = pickle.load(file_descriptor)
 
-            ped_noext = splitext(ped)[0]
-
-            print(self.restant_classes_pedestrians[ped])
-
-            #Del peatón seleccionado se selecciona de manera aleatoria una de sus clases
-            pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
-
-            clas = self.restant_classes_pedestrians[ped][pos_class]
-
-            self.restant_classes_pedestrians[ped].remove(clas)
-
-            PathInstance = Path(join(self.path_instances, ped_noext))
-
-            #Se carga del disco duro la instancia correspondiente al peatón 'ped' y la clase 'clas' y se almacena en el batch
-
-            with (PathInstance / (ped_noext + '_' + str(clas) + 'p.pkl')).open('rb') as input:
-                instance1 = pickle.load(input)
-
-            frames = instance1['frames']
+            frames = instance['frames']
 
             #Normalización de los frames
             if self.normalized:
@@ -115,34 +155,7 @@ class DataGeneratorOrderPrediction(Sequence):
             X3[index_batch, ] = frames[2]
             X4[index_batch, ] = frames[3]
 
-            y[index_batch, ] = instance1['class']
-
-            index_batch += 1
-
-            #Del peatón seleccionado se selecciona de manera aleatoria una de sus clases
-            pos_class = np.random.randint(len(self.restant_classes_pedestrians[ped]))
-
-            clas = self.restant_classes_pedestrians[ped][pos_class]
-
-            self.restant_classes_pedestrians[ped].remove(clas)
-
-            with (PathInstance / (ped_noext + '_' + str(clas) + 'p.pkl')).open('rb') as input:
-                instance2 = pickle.load(input)
-
-            frames = instance2['frames']
-
-            #Normalización de los frames
-            if self.normalized:
-                frames = frames * 1 / 255
-
-            X1[index_batch, ] = frames[0]
-            X2[index_batch, ] = frames[1]
-            X3[index_batch, ] = frames[2]
-            X4[index_batch, ] = frames[3]
-
-            y[index_batch, ] = instance2['class']
-
-            index_batch += 1
+            y[index_batch, ] = instance['class']
 
         #Para que los elementos del batch sean introducidos a la red de forma desordenada (que no esten correlativos los
         #elementos pertenecientes a la misma instancia)
@@ -161,7 +174,7 @@ class DataGeneratorOrderPrediction(Sequence):
         la secuencia de frames ordenados y la secuencia de frames desordenados. Por lo tanto, el número de instancias
         seleccionadas será igual a la mitad del tamaño del batch (batch_size/2)"""
 
-        list_IDs_temp = self.list_IDs_epoch[int(index * (self.batch_size / 2)):int((index + 1) * (self.batch_size / 2))]
+        list_IDs_temp = self.list_IDs_epoch[int(index * self.batch_size):int((index + 1) * self.batch_size)]
 
         #LLamo a la función para generar los datos con el identificador de las instancias que forman el batch
         X, y = self.__data_generation(list_IDs_temp)
