@@ -76,6 +76,7 @@ class DataGeneratorShuffle(Sequence):
         return X, to_categorical(y, self.n_clases)
 
     def __getitem__(self, index):
+
         """Lista con los indices de las instancias que van a estar en el batch index. Por cada instancia, se va a tener
         la secuencia de frames ordenados y la secuencia de frames desordenados. Por lo tanto, el número de instancias
         seleccionadas será igual a la mitad del tamaño del batch (batch_size/2)"""

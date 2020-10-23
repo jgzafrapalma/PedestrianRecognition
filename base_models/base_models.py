@@ -37,7 +37,7 @@ class CaffeNet(Model):
         # 1th Convolutional Layers
         x = self.Conv2D_1(inputs)
         x = self.MaxPooling2D_1(x)
-        x = self.BatchNormalization(x, training)
+        x = self.BatchNormalization_1(x, training)
 
         # 2th Convolutional Layers
         x = self.Conv2D_2(x)

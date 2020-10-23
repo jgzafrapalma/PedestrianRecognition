@@ -10,7 +10,8 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 import yaml
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
-rootdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
 
 with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
@@ -75,7 +76,6 @@ project_name = config['Hyperparameters_Optimization_OrderPrediction']['tuner']['
 
 dim = config['Hyperparameters_Optimization_OrderPrediction']['dim']
 epochs = config['Hyperparameters_Optimization_OrderPrediction']['epochs']
-n_frames = config['Hyperparameters_Optimization_OrderPrediction']['n_frames']
 n_classes = config['Hyperparameters_Optimization_OrderPrediction']['n_classes']
 n_channels = config['Hyperparameters_Optimization_OrderPrediction']['n_channels']
 
@@ -97,7 +97,7 @@ if type_model == 'SIAMESE':
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
 
-    tuner = Tuners_OrderPrediction.TunerRandomShuffle(
+    tuner = Tuners_OrderPrediction.TunerRandomOrderPrediction(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],
@@ -110,7 +110,7 @@ if tuner_type == 'Random_Search':
 
 elif tuner_type == 'HyperBand':
 
-    tuner = Tuners_OrderPrediction.TunerHyperBandShuffle(
+    tuner = Tuners_OrderPrediction.TunerHyperBandOrderPrediction(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],
@@ -123,7 +123,7 @@ elif tuner_type == 'HyperBand':
 
 else:
 
-    tuner = Tuners_OrderPrediction.TunerBayesianShuffle(
+    tuner = Tuners_OrderPrediction.TunerBayesianOrderPrediction(
         hypermodel,
         objective=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['objetive'],
         seed=config['Hyperparameters_Optimization_OrderPrediction']['tuner']['seed'],

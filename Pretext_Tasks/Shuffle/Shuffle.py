@@ -9,7 +9,11 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('../../config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -38,9 +42,6 @@ session = InteractiveSession(config=configProto)
 
 
 #Se añade el directorio utilities a sys.path para que pueda ser usaado por el comando import
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 
@@ -67,7 +68,7 @@ dataset = config['Shuffle']['dataset']
 type_model = config['Shuffle']['type_model']
 data_sampling = config['Shuffle']['data_sampling']
 tuner_type = config['Shuffle']['tuner_type']
-id_hyperparameters = config['Shuffle']['id_hyperparameters']
+project_name = config['Shuffle']['project_name']
 
 
 path_instances = Path(join(config['Shuffle']['path_instances'], dataset, 'Shuffle', data_sampling))
@@ -81,10 +82,10 @@ n_channels = config['Shuffle']['n_channels']
 
 #Se carga la ruta en la que se almacena los resultados de tensorboard
 #tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, date_time)))
-tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters)))
+tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name)))
 
 #Se carga la ruta en la que se encuentra el fichero con los hiperparámetros
-path_hyperparameters = Path(join(config['Shuffle']['path_hyperparameters'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters + '.json'))
+path_hyperparameters = Path(join(config['Shuffle']['path_hyperparameters'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name + '.json'))
 
 with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
@@ -126,7 +127,6 @@ if type_model == 'CONV3D':
 
 elif type_model == 'C3D':
 
-    dense_activation = hyperparameters['dense_activation']
     dropout_rate_1 = hyperparameters['dropout_rate_1']
     dropout_rate_2 = hyperparameters['dropout_rate_2']
     learning_rate = hyperparameters['learning_rate']
@@ -134,7 +134,7 @@ elif type_model == 'C3D':
     units_dense_layers_1 = hyperparameters['units_dense_layers_1']
     units_dense_layers_2 = hyperparameters['units_dense_layers_2']
 
-    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layers_1, units_dense_layers_2, learning_rate)
+    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
 
 
 
@@ -154,7 +154,7 @@ history = model.fit(x=train_generator, validation_data=validation_generator, epo
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, id_hyperparameters))
+path_output_model = Path(join(config['Shuffle']['path_output_model'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)

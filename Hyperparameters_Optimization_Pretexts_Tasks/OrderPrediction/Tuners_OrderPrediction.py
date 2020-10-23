@@ -31,7 +31,7 @@ class TunerBayesianOrderPrediction(kerastuner.tuners.BayesianOptimization):
 
         validation_generator = DataGenerators_OrderPrediction.DataGeneratorOrderPrediction(validation_ids_instances, **params)
 
-        super(TunerBayesianOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerBayesianOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)
 
 
 class TunerRandomOrderPrediction(kerastuner.tuners.RandomSearch):
