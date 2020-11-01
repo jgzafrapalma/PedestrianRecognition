@@ -31,7 +31,7 @@ class TunerBayesianCrossingDetectionShuffle(kerastuner.tuners.BayesianOptimizati
 
         validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
-        super(TunerBayesianCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerBayesianCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)
 
 class TunerHyperBandCrossingDetectionShuffle(kerastuner.tuners.Hyperband):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels,
@@ -52,7 +52,7 @@ class TunerHyperBandCrossingDetectionShuffle(kerastuner.tuners.Hyperband):
 
         validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
-        super(TunerHyperBandCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerHyperBandCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)
 
 class TunerRandomCrossingDetectionShuffle(kerastuner.tuners.RandomSearch):
     def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels,
@@ -73,4 +73,4 @@ class TunerRandomCrossingDetectionShuffle(kerastuner.tuners.RandomSearch):
 
         validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
-        super(TunerRandomCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks)
+        super(TunerRandomCrossingDetectionShuffle, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)

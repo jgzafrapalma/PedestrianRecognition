@@ -13,7 +13,7 @@ from tensorflow.keras.optimizers import Adam
 
 
 #Modelo para la tarea de pretexto de reconocer frames desordenados
-def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
+def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layer, learning_rate):
 
     #Se define la entrada del modelo
     inputs = Input(the_input_shape)
@@ -28,7 +28,7 @@ def model_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_
 
     features = Flatten(name='Flatten_Shuffle')(x)
 
-    x = Dense(units=units_dense_layer, activation=dense_activation, name='FC_1_Shuffle')(features)
+    x = Dense(units=units_dense_layer, activation='relu', name='FC_1_Shuffle')(features)
 
     x = Dropout(dropout_rate_2, name='Dropout_2_Shuffle')(x)
 

@@ -81,7 +81,9 @@ OrderPrediction:
   seed: 1
   random: False
 HP_Optimization_CrossingDetection_Shuffle:
+  n_frames: 16
   dim: !!python/tuple [ 128, 128 ]
+  n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'C3D'
   data_sampling: 'Distributed' # OpticalFlow
@@ -93,10 +95,32 @@ HP_Optimization_CrossingDetection_Shuffle:
   tuner_type_pretext_task: 'Bayesian_Optimization'
   project_name_pretext_task: '11102020-174000'
   epochs: 100
-  n_frames: 16
   seed: 1
-  n_classes: 2
+  random: False
+  tuner:
+    type: 'Bayesian_Optimization'
+    objetive: val_loss
+    seed: 1
+    executions_per_trial: 2           #Random_Search, HyperBand
+    max_trials: 100                   #Random_Search, Bayesian_Optimization
+    max_epochs: 100                   #HyperBand
+    num_initial_points: 5             #Bayesian_Optimization
+    project_name: '11102020-174000'
+HP_Optimization_CrossingDetection_OrderPrediction:
+  dim: !!python/tuple [ 128, 128 ]
   n_channels: 3
+  dataset: 'PIE_dataset'
+  type_model: 'SIAMESE'
+  data_sampling: 'Distributed' # OpticalFlow
+  path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
+  path_dir_results: '/pub/experiments/jzafra/tuner_keras_results/' #'/media/jorge/DATOS/TFG/tuner_keras_results'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/' #'/media/jorge/DATOS/TFG/hyperparameters'
+  path_weights: '/pub/experiments/jzafra/models/'
+  tuner_type_pretext_task: 'Bayesian_Optimization'
+  project_name_pretext_task: '11102020-174000'
+  epochs: 100
+  seed: 1
   random: False
   tuner:
     type: 'Bayesian_Optimization'
@@ -108,6 +132,9 @@ HP_Optimization_CrossingDetection_Shuffle:
     num_initial_points: 5             #Bayesian_Optimization
     project_name: '11102020-174000'
 Transfer_Learning_CrossingDetection_Shuffle:
+  n_frames: 16
+  dim: !!python/tuple [ 128, 128 ]
+  n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'C3D'
   data_sampling: 'Distributed' # OpticalFlow
@@ -122,12 +149,27 @@ Transfer_Learning_CrossingDetection_Shuffle:
   epochs: 100
   seed: 1
   random: False
-  dim: !!python/tuple [128, 128]
-  n_frames: 16
-  n_classes: 2
+Transfer_Learning_CrossingDetection_OrderPrediction:
+  dim: !!python/tuple [ 128, 128 ]
   n_channels: 3
+  dataset: 'PIE_dataset'
+  type_model: 'SIAMESE'
+  data_sampling: 'Distributed' # OpticalFlow
+  project_name: '11102020-174000'
+  tuner_type: 'Bayesian_Optimization'
+  path_weights: '/pub/experiments/jzafra/models/'
+  path_instances: '/pub/experiments/jzafra/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
+  tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
+  path_output_model: '/pub/experiments/jzafra/models/'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
+  epochs: 100
+  seed: 1
+  random: False
 Performance_CrossingDetection_Shuffle:
+  n_frames: 16
   dim: !!python/tuple [128, 128]
+  n_channels: 3
   dataset: 'PIE_dataset'
   data_sampling: 'Distributed'
   path_instances: '/pub/experiments/jzafra/instances/'
@@ -139,9 +181,20 @@ Performance_CrossingDetection_Shuffle:
   tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
-  n_frames: 16
-  n_clases: 2
+Performance_CrossingDetection_OrderPrediction:
+  dim: !!python/tuple [128, 128]
   n_channels: 3
+  dataset: 'PIE_dataset'
+  data_sampling: 'Distributed'
+  path_instances: '/pub/experiments/jzafra/instances/'
+  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
+  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
+  path_weights: '/pub/experiments/jzafra/models/'
+  type_model: 'SIAMESE'
+  project_name: '11102020-174000'
+  tuner_type: 'Bayesian_Optimization'
+  seed: 1
+  random: False
 Performance_PretexTasks:
 
 #Hyperparameters_Optimization_Pretext_Tasks:

@@ -56,9 +56,7 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_CL(HyperModel):
             units=hp.Int(
                 "unit", min_value=32, max_value=512, step=32, default=64
             ),
-            activation=hp.Choice(
-                "dense_activation", values=["relu", "tanh", "sigmoid"], default="relu"
-            ),
+            activation='relu',
             name='FC_1_FINAL'
         )(x)
 
@@ -124,7 +122,7 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_FT(HyperModel):
 
         x = Dense(
             units=self.hyperparameters['unit'],
-            activation=self.hyperparameters['dense_activation'],
+            activation='relu',
             name='FC_1_FINAL'
         )(x)
 
@@ -250,7 +248,7 @@ class HyperModel_Shuffle_C3D_CrossingDetection_FT(HyperModel):
         # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
         basemodel = C3D(self.the_input_shape)
 
-        # Se congela el modelo base para que sus pesos no sean entrenables
+        # Se descongela el modelo base
         basemodel.trainable = True
 
         # El modelo base se pone en modo inferencia

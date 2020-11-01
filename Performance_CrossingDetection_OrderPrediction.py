@@ -16,9 +16,9 @@ with open('config.yaml', 'r') as file_descriptor:
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
 
-if not config['Performance_CrossingDetection_Shuffle']['random']:
+if not config['Performance_CrossingDetection_OrderPrediction']['random']:
 
-    SEED = config['Performance_CrossingDetection_Shuffle']['seed']
+    SEED = config['Performance_CrossingDetection_OrderPrediction']['seed']
     from numpy.random import seed
     seed(SEED)
     import tensorflow as tf
@@ -38,12 +38,10 @@ session = InteractiveSession(config=configProto)
 
 rootdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(rootdir, 'utilities'))
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'Shuffle'))
+sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'OrderPrediction'))
 
 
-
-
-import DataGenerators_CrossingDetection_Shuffle, models_CrossingDetection_Shuffle
+import DataGenerators_CrossingDetection_OrderPrediction, models_CrossingDetection_OrderPrediction
 
 from FuncionesAuxiliares import read_instance_file_txt
 from os.path import join
@@ -57,27 +55,22 @@ from tensorflow.keras.models import load_model
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, classification_report
 
 
-n_frames = config['Performance_CrossingDetection_Shuffle']['n_frames']
-dim = config['Performance_CrossingDetection_Shuffle']['dim']
-n_channels = config['Performance_CrossingDetection_Shuffle']['n_channels']
 #Cargar las variables necesarias del fichero de configuración
-
-dataset = config['Performance_CrossingDetection_Shuffle']['dataset']
-type_model = config['Performance_CrossingDetection_Shuffle']['type_model']
-data_sampling = config['Performance_CrossingDetection_Shuffle']['data_sampling']
-project_name = config['Performance_CrossingDetection_Shuffle']['project_name']
-tuner_type = config['Performance_CrossingDetection_Shuffle']['tuner_type']
-
+dim = config['Performance_CrossingDetection_OrderPrediction']['dim']
+dataset = config['Performance_CrossingDetection_OrderPrediction']['dataset']
+type_model = config['Performance_CrossingDetection_OrderPrediction']['type_model']
+data_sampling = config['Performance_CrossingDetection_OrderPrediction']['data_sampling']
+project_name = config['Performance_CrossingDetection_OrderPrediction']['project_name']
+tuner_type = config['Performance_CrossingDetection_OrderPrediction']['tuner_type']
+n_channels = config['Performance_CrossingDetection_OrderPrediction']['n_channels']
 
 #Ruta donde se encuentran las instancias que van a ser utilizadas para obtener las predicciones del modelo final
-#path_instances = Path(join(config['Performance_FinalModels']['path_instances'], dataset, type_model, pretext_task))
-path_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_instances'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
-path_ids_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_id_instances'], dataset))
+path_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_ids_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
 
-path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
-
-path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
 
 with path_hyperparameters_CL.open('r') as file_descriptor:
@@ -95,40 +88,25 @@ params = {'dim': dim,
           'batch_size': hyperparameters_cl['batch_size'],
           'n_clases': 2,
           'n_channels': n_channels,
-          'n_frames': n_frames,
           'normalized': hyperparameters_cl['normalized'],
           'shuffle': hyperparameters_cl['shuffle']}
 
 
 validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
 
-validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
+validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
 
 
-if type_model == 'CONV3D':
+if type_model == 'SIAMESE':
 
+    units_dense_layer_1 = hyperparameters_cl['units_dense_layer_1']
+    units_dense_layer_2 = hyperparameters_cl['units_dense_layer_2']
 
-    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-    dense_activation = hyperparameters_cl['dense_activation']
-    unit = hyperparameters_cl['unit']
-
-    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate_fine_tuning)
-
-
-elif type_model == 'C3D':
-
-    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-    units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
-    units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
-    learning_rate = hyperparameters_cl['learning_rate']
-
-    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
+    model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, learning_rate_fine_tuning)
 
 
 #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+path_weights = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
 #Se carga el modelo final
 model.load_weights(str(path_weights), by_name=True)

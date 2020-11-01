@@ -9,7 +9,12 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('../../../config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+parentparentdir = os.path.dirname(parentdir)
+rootdir = os.path.dirname(parentparentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
@@ -35,11 +40,6 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'Shuffle'))
 
@@ -63,15 +63,15 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau
 from kerastuner.tuners import BayesianOptimization, Hyperband, RandomSearch
 
 
+n_frames = config['HP_Optimization_CrossingDetection_Shuffle']['n_frames']
+dim = config['HP_Optimization_CrossingDetection_Shuffle']['dim']
+n_channels = config['HP_Optimization_CrossingDetection_Shuffle']['n_channels']
 
 dataset = config['HP_Optimization_CrossingDetection_Shuffle']['dataset']
 type_model = config['HP_Optimization_CrossingDetection_Shuffle']['type_model']
 data_sampling = config['HP_Optimization_CrossingDetection_Shuffle']['data_sampling']
 
-n_frames = config['HP_Optimization_CrossingDetection_Shuffle']['n_frames']
-
 path_instances = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_instances'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
-
 path_id_instances = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_id_instances'], dataset))
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
@@ -82,11 +82,7 @@ project_name = config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['pro
 tuner_type_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['tuner_type_pretext_task']
 project_name_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['project_name_pretext_task']
 
-dim = config['HP_Optimization_CrossingDetection_Shuffle']['dim']
 epochs = config['HP_Optimization_CrossingDetection_Shuffle']['epochs']
-n_classes = config['HP_Optimization_CrossingDetection_Shuffle']['n_classes']
-n_channels = config['HP_Optimization_CrossingDetection_Shuffle']['n_channels']
-
 
 # AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO
 
@@ -112,11 +108,12 @@ path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_we
 
 if type_model == 'CONV3D':
 
-    hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes, path_weights=path_weights)
+    hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)
 
 elif type_model == 'C3D':
 
-    hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes, path_weights=path_weights)
+    hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)
+
 
 #SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
 if tuner_type == 'Random_Search':
@@ -162,13 +159,11 @@ earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verb
 
 reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
 
-# !!!!!!PONER reducelronplateau COMO CALLBACKS Y AJUSTAR SUS HIPERPARÁMETROS!!!!!!!!!!!!!!
-
 tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, 2, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 
@@ -182,8 +177,13 @@ best_hp = tuner.get_best_hyperparameters()[0].values
 with (path_output_results_CL / project_name / 'tuner.pkl').open('wb') as file_descriptor:
     pickle.dump(tuner, file_descriptor)
 
-with (path_output_results_CL / project_name / 'search_time.txt').open('w') as filehandle:
-    filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+time_search_file = (path_output_results_CL / project_name / 'search_time.txt')
+
+#Si el fichero con el tiempo de busqueda no existe, se crea
+if not time_search_file.exists():
+
+    with time_search_file.open('w') as filehandle:
+        filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
 
 # Se guardan los hiperparámetros
 with (path_output_hyperparameters_CL / (project_name + '.json')).open('w') as filehandle:
@@ -196,8 +196,7 @@ with (path_output_hyperparameters_CL / (project_name + '.json')).open('w') as fi
 if type_model == 'CONV3D':
 
     best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
-                                                                     dropout_rate_2=best_hp['dropout_rate_2'], dense_activation=best_hp['dense_activation'],
-                                                                     units_dense_layer=best_hp['unit'], learning_rate=best_hp['learning_rate'])
+                                                                     dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layer=best_hp['unit'], learning_rate=best_hp['learning_rate'])
 
 elif type_model == 'C3D':
 
@@ -212,7 +211,7 @@ params = {
     'dim': dim,
     'path_instances': path_instances,
     'batch_size': best_hp['batch_size'],
-    'n_clases': n_classes,
+    'n_clases': 2,
     'n_channels': n_channels,
     'n_frames': n_frames,
     'normalized': best_hp['normalized'],
@@ -233,6 +232,7 @@ keras_callbacks = [earlystopping, reducelronplateau]
 
 best_model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
+#Se guardan los pesos del modelo que va a ser utilizado en el aguste fino
 best_model.save_weights(str(path_output_results_CL / project_name / 'weights.h5'))
 
 path_weights = path_output_results_CL / project_name / 'weights.h5'
@@ -242,11 +242,11 @@ path_weights = path_output_results_CL / project_name / 'weights.h5'
 
 if type_model == 'CONV3D':
 
-    hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes, path_weights=path_weights, hyperparameters=best_hp)
+    hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)
 
 elif type_model == 'C3D':
 
-    hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes, path_weights=path_weights, hyperparameters=best_hp)
+    hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)
 
 if tuner_type == 'Random_Search':
 
@@ -310,8 +310,14 @@ best_hp = tuner.get_best_hyperparameters()[0].values
 with (path_output_results_FT / project_name / 'tuner.pkl').open('wb') as file_descriptor:
     pickle.dump(tuner, file_descriptor)
 
-with (path_output_results_FT / project_name / 'search_time.txt').open('w') as filehandle:
-    filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+time_search_file = (path_output_results_FT / project_name / 'search_time.txt')
+
+#Si el fichero con el tiempo de busqueda no existe, se crea
+if not time_search_file.exists():
+
+    with time_search_file.open('w') as filehandle:
+        filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
+
 
 # Se guardan los hiperparámetros
 with (path_output_hyperparameters_FT / (project_name + '.json')).open('w') as filehandle:

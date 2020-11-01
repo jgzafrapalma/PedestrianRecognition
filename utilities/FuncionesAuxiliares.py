@@ -776,7 +776,7 @@ def extract_pedestriansFrames_datasets_PIE(input_path_data, input_path_dataset, 
 
 
 #Función que permite crear instancias que van a ser utilizadas para la evaluación del modelo final
-def create_instances_PIE(input_path_data, input_path_frames, output_path_cuts, output_path_instances, n_frames, optical_flow=False):
+def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, output_path_cuts, output_path_instances, n_frames, optical_flow=False):
 
     logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
