@@ -9,7 +9,11 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('../../config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+rootdir = os.path.dirname(parentdir)
+
+with open(os.path.join(rootdir,'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
@@ -35,9 +39,6 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 from os.path import join

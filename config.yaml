@@ -2,7 +2,7 @@ Hyperparameters_Optimization_Shuffle:
   dim: !!python/tuple [ 128, 128 ]
   dataset: 'PIE_dataset'
   type_model: 'C3D'
-  data_sampling: 'Distributed' # OpticalFlow
+  data_sampling: 'OpticalFlow' # Distributed
   path_instances: '/pub/experiments/jzafra/instances/'              # '/media/jorge/DATOS/TFG/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       # '/media/jorge/DATOS/TFG/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'   # '/media/jorge/DATOS/TFG/tuner_keras_results'
@@ -26,7 +26,7 @@ Hyperparameters_Optimization_OrderPrediction:
   dim: !!python/tuple [ 128, 128 ]
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'Distributed' # OpticalFlow
+  data_sampling: 'OpticalFlow' # Distributed OpticalFlow
   path_instances: '/pub/experiments/jzafra/instances/'              #'/media/jorge/DATOS/TFG/instances/'             
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/media/jorge/DATOS/TFG/ids_instances/'        
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'   #'/media/jorge/DATOS/TFG/tuner_keras_results'    

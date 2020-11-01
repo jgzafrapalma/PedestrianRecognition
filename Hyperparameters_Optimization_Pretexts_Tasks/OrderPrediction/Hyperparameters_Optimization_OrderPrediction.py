@@ -135,7 +135,7 @@ else:
     )
 
 #SE LLEVA A CABO LA BUSQUEDA DE LOS MEJORES HIPERPARÁMETROS
-earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=1, mode='min', restore_best_weights=True)
 
 reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
 
