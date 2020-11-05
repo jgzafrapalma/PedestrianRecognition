@@ -9,7 +9,10 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('config.yaml', 'r') as file_descriptor:
+currentdir = os.path.dirname(os.path.realpath(__file__))
+rootdir = os.path.dirname(currentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -36,11 +39,8 @@ session = InteractiveSession(config=configProto)
 
 ########################################################################################################################
 
-rootdir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(rootdir, 'utilities'))
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'Shuffle'))
-
-
+sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
 
 
 import DataGenerators_CrossingDetection_Shuffle, models_CrossingDetection_Shuffle
@@ -75,12 +75,11 @@ path_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path
 path_ids_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_id_instances'], dataset))
 
 
-if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
+if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
-    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
-
+    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
     with path_hyperparameters_CL.open('r') as file_descriptor:
         hyperparameters_cl = json.load(file_descriptor)
@@ -88,9 +87,7 @@ if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
     with path_hyperparameters_FT.open('r') as file_descriptor:
         hyperparameters_ft = json.load(file_descriptor)
 
-
     learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
-
 
     params = {'dim': dim,
             'path_instances': path_instances,
@@ -101,21 +98,17 @@ if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
             'normalized': hyperparameters_cl['normalized'],
             'shuffle': hyperparameters_cl['shuffle']}
 
-
     validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
 
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
-
     if type_model == 'CONV3D':
-
 
         dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
         dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
         unit = hyperparameters_cl['unit']
 
         model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate_fine_tuning)
-
 
     elif type_model == 'C3D':
 
@@ -129,7 +122,7 @@ if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
 
 
     #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
     #Se carga el modelo final
     model.load_weights(str(path_weights), by_name=True)
@@ -171,8 +164,7 @@ if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
 
 else:
 
-    path_hyperparameters = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'No_Transfer_Learning', project_name + '.json'))
-
+    path_hyperparameters = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name + '.json'))
 
     with path_hyperparameters.open('r') as file_descriptor:
         hyperparameters = json.load(file_descriptor)
@@ -194,7 +186,6 @@ else:
 
     if type_model == 'CONV3D':
 
-
         dropout_rate_1 = hyperparameters['dropout_rate_1']
         dropout_rate_2 = hyperparameters['dropout_rate_2']
         unit = hyperparameters['unit']
@@ -203,7 +194,7 @@ else:
         model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate)
 
     #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join('/pub/experiments/jzafra/models/', dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, '05112020-184600', 'weights.h5'))
+    path_weights = Path(join('/pub/experiments/jzafra/models/', dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
     #Se carga el modelo final
     model.load_weights(str(path_weights), by_name=True)

@@ -11,8 +11,7 @@ import yaml
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
+rootdir = os.path.dirname(parentdir)
 
 with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
@@ -41,7 +40,7 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'Shuffle'))
+sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
 
 import pickle
 #import logging
@@ -84,17 +83,17 @@ project_name_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle'][
 
 epochs = config['HP_Optimization_CrossingDetection_Shuffle']['epochs']
 
-if config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'] != 'None':
+if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     # AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO
 
-    path_output_results_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
+    path_output_results_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
 
-    path_output_results_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
+    path_output_results_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
 
-    path_output_hyperparameters_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
+    path_output_hyperparameters_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
 
-    path_output_hyperparameters_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
+    path_output_hyperparameters_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
 
     path_output_results_CL.mkdir(parents=True, exist_ok=True)
 
@@ -107,7 +106,6 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'] != 'None'
 
     #Ruta en la que se encuentran los pesos que se van a cargar en la capa convolucional del modelo
     path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'weights.h5')
-
 
     if type_model == 'CONV3D':
 
@@ -204,7 +202,7 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'] != 'None'
     elif type_model == 'C3D':
 
         best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
-                                                                        dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layers_1=best_hp['units_dense_layers_1'], 
+                                                                        dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layers_1=best_hp['units_dense_layers_1'],
                                                                         units_dense_layers_2=best_hp['units_dense_layers_2'], learning_rate=best_hp['learning_rate'])
 
     # Falta cargar los pesos obtenidos en el entrenamiento de la tarea de pretexto
@@ -223,7 +221,6 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'] != 'None'
 
     train_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(train_ids_instances, **params)
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
-
 
     earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
@@ -328,20 +325,18 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'] != 'None'
 
 else:
 
-    path_output_results = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'No_Transfer_Learning'))
+    path_output_results = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
 
-    path_output_hyperparameters = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'No_Transfer_Learning'))
+    path_output_hyperparameters = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
 
     path_output_results.mkdir(parents=True, exist_ok=True)
 
     path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 
     if type_model == 'CONV3D':
-
         hypermodel = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2)
 
-
-    #SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
+    # SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
     if tuner_type == 'Random_Search':
 
         tuner = Tuners_CrossingDetection_Shuffle.TunerRandomCrossingDetectionShuffle(
@@ -405,9 +400,8 @@ else:
 
     time_search_file = (path_output_results / project_name / 'search_time.txt')
 
-    #Si el fichero con el tiempo de busqueda no existe, se crea
+    # Si el fichero con el tiempo de busqueda no existe, se crea
     if not time_search_file.exists():
-
         with time_search_file.open('w') as filehandle:
             filehandle.write("Tiempo de busqueda: %f\n" % elapsed_time)
 

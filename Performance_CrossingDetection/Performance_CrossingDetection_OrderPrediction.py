@@ -9,7 +9,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.45
 #Se carga el fichero de configuración
 import yaml
 
-with open('config.yaml', 'r') as file_descriptor:
+with open('../config.yaml', 'r') as file_descriptor:
     config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
 
 
@@ -37,8 +37,8 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 rootdir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(rootdir, 'utilities'))
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'OrderPrediction'))
+sys.path.append(os.path.join(rootdir, '../utilities'))
+sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', '../CrossingDetection', 'OrderPrediction'))
 
 
 import DataGenerators_CrossingDetection_OrderPrediction, models_CrossingDetection_OrderPrediction
@@ -65,12 +65,15 @@ tuner_type = config['Performance_CrossingDetection_OrderPrediction']['tuner_type
 n_channels = config['Performance_CrossingDetection_OrderPrediction']['n_channels']
 
 #Ruta donde se encuentran las instancias que van a ser utilizadas para obtener las predicciones del modelo final
-path_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_instances'], dataset,
+                           '../CrossingDetection', '4_frames', data_sampling))
 path_ids_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
 
-path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
-path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning',
+                                    '../CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning',
+                                    '../CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
 
 with path_hyperparameters_CL.open('r') as file_descriptor:
@@ -106,7 +109,8 @@ if type_model == 'SIAMESE':
 
 
 #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-path_weights = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+path_weights = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_weights'], dataset, 'Transfer_Learning',
+                         '../CrossingDetection', 'OrderPrediction', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
 #Se carga el modelo final
 model.load_weights(str(path_weights), by_name=True)
