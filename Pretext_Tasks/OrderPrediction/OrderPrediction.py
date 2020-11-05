@@ -49,7 +49,7 @@ import numpy as np
 from pathlib import Path
 #from datetime import datetime
 
-import DataGenerator_OrderPrediction, models_OrderPrediction
+import DataGenerators_OrderPrediction, models_OrderPrediction
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -85,26 +85,23 @@ with path_hyperparameters.open('r') as file_descriptor:
     hyperparameters = json.load(file_descriptor)
 
 #Se cargan los hiperparámetros necesarios en el DataGenerator
-batch_size = hyperparameters['batch_size']
-normalized = hyperparameters['normalized']
-shuffle = hyperparameters['shuffle']
 
 params = {'dim': dim,
           'path_instances': path_instances,
-          'batch_size': batch_size,
+          'batch_size': hyperparameters['batch_size'],
           'n_clases': n_classes,
           'n_channels': n_channels,
-          'normalized': normalized,
-          'shuffle': shuffle,
+          'normalized': hyperparameters['normalized'],
+          'shuffle': hyperparameters['shuffle'],
           'n_epochs': epochs}
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
 validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
-train_generator = DataGenerator_OrderPrediction.DataGeneratorOrderPrediction(train_ids_instances, **params)
+train_generator = DataGenerators_OrderPrediction.DataGeneratorOrderPrediction(train_ids_instances, **params)
 
-validation_generator = DataGenerator_OrderPrediction.DataGeneratorOrderPrediction(validation_ids_instances, **params)
+validation_generator = DataGenerators_OrderPrediction.DataGeneratorOrderPrediction(validation_ids_instances, **params)
 
 if type_model == 'SIAMESE':
 
@@ -130,7 +127,7 @@ history = model.fit(x=train_generator, validation_data=validation_generator, epo
 
 
 #ALMACENAR LOS RESULTADOS OBTENIDOS DEL ENTRENAMIENTO
-path_output_model = Path(join(config['OrderPrediction']['path_output_model'], dataset, 'OrderPrediction', data_sampling, tuner_type, project_name))
+path_output_model = Path(join(config['OrderPrediction']['path_output_model'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, project_name))
 
 #Se crean los directorios en los que se van a almacenar los resultados
 path_output_model.mkdir(parents=True, exist_ok=True)

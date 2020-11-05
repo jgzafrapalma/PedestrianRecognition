@@ -9,7 +9,7 @@ parentdir = os.path.dirname(currentdir)
 rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'base_models'))
 
-from CaffeNet import CaffeNet
+from base_models import CaffeNet
 
 def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_dense_layers_2, learning_rate):
     # Se definen las 4 entradas del modelo

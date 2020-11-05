@@ -75,98 +75,173 @@ path_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path
 path_ids_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_id_instances'], dataset))
 
 
-path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+if config['Performance_CrossingDetection_Shuffle']['path_weights'] != 'None':
 
-path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-
-with path_hyperparameters_CL.open('r') as file_descriptor:
-    hyperparameters_cl = json.load(file_descriptor)
-
-with path_hyperparameters_FT.open('r') as file_descriptor:
-    hyperparameters_ft = json.load(file_descriptor)
+    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
 
-learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+    with path_hyperparameters_CL.open('r') as file_descriptor:
+        hyperparameters_cl = json.load(file_descriptor)
+
+    with path_hyperparameters_FT.open('r') as file_descriptor:
+        hyperparameters_ft = json.load(file_descriptor)
 
 
-params = {'dim': dim,
-          'path_instances': path_instances,
-          'batch_size': hyperparameters_cl['batch_size'],
-          'n_clases': 2,
-          'n_channels': n_channels,
-          'n_frames': n_frames,
-          'normalized': hyperparameters_cl['normalized'],
-          'shuffle': hyperparameters_cl['shuffle']}
+    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
 
 
-validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
-
-validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
-
-
-if type_model == 'CONV3D':
-
-
-    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-    dense_activation = hyperparameters_cl['dense_activation']
-    unit = hyperparameters_cl['unit']
-
-    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate_fine_tuning)
+    params = {'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': hyperparameters_cl['batch_size'],
+            'n_clases': 2,
+            'n_channels': n_channels,
+            'n_frames': n_frames,
+            'normalized': hyperparameters_cl['normalized'],
+            'shuffle': hyperparameters_cl['shuffle']}
 
 
-elif type_model == 'C3D':
+    validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
 
-    dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-    dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-    units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
-    units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
-    learning_rate = hyperparameters_cl['learning_rate']
-
-    model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
+    validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
 
-#Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+    if type_model == 'CONV3D':
 
-#Se carga el modelo final
-model.load_weights(str(path_weights), by_name=True)
 
-y_predictions = model.predict(x=validation_generator)
+        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+        unit = hyperparameters_cl['unit']
 
-y_prob_positive = y_predictions[:, 1]
+        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate_fine_tuning)
 
-y_predictions = np.round(y_predictions)
 
-"""Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
-id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
+    elif type_model == 'C3D':
 
-y_true = y_validation.argmax(axis=1)
-y_pred = y_predictions.argmax(axis=1)
+        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+        units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
+        units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
+        learning_rate = hyperparameters_cl['learning_rate']
 
-print("MATRIZ DE CONFUSIÓN: ")
-print(confusion_matrix(y_true, y_pred))
+        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
 
-print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
 
-print("F1 Score: %f" % f1_score(y_true, y_pred))
+    #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
+    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
-print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+    #Se carga el modelo final
+    model.load_weights(str(path_weights), by_name=True)
 
-print("CLASSIFICATION REPORT: ")
+    y_predictions = model.predict(x=validation_generator)
 
-print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+    y_prob_positive = y_predictions[:, 1]
 
-#CALCULO DE LA CURVA ROC
+    y_predictions = np.round(y_predictions)
 
-fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+    """Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+    id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
 
-plt.plot(fpr, tpr, marker='.')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
+    y_true = y_validation.argmax(axis=1)
+    y_pred = y_predictions.argmax(axis=1)
 
-plt.savefig('curveRoc.png')
+    print("MATRIZ DE CONFUSIÓN: ")
+    print(confusion_matrix(y_true, y_pred))
+
+    print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
+
+    print("F1 Score: %f" % f1_score(y_true, y_pred))
+
+    print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+
+    print("CLASSIFICATION REPORT: ")
+
+    print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+
+    #CALCULO DE LA CURVA ROC
+
+    fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+
+    plt.plot(fpr, tpr, marker='.')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    plt.savefig('curveRoc.png')
+
+else:
+
+    path_hyperparameters = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', tuner_type, type_model, 'No_Transfer_Learning', project_name + '.json'))
+
+
+    with path_hyperparameters.open('r') as file_descriptor:
+        hyperparameters = json.load(file_descriptor)
+
+    params = {'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': hyperparameters['batch_size'],
+            'n_clases': 2,
+            'n_channels': n_channels,
+            'n_frames': n_frames,
+            'normalized': hyperparameters['normalized'],
+            'shuffle': hyperparameters['shuffle']}
+
+
+    validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
+
+    validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
+
+
+    if type_model == 'CONV3D':
+
+
+        dropout_rate_1 = hyperparameters['dropout_rate_1']
+        dropout_rate_2 = hyperparameters['dropout_rate_2']
+        unit = hyperparameters['unit']
+        learning_rate = hyperparameters['learning_rate']
+
+        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate)
+
+    #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
+    path_weights = Path(join('/pub/experiments/jzafra/models/', dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, '05112020-184600', 'weights.h5'))
+
+    #Se carga el modelo final
+    model.load_weights(str(path_weights), by_name=True)
+
+    y_predictions = model.predict(x=validation_generator)
+
+    y_prob_positive = y_predictions[:, 1]
+
+    y_predictions = np.round(y_predictions)
+
+    """Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+    id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
+
+    y_true = y_validation.argmax(axis=1)
+    y_pred = y_predictions.argmax(axis=1)
+
+    print("MATRIZ DE CONFUSIÓN: ")
+    print(confusion_matrix(y_true, y_pred))
+
+    print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
+
+    print("F1 Score: %f" % f1_score(y_true, y_pred))
+
+    print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+
+    print("CLASSIFICATION REPORT: ")
+
+    print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+
+    #CALCULO DE LA CURVA ROC
+
+    fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+
+    plt.plot(fpr, tpr, marker='.')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    plt.savefig('curveRoc.png')
 
 
 #with open('predictions.txt', 'w') as filehandle:

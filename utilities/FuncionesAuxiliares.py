@@ -807,9 +807,9 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                     if optical_flow:
 
-                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', 'OpticalFlow'))
+                        Path_Instances = Path(join(output_path_instances, 'CrossingDetection', str(n_frames) + '_frames', 'OpticalFlow'))
 
-                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', 'OpticalFlow', ped.stem))
+                        Path_Cuts = Path(join(output_path_cuts, 'CrossingDetection', str(n_frames) + '_frames', 'OpticalFlow', ped.stem))
 
                         Path_Instances.mkdir(parents=True, exist_ok=True)
 
@@ -841,9 +841,9 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                     else:
 
-                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', 'Distributed'))
+                        Path_Instances = Path(join(output_path_instances, 'CrossingDetection', str(n_frames) + '_frames', 'Distributed'))
 
-                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', 'Distributed', ped.stem))
+                        Path_Cuts = Path(join(output_path_cuts, 'CrossingDetection', str(n_frames) + '_frames', 'Distributed', ped.stem))
 
                         Path_Instances.mkdir(parents=True, exist_ok=True)
 

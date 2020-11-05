@@ -12,13 +12,13 @@ class CaffeNet(Model):
         self.Conv2D_1 = Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
                      activation='relu', input_shape=the_input_shape, name='Conv2D_1_CaffeNet')
         self.MaxPooling2D_1 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_1_CaffeNet')
-        self.BatchNormalization_1 = BatchNormalization(name='BatchNormalization_1_CaffeNet')
+        #self.BatchNormalization_1 = BatchNormalization(name='BatchNormalization_1_CaffeNet')
 
         # 2th Convolutional Layers
         self.Conv2D_2 = Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
                      activation='relu', name='Conv2D_2_CaffeNet')
         self.MaxPooling2D_2 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_2_CaffeNet')
-        self.BatchNormalization_2 = BatchNormalization(name='BatchNormalization_2_CaffeNet')
+        #self.BatchNormalization_2 = BatchNormalization(name='BatchNormalization_2_CaffeNet')
 
         # 3th Convolutional Layers
         self.Conv2D_3 = Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
@@ -37,12 +37,12 @@ class CaffeNet(Model):
         # 1th Convolutional Layers
         x = self.Conv2D_1(inputs)
         x = self.MaxPooling2D_1(x)
-        x = self.BatchNormalization_1(x, training)
+        #x = self.BatchNormalization_1(x, training)
 
         # 2th Convolutional Layers
         x = self.Conv2D_2(x)
         x = self.MaxPooling2D_2(x)
-        x = self.BatchNormalization_2(x, training)
+        #x = self.BatchNormalization_2(x, training)
 
         # 3th Convolutional Layers
         x = self.Conv2D_3(x)

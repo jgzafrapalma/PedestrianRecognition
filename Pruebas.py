@@ -5,7 +5,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.45
 
-from utilities.FuncionesAuxiliares import create_instances_PIE, create_instances_PIE_OrderPrediction
+from utilities.FuncionesAuxiliares import create_instances_PIE_CrossingDetection, create_instances_PIE_OrderPrediction
 
 
 
@@ -43,11 +43,11 @@ output_path_instances="/media/jorge/DATOS/TFG/instances/JAAD_dataset", n_frames=
 path_output='/pub/experiments/jzafra/ids_instances/PIE_dataset')"""
 
 
-"""create_instances_PIE(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset', 
-output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=16, optical_flow=True)
+create_instances_PIE_CrossingDetection(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset', 
+output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=4, optical_flow=True)
 
-create_instances_PIE(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset', 
-output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=16, optical_flow=False)"""
+create_instances_PIE_CrossingDetection(input_path_data='/pub/experiments/jzafra/data/pie_database.pkl', input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset', 
+output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', n_frames=4, optical_flow=False)
 
 """create_instances_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.pkl', input_path_frames='/media/jorge/DATOS/TFG/frames/PIE_dataset', output_path_cuts='/media/jorge/DATOS/TFG/cuts/PIE_dataset',
 output_path_instances='/media/jorge/DATOS/TFG/instances/PIE_dataset', n_frames=16, optical_flow=True)
@@ -56,9 +56,9 @@ create_instances_PIE(input_path_data='/media/jorge/DATOS/TFG/data/pie_database.p
 output_path_instances='/media/jorge/DATOS/TFG/instances/PIE_dataset', n_frames=16, optical_flow=False)"""
 
 
-create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
+"""create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
 output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=False)
 
 create_instances_PIE_OrderPrediction(input_path_frames='/pub/experiments/jzafra/frames/PIE_dataset', output_path_cuts='/pub/experiments/jzafra/cuts/PIE_dataset',
-output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=True)
+output_path_instances='/pub/experiments/jzafra/instances/PIE_dataset', optical_flow=True)"""
 

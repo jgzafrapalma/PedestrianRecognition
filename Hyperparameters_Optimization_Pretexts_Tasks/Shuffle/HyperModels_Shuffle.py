@@ -46,9 +46,7 @@ class HyperModel_Shuffle_CONV3D(HyperModel):
                 units=hp.Int(
                     "unit", min_value=32, max_value=512, step=32, default=64
                 ),
-                activation=hp.Choice(
-                    "dense_activation", values=["relu", "tanh", "sigmoid"], default="relu"
-                ),
+                activation='relu',
                 name='FC_1_Shuffle'
             )(features)
 

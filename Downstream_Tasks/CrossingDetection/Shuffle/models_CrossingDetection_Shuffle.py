@@ -12,9 +12,12 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Flatten, Dropout, Dense, Input
 from tensorflow.keras.optimizers import Adam
 
+import tensorflow as tf
 
 
-def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, dense_activation, units_dense_layer, learning_rate):
+
+
+def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layer, learning_rate):
 
 
     # Se define la entrada del modelo
@@ -33,7 +36,7 @@ def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, drop
 
     x = Flatten(name='Flatten_FINAL')(x)
 
-    x = Dense(units=units_dense_layer, activation=dense_activation, name='FC_1_FINAL')(x)
+    x = Dense(units=units_dense_layer, activation='relu', name='FC_1_FINAL')(x)
 
     x = Dropout(dropout_rate_2, name='Dropout_2_FINAL')(x)
 
@@ -46,7 +49,40 @@ def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, drop
 
     optimizer = Adam(learning_rate=learning_rate)
 
-    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
+
+    return model
+
+def model_CrossingDetection_Shuffle_CONV3D_NTL(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layer, learning_rate):
+
+
+    # Se define la entrada del modelo
+    inputs = Input(the_input_shape)
+
+    # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
+    basemodel = CONV3D(the_input_shape)
+
+    # El modelo base se pone en modo inferencia
+    x = basemodel(inputs)
+
+    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(x)
+
+    x = Flatten(name='Flatten_FINAL')(x)
+
+    x = Dense(units=units_dense_layer, activation='relu', name='FC_1_FINAL')(x)
+
+    x = Dropout(dropout_rate_2, name='Dropout_2_FINAL')(x)
+
+    outputs = Dense(2, activation='softmax', name='FC_2_FINAL')(x)
+
+    # Se define el modelo
+    model = Model(inputs, outputs)
+
+    model.summary()
+
+    optimizer = Adam(learning_rate=learning_rate)
+
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
     return model
 

@@ -117,13 +117,12 @@ validation_generator = DataGenerators_Shuffle.DataGeneratorShuffle(validation_id
 if type_model == 'CONV3D':
 
     #Se obtienen los hiperparametros para el modelo de convoluciones 3D
-    dense_activation = hyperparameters['dense_activation']
     dropout_rate_1 = hyperparameters['dropout_rate_1']
     dropout_rate_2 = hyperparameters['dropout_rate_2']
     learning_rate = hyperparameters['learning_rate']
     unit = hyperparameters['unit']
 
-    model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, dense_activation, unit, learning_rate)
+    model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, unit, learning_rate)
 
 elif type_model == 'C3D':
 

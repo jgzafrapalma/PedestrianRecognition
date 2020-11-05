@@ -67,7 +67,7 @@ class DataGeneratorOrderPrediction(Sequence):
 
     def on_epoch_end(self):
 
-        print("Nueva epoca")
+        #print("Nueva epoca")
 
         """self.n_epochs += 1 # Número de epocas que se llevan ejecutadas
 

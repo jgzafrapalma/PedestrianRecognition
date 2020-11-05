@@ -14,6 +14,8 @@ from tensorflow.keras.layers import Flatten, Dense, Dropout, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 
+import tensorflow as tf
+
 
 
 """Hipermodelo utilizado para la optimización de los hiperparámetros de la capa de clasificación durante la transferencia de información,
@@ -79,7 +81,7 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_CL(HyperModel):
 
         model.load_weights(str(self.path_weights), by_name=True)
 
-        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
         return model
 
@@ -143,9 +145,70 @@ class HyperModel_Shuffle_CONV3D_CrossingDetection_FT(HyperModel):
 
         model.load_weights(str(self.path_weights), by_name=True)
 
-        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
         return model
+
+
+
+class HyperModel_Shuffle_CONV3D_CrossingDetection(HyperModel):
+    """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
+
+    def __init__(self, the_input_shape, num_classes):
+        """Se inicializan las variables de la clase"""
+        self.the_input_shape = the_input_shape
+        self.num_classes = num_classes
+    """Función en la que se define el modelo del que se quieren optimizar las hiperparámetros"""
+
+    def build(self, hp):
+
+        # Se define la entrada del modelo
+        inputs = Input(self.the_input_shape)
+
+        # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
+        basemodel = CONV3D(self.the_input_shape)
+
+        # El modelo base se pone en modo inferencia
+        x = basemodel(inputs)
+
+        x = Dropout(
+            rate=hp.Float(
+                "dropout_rate_1", min_value=0.0, max_value=0.5, default=0.25, step=0.05
+            ),
+            name='Dropout_1_FINAL'
+        )(x)
+
+        x = Flatten(name='Flatten_FINAL')(x)
+
+        x = Dense(
+            units=hp.Int(
+                "unit", min_value=32, max_value=512, step=32, default=64
+            ),
+            activation='relu',
+            name='FC_1_FINAL'
+        )(x)
+
+        x = Dropout(
+            rate=hp.Float(
+                "dropout_rate_2", min_value=0.0, max_value=0.5, default=0.25, step=0.05
+            ),
+            name='Dropout_2_FINAL'
+        )(x)
+
+        outputs = Dense(self.num_classes, activation='softmax', name='FC_2_FINAL')(x)
+
+        model = Model(inputs, outputs)
+
+        optimizer = Adam(
+            learning_rate=hp.Float(
+                "learning_rate", min_value=1e-4, max_value=1e-2, sampling="LOG", default=1e-3
+            )
+        )
+
+        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
+
+        return model
+
 
 
 
