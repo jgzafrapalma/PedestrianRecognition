@@ -2,8 +2,7 @@ import os, sys
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
+rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'base_models'))
 
 from base_models import CONV3D, C3D

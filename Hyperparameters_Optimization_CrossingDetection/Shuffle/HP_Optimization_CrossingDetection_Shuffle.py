@@ -87,13 +87,13 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     # AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO
 
-    path_output_results_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
+    path_output_results_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
 
-    path_output_results_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
+    path_output_results_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
 
-    path_output_hyperparameters_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
+    path_output_hyperparameters_CL = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer'))
 
-    path_output_hyperparameters_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
+    path_output_hyperparameters_FT = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning'))
 
     path_output_results_CL.mkdir(parents=True, exist_ok=True)
 
@@ -325,9 +325,9 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
 else:
 
-    path_output_results = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
+    path_output_results = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_dir_results'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
 
-    path_output_hyperparameters = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
+    path_output_hyperparameters = Path(join(config['HP_Optimization_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model))
 
     path_output_results.mkdir(parents=True, exist_ok=True)
 

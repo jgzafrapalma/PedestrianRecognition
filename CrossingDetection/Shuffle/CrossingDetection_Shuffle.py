@@ -83,12 +83,12 @@ validation_ids_instances = read_instance_file_txt(path_id_instances / 'validatio
 
 if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
-    tensorboard_logs = str(Path(join(config['CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name)))
+    tensorboard_logs = str(Path(join(config['CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name)))
 
     ##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
-    path_hyperparameters_CL = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+    path_hyperparameters_CL = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-    path_hyperparameters_FT = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+    path_hyperparameters_FT = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
 
     with path_hyperparameters_CL.open('r') as file_descriptor:
@@ -178,7 +178,7 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
     #GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
 
-    path_output_model = Path(join(config['CrossingDetection_Shuffle']['path_output_model'], dataset, 'Transfer_Learning', 'CrossingDetection', 'Shuffle', data_sampling, tuner_type, type_model, project_name))
+    path_output_model = Path(join(config['CrossingDetection_Shuffle']['path_output_model'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name))
 
     #Se crean los directorios en los que se van a almacenar los resultados
     path_output_model.mkdir(parents=True, exist_ok=True)
@@ -191,9 +191,9 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
 else:
 
-    tensorboard_logs = str(Path(join(config['CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name)))
+    tensorboard_logs = str(Path(join(config['CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name)))
 
-    path_hyperparameters = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name + '.json'))
+    path_hyperparameters = Path(join(config['CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name + '.json'))
 
     with path_hyperparameters.open('r') as file_descriptor:
         hyperparameters = json.load(file_descriptor)
@@ -237,7 +237,7 @@ else:
 
     # GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
 
-    path_output_model = Path(join(config['CrossingDetection_Shuffle']['path_output_model'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name))
+    path_output_model = Path(join(config['CrossingDetection_Shuffle']['path_output_model'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name))
 
     # Se crean los directorios en los que se van a almacenar los resultados
     path_output_model.mkdir(parents=True, exist_ok=True)

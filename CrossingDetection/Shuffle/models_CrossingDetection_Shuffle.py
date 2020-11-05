@@ -2,14 +2,13 @@ import os, sys
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
+rootdir = os.path.dirname(parentdir)
 sys.path.append(os.path.join(rootdir, 'base_models'))
 
 from base_models import CONV3D, C3D
 
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Flatten, Dropout, Dense, Input
+from tensorflow.keras.layers import Flatten, Dropout, Dense, Input, Conv3D
 from tensorflow.keras.optimizers import Adam
 
 import tensorflow as tf
@@ -25,6 +24,31 @@ def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, drop
 
     # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
     basemodel = CONV3D(the_input_shape)
+
+    #Conv3D_1 = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', input_shape=the_input_shape, name='Conv3D_1_CONV3D')
+
+    #Conv3D_1.trainable = False
+
+    #Conv3D_2 = Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_2_CONV3D')
+
+    #Conv3D_2.trainable = False
+
+    #Conv3D_3 = Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_3_CONV3D')
+
+    #Conv3D_3.trainable = False
+
+    #Conv3D_4 = Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_4_CONV3D')                        
+
+    #Conv3D_4.trainable = False
+
+
+    #x = Conv3D_1(inputs)
+
+    #x = Conv3D_2(x)
+
+    #x = Conv3D_3(x)
+
+    #x = Conv3D_4(x)
 
     # Se congela el modelo base para que sus pesos no sean entrenables
     basemodel.trainable = False

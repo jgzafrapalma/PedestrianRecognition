@@ -40,6 +40,7 @@ session = InteractiveSession(config=configProto)
 ########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
+sys.path.append(os.path.join(rootdir, 'base_models'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
 
 
@@ -77,9 +78,9 @@ path_ids_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['
 
 if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
-    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
     with path_hyperparameters_CL.open('r') as file_descriptor:
         hyperparameters_cl = json.load(file_descriptor)
@@ -122,7 +123,7 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
 
     #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', 'Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'weights.h5'))
 
     #Se carga el modelo final
     model.load_weights(str(path_weights), by_name=True)
@@ -148,6 +149,10 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
 
+    print("Precision Score: %f" % precision_score(y_true, y_pred))
+    
+    print("Recall Score: %f" % recall_score(y_true, y_pred))
+
     print("CLASSIFICATION REPORT: ")
 
     print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
@@ -164,7 +169,7 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
 else:
 
-    path_hyperparameters = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name + '.json'))
+    path_hyperparameters = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name + '.json'))
 
     with path_hyperparameters.open('r') as file_descriptor:
         hyperparameters = json.load(file_descriptor)
@@ -194,7 +199,7 @@ else:
         model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate)
 
     #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join('/pub/experiments/jzafra/models/', dataset, 'CrossingDetection', 'No_Transfer_Learning', 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
+    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'weights.h5'))
 
     #Se carga el modelo final
     model.load_weights(str(path_weights), by_name=True)
@@ -219,6 +224,10 @@ else:
     print("F1 Score: %f" % f1_score(y_true, y_pred))
 
     print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+
+    print("Precision Score: %f" % precision_score(y_true, y_pred))
+    
+    print("Recall Score: %f" % recall_score(y_true, y_pred))
 
     print("CLASSIFICATION REPORT: ")
 

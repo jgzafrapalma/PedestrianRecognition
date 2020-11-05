@@ -86,8 +86,8 @@ HP_Optimization_CrossingDetection_Shuffle:
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
-  data_sampling: 'Distributed' # OpticalFlow
-  Transfer_Learning: True
+  data_sampling: 'OpticalFlow' # OpticalFlow
+  Transfer_Learning: False
   path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results/' #'/media/jorge/DATOS/TFG/tuner_keras_results'
@@ -138,7 +138,7 @@ CrossingDetection_Shuffle:
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
-  data_sampling: 'Distributed' # OpticalFlow
+  data_sampling: 'OpticalFlow' # OpticalFlow
   project_name: '03112020-184600'
   tuner_type: 'Bayesian_Optimization'
   Transfer_Learning: True
@@ -173,12 +173,12 @@ Performance_CrossingDetection_Shuffle:
   dim: !!python/tuple [128, 128]
   n_channels: 3
   dataset: 'PIE_dataset'
-  data_sampling: 'Distributed'
+  data_sampling: 'OpticalFlow'
   Transfer_Learning: True
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
-  path_weights: 'None' #'/pub/experiments/jzafra/models/'
+  path_weights: '/pub/experiments/jzafra/models/'
   type_model: 'CONV3D'
   project_name: '03112020-184600'
   tuner_type: 'Bayesian_Optimization'

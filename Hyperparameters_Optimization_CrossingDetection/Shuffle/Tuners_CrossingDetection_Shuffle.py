@@ -2,9 +2,8 @@ import os, sys
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'Shuffle'))
+rootdir = os.path.dirname(parentdir)
+sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
 
 import DataGenerators_CrossingDetection_Shuffle
 
