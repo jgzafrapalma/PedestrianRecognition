@@ -201,5 +201,27 @@ Performance_CrossingDetection_OrderPrediction:
   tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
-
-
+create_instances_PIE_CrossingDetection:
+  input_path_data: '/media/jorge/DATOS/TFG/data/pie_database.pkl' #'/pub/experiments/jzafra/data/pie_database.pkl' #Dirección donde se encuentra el fichero con la información del conjunto de datos
+  input_path_dataset: '/media/jorge/DATOS/TFG/datasets/PIE_clips' #'/pub/experiments/jzafra/datasets/PIE_clips' #Dirección donde se encuentra el conjunto de datos
+  output_path_frames: '/media/jorge/DATOS/TFG/frames/PIE_dataset' #'/pub/experiments/jzafra/frames/PIE_dataset' #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
+  output_path_instances: '/media/jorge/DATOS/TFG/instances/PIE_dataset' #'/pub/experiments/jzafra/instances/PIE_dataset' #Dirección base donde se van a almacenar las instancias creadas
+  output_path_cuts: '/media/jorge/DATOS/TFG/cuts/PIE_dataset' #'/pub/experiments/jzafra/cuts/PIE_dataset' #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
+  n_frames: 4 #Número de fotogramas que se van a recortar
+  rate: 0.10 #Tasa de incremento de las cajas de coliciones de las capas de coliciones de manera vertical
+  shape: !!python/tuple [80, 80] #Tamaño de los fotogramas resultado recortados
+  optical_flow: False #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
+create_instances_PIE_OrderPrediction:
+  input_path_data: '/media/jorge/DATOS/TFG/data/pie_database.pkl' #'/pub/experiments/jzafra/data/pie_database.pkl' #Dirección donde se encuentra el fichero con la información del conjunto de datos
+  input_path_dataset: '/media/jorge/DATOS/TFG/datasets/PIE_clips' #'/pub/experiments/jzafra/datasets/PIE_clips' #Dirección donde se encuentra el conjunto de datos
+  output_path_frames: '/media/jorge/DATOS/TFG/frames/PIE_dataset' #'/pub/experiments/jzafra/frames/PIE_dataset' #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
+  output_path_instances: '/media/jorge/DATOS/TFG/instances/PIE_dataset' #'/pub/experiments/jzafra/instances/PIE_dataset' #Dirección base donde se van a almacenar las instancias creadas
+  output_path_cuts: '/media/jorge/DATOS/TFG/cuts/PIE_dataset' #'/pub/experiments/jzafra/cuts/PIE_dataset' #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
+  rate: 0.10 #Tasa de incremento de las cajas de coliciones de las capas de coliciones de manera vertical
+  shape: !!python/tuple [80, 80] #Tamaño de los fotogramas resultado recortados
+  optical_flow: False #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
+create_train_validation_test:
+  path_instances: '/pub/experiments/jzafra/data/pie_database.pkl' #Ruta donde se encuentra el fichero con la información de las intancias del conjunto de datos
+  percent_validation: 0.15 #Tanto por ciento de instancias que van a pertenecer al conjunto de validación
+  percent_test: 0.15 #Tanto por ciento de instancias que van a pertenecer al conjunto de test
+  path_output: '/pub/experiments/jzafra/ids_instances/PIE_dataset' #Dirección donde se van a almacenar los ficheros de texto que contienen las instancias de train, validation y test

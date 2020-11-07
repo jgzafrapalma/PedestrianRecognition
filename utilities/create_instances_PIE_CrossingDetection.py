@@ -1,15 +1,38 @@
+#LIMITAR CPU AL 45%
+import os, sys
+import tensorflow as tf
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.45
 
-from FuncionesAuxiliares import extract_pedestriansFrames_datasets_PIE
+#Se carga el fichero de configuración
+import yaml
 
+currentdir = os.path.dirname(os.path.realpath(__file__))
+rootdir = os.path.dirname(currentdir)
+
+with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
+    config = yaml.load(file_descriptor, Loader=yaml.FullLoader)
+
+
+from FuncionesAuxiliares import extract_pedestriansFrames_datasets_PIE, extractFramesOpticalFlow, extractFramesUniform
+
+import logging
+import pickle
+from pathlib import Path
+from os.path import join
+import cv2
 
 
 
 #Función que permite crear instancias que van a ser utilizadas para la evaluación del modelo final
-def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, output_path_cuts, output_path_instances, n_frames, optical_flow=False):
+def create_instances_PIE_CrossingDetection(input_path_data, input_path_dataset, output_path_frames, output_path_instances, output_path_cuts, n_frames, rate, shape, optical_flow=False):
 
-    if not input_path_frames.exists():
+    #Se comprueba si los frames necesarios para crear las instancias ya estan creados
+    if not Path(join(output_path_frames, str(shape[0]) + '_' + str(shape[1]))).exists():
 
-        extract_pedestriansFrames_datasets_PIE(input_path_data, input_path_dataset, output_path_frames, rate, shape=())
+        extract_pedestriansFrames_datasets_PIE(input_path_data, input_path_dataset, output_path_frames, rate, shape)
 
 
     logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
@@ -19,7 +42,7 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
         data = pickle.load(file_descriptor)
 
     # Ruta donde se encuentran los frames de cada peaton por video
-    Path_Frames = Path(input_path_frames)
+    Path_Frames = Path(join(output_path_frames, str(shape[0]) + '_' + str(shape[1])))
 
     for set_video in Path_Frames.iterdir():
 
@@ -41,9 +64,9 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                     if optical_flow:
 
-                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', 'OpticalFlow'))
+                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', str(shape[0]) + '_' + str(shape[1]), 'OpticalFlow'))
 
-                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', 'OpticalFlow', ped.stem))
+                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', str(shape[0]) + '_' + str(shape[1]), 'OpticalFlow', ped.stem))
 
                         Path_Instances.mkdir(parents=True, exist_ok=True)
 
@@ -75,9 +98,9 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                     else:
 
-                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', 'Distributed'))
+                        Path_Instances = Path(join(output_path_instances, 'Crossing-Detection', str(n_frames) + '_frames', str(shape[0]) + '_' + str(shape[1]), 'Distributed'))
 
-                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', 'Distributed', ped.stem))
+                        Path_Cuts = Path(join(output_path_cuts, 'Crossing-Detection', str(n_frames) + '_frames', 'Distributed', str(shape[0]) + '_' + str(shape[1]), ped.stem))
 
                         Path_Instances.mkdir(parents=True, exist_ok=True)
 
@@ -88,7 +111,7 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                         if not Path_Instance.exists():
 
-                            output_frames = extractFrames(Path_Ped, n_frames)
+                            output_frames = extractFramesUniform(Path_Ped, n_frames)
 
                             # Se crea la instancia
                             instance = {'frames': output_frames, 'crossing': crossing}
@@ -105,4 +128,14 @@ def create_instances_PIE_CrossingDetection(input_path_data, input_path_frames, o
 
                             logging.info("La instancia %s no se ha creado porque ya existe" % Path_Instance.stem)
 
-create_instances_PIE_CrossingDetection()
+create_instances_PIE_CrossingDetection(
+    input_path_data=config['create_instances_PIE_CrossingDetection']['input_path_data'],
+    input_path_dataset=config['create_instances_PIE_CrossingDetection']['input_path_dataset'],
+    output_path_frames=config['create_instances_PIE_CrossingDetection']['output_path_frames'],
+    output_path_instances=config['create_instances_PIE_CrossingDetection']['output_path_instances'],
+    output_path_cuts=config['create_instances_PIE_CrossingDetection']['output_path_cuts'],
+    n_frames=config['create_instances_PIE_CrossingDetection']['n_frames'],
+    rate=config['create_instances_PIE_CrossingDetection']['rate'],
+    shape=config['create_instances_PIE_CrossingDetection']['shape'],
+    optical_flow=config['create_instances_PIE_CrossingDetection']['optical_flow']
+)
