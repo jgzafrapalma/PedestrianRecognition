@@ -1,62 +1,42 @@
-import os, sys
-
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
-sys.path.append(os.path.join(rootdir, 'base_models'))
-
-from base_models import CONV3D, C3D
-
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Flatten, Dropout, Dense, Input, Conv3D
 from tensorflow.keras.optimizers import Adam
 
+from tensorflow.keras import Sequential
+
 import tensorflow as tf
 
+import numpy as np
 
 
-
-def model_CrossingDetection_Shuffle_CONV3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layer, learning_rate):
+def model_CrossingDetection_Shuffle_CONV3D_TL(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layer, learning_rate, path_conv_weights):
 
 
     # Se define la entrada del modelo
     inputs = Input(the_input_shape)
 
-    # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
-    basemodel = CONV3D(the_input_shape)
+    base_model = Sequential(name='CONV3D')
 
-    #Conv3D_1 = Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', input_shape=the_input_shape, name='Conv3D_1_CONV3D')
+    base_model.add(Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', input_shape=the_input_shape, name='Conv3D_1_CONV3D'))
 
-    #Conv3D_1.trainable = False
+    base_model.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_2_CONV3D'))
 
-    #Conv3D_2 = Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_2_CONV3D')
+    base_model.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_3_CONV3D'))
 
-    #Conv3D_2.trainable = False
-
-    #Conv3D_3 = Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_3_CONV3D')
-
-    #Conv3D_3.trainable = False
-
-    #Conv3D_4 = Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_4_CONV3D')                        
-
-    #Conv3D_4.trainable = False
-
-
-    #x = Conv3D_1(inputs)
-
-    #x = Conv3D_2(x)
-
-    #x = Conv3D_3(x)
-
-    #x = Conv3D_4(x)
+    base_model.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_4_CONV3D'))
 
     # Se congela el modelo base para que sus pesos no sean entrenables
-    basemodel.trainable = False
+    base_model.trainable = False
 
-    # El modelo base se pone en modo inferencia
-    x = basemodel(inputs, training=False)
+    #Se cargan los pesos en las capas convoluciones para la transferencia de conocimiento
+    with (path_conv_weights).open('rb') as file_descriptor:
+        conv_weights = np.load(file_descriptor, allow_pickle=True)
 
-    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(x)
+    base_model.set_weights(conv_weights)
+
+    output_1 = base_model(inputs, training=False)
+
+    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(output_1)
 
     x = Flatten(name='Flatten_FINAL')(x)
 
@@ -83,13 +63,20 @@ def model_CrossingDetection_Shuffle_CONV3D_NTL(the_input_shape, dropout_rate_1, 
     # Se define la entrada del modelo
     inputs = Input(the_input_shape)
 
-    # Se declara el modelo base que se va a emplear (capas convoluciones del modelo)
-    basemodel = CONV3D(the_input_shape)
+    base_model = Sequential(name='CONV3D')
 
-    # El modelo base se pone en modo inferencia
-    x = basemodel(inputs)
+    base_model.add(Conv3D(16, (3, 5, 5), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', input_shape=self.the_input_shape, name='Conv3D_1_CONV3D'))
 
-    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(x)
+    base_model.add(Conv3D(24, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_2_CONV3D'))
+
+    base_model.add(Conv3D(32, (3, 3, 3), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_3_CONV3D'))
+
+    base_model.add(Conv3D(12, (1, 6, 6), strides=(1, 2, 2), padding='valid', data_format='channels_last', activation='relu', name='Conv3D_4_CONV3D'))
+
+
+    output_1 = base_model(inputs)
+
+    x = Dropout(dropout_rate_1, name='Dropout_1_FINAL')(output_1)
 
     x = Flatten(name='Flatten_FINAL')(x)
 
@@ -112,7 +99,7 @@ def model_CrossingDetection_Shuffle_CONV3D_NTL(the_input_shape, dropout_rate_1, 
 
 
 
-def model_CrossingDetection_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate):
+"""def model_CrossingDetection_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate):
 
 
         # Se define la entrada del modelo
@@ -159,4 +146,4 @@ def model_CrossingDetection_Shuffle_C3D(the_input_shape, dropout_rate_1, dropout
 
         model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
-        return model
+        return model"""

@@ -46,7 +46,6 @@ import pickle
 import time
 from pathlib import Path
 import json
-#import logging
 
 import HyperModels_OrderPrediction, Tuners_OrderPrediction
 
@@ -55,8 +54,6 @@ from FuncionesAuxiliares import read_instance_file_txt
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
-
-#logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
 
 dataset = config['Hyperparameters_Optimization_OrderPrediction']['dataset']
 type_model = config['Hyperparameters_Optimization_OrderPrediction']['type_model']
@@ -76,7 +73,6 @@ project_name = config['Hyperparameters_Optimization_OrderPrediction']['tuner']['
 
 dim = config['Hyperparameters_Optimization_OrderPrediction']['dim']
 epochs = config['Hyperparameters_Optimization_OrderPrediction']['epochs']
-n_classes = config['Hyperparameters_Optimization_OrderPrediction']['n_classes']
 n_channels = config['Hyperparameters_Optimization_OrderPrediction']['n_channels']
 
 
@@ -92,7 +88,7 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 #SE DEFINE EL HYPERMODELO EN FUNCIÓN DEL TIPO DE MODELO
 if type_model == 'SIAMESE':
 
-    hypermodel = HyperModels_OrderPrediction.HyperModel_OrderPrediction_SIAMESE(the_input_shape=(dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_OrderPrediction.HyperModel_OrderPrediction_SIAMESE(the_input_shape=(dim[0], dim[1], n_channels), num_classes=12)
 
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
@@ -135,7 +131,7 @@ else:
     )
 
 #SE LLEVA A CABO LA BUSQUEDA DE LOS MEJORES HIPERPARÁMETROS
-earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=1, mode='min', restore_best_weights=True)
+earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
 reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
 
@@ -143,7 +139,7 @@ tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 

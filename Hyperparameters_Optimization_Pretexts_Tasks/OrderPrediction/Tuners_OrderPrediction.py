@@ -13,17 +13,17 @@ import kerastuner
 
 
 class TunerBayesianOrderPrediction(kerastuner.tuners.BayesianOptimization):
-    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_classes, n_channels,
+    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_channels,
                     verbose, epochs, callbacks):
 
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': n_classes,
+            'batch_size': 64, #trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'n_clases': 12,
             'n_channels': n_channels,
-            'normalized': trial.hyperparameters.Boolean('normalized', default=True),
-            'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
+            'normalized': True,
+            'shuffle': True,
             'n_epochs': epochs
         }
 
@@ -35,14 +35,14 @@ class TunerBayesianOrderPrediction(kerastuner.tuners.BayesianOptimization):
 
 
 class TunerRandomOrderPrediction(kerastuner.tuners.RandomSearch):
-    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_classes,
-                    n_channels, verbose, epochs, callbacks):
+    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_channels, 
+                    verbose, epochs, callbacks):
 
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': n_classes,
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'n_clases': 12,
             'n_channels': n_channels,
             'normalized': trial.hyperparameters.Boolean('normalized', default=True),
             'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
@@ -56,14 +56,14 @@ class TunerRandomOrderPrediction(kerastuner.tuners.RandomSearch):
         super(TunerRandomOrderPrediction, self).run_trial(trial, train_generator, validation_data=validation_generator, verbose=verbose, epochs=epochs, callbacks=callbacks, shuffle=False)
 
 class TunerHyperBandOrderPrediction(kerastuner.tuners.Hyperband):
-    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_classes,
-                  n_channels, verbose, epochs, callbacks):
+    def run_trial(self, trial, train_ids_instances, validation_ids_instances, dim, path_instances, n_channels, 
+                    verbose, epochs, callbacks):
 
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64, 128], default=32),
-            'n_clases': n_classes,
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'n_clases': 12,
             'n_channels': n_channels,
             'normalized': trial.hyperparameters.Boolean('normalized', default=True),
             'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),

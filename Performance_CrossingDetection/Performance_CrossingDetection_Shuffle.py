@@ -242,8 +242,3 @@ else:
     plt.ylabel('True Positive Rate')
 
     plt.savefig('curveRoc.png')
-
-
-#with open('predictions.txt', 'w') as filehandle:
-    #for id_instance, y_real, y_pred in zip(id_instances_validation, y_validation, y_predictions):
-        #filehandle.write("%s %f %f\n" % (id_instance, y_real, y_pred))

@@ -47,7 +47,6 @@ from os.path import join
 import json
 import numpy as np
 from pathlib import Path
-#from datetime import datetime
 
 import DataGenerators_OrderPrediction, models_OrderPrediction
 
@@ -57,10 +56,10 @@ from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
-#date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
 
 #Se cargan las variables necesarias del fichero de configuración
 dim = config['OrderPrediction']['dim']
+n_channels = config['OrderPrediction']['n_channels']
 dataset = config['OrderPrediction']['dataset']
 type_model = config['OrderPrediction']['type_model']
 data_sampling = config['OrderPrediction']['data_sampling']
@@ -73,8 +72,6 @@ path_id_instances = Path(join(config['OrderPrediction']['path_id_instances'], da
 
 
 epochs = config['OrderPrediction']['epochs']
-n_classes = config['OrderPrediction']['n_classes']
-n_channels = config['OrderPrediction']['n_channels']
 
 tensorboard_logs = str(Path(join(config['OrderPrediction']['tensorboard_logs'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, project_name)))
 
@@ -89,7 +86,7 @@ with path_hyperparameters.open('r') as file_descriptor:
 params = {'dim': dim,
           'path_instances': path_instances,
           'batch_size': hyperparameters['batch_size'],
-          'n_clases': n_classes,
+          'n_clases': 12,
           'n_channels': n_channels,
           'normalized': hyperparameters['normalized'],
           'shuffle': hyperparameters['shuffle'],
@@ -107,9 +104,12 @@ if type_model == 'SIAMESE':
 
     units_dense_layers_1 = hyperparameters['units_dense_layers_1']
     units_dense_layers_2 = hyperparameters['units_dense_layers_2']
+    dropout_rate_1 = hyperparameters['dropout_rate_1']
+    dropout_rate_2 = hyperparameters['dropout_rate_2']
     learning_rate = hyperparameters['learning_rate']
+    momentum = hyperparameters['momentum']
 
-    model = models_OrderPrediction.model_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), units_dense_layers_1, units_dense_layers_2, learning_rate)
+    model = models_OrderPrediction.model_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), units_dense_layers_1, units_dense_layers_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum)
 
 #CALLBACKS
 
@@ -134,6 +134,12 @@ path_output_model.mkdir(parents=True, exist_ok=True)
 
 np.save(path_output_model / 'history.npy', history.history)
 
-#model.save(path_output_model / 'model.h5')
-
 model.save_weights(str(path_output_model / 'weights.h5'))
+
+model.save(path_output_model / 'model.h5')
+
+#Se guardan los pesos de las capas convolucionales
+conv_weights = model.layers[4].get_weights()
+
+with (path_output_model / 'conv_weights.npy').open('wb') as file_descriptor:
+    np.save(file_descriptor, conv_weights)

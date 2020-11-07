@@ -11,7 +11,6 @@ Hyperparameters_Optimization_Shuffle:
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters'   # '/media/jorge/DATOS/TFG/hyperparameters'
   epochs: 100
   seed: 1
-  n_classes: 2
   random: False
   tuner:
     type: 'Bayesian_Optimization'
@@ -24,17 +23,16 @@ Hyperparameters_Optimization_Shuffle:
     project_name: '03112020-184600'
 Hyperparameters_Optimization_OrderPrediction:
   dim: !!python/tuple [ 128, 128 ]
+  n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'OpticalFlow' # Distributed OpticalFlow
+  data_sampling: 'Distributed' # Distributed OpticalFlow
   path_instances: '/pub/experiments/jzafra/instances/'              #'/media/jorge/DATOS/TFG/instances/'             
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/media/jorge/DATOS/TFG/ids_instances/'        
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'   #'/media/jorge/DATOS/TFG/tuner_keras_results'    
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters'   #'/media/jorge/DATOS/TFG/hyperparameters'    
   epochs: 100
   seed: 1
-  n_classes: 12
-  n_channels: 3
   random: False
   tuner:
     type: 'Bayesian_Optimization'
@@ -44,9 +42,11 @@ Hyperparameters_Optimization_OrderPrediction:
     max_trials: 100                   #Random_Search, Bayesian_Optimization
     max_epochs: 100                   #HyperBand
     num_initial_points: 5             #Bayesian_Optimization
-    project_name: '11102020-174000'
+    project_name: '06112020-172000'
 Shuffle:
+  n_frames: 16
   dim: !!python/tuple [128, 128]
+  n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
   data_sampling: 'OpticalFlow'
@@ -58,26 +58,22 @@ Shuffle:
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'          #'/media/jorge/DATOS/TFG/tensorboard/'   
   path_output_model: '/pub/experiments/jzafra/models/'              #'/media/jorge/DATOS/TFG/models/'             
   epochs: 100
-  n_frames: 16
-  n_classes: 2
-  n_channels: 3
   seed: 1
   random: False
 OrderPrediction:
   dim: !!python/tuple [128, 128]
+  n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
   data_sampling: 'Distributed'
   tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
-  project_name: '11102020-174000'
+  project_name: '06112020-172000'
   path_instances: '/pub/experiments/jzafra/instances/'              #'/pub/experiments/jzafra/instances/'         '/media/jorge/DATOS/TFG/instances/'  
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/pub/experiments/jzafra/ids_instances/'     '/media/jorge/DATOS/TFG/ids_instances/'     
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'  #'/pub/experiments/jzafra/hyperparameters/'   '/media/jorge/DATOS/TFG/hyperparameters/'
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'          #'/pub/experiments/jzafra/tensorboard/'       '/media/jorge/DATOS/TFG/tensorboard/'
   path_output_model: '/pub/experiments/jzafra/models/'              #'/pub/experiments/jzafra/models/'            '/media/jorge/DATOS/TFG/models/'
   epochs: 100
-  n_classes: 12
-  n_channels: 3
   seed: 1
   random: False
 HP_Optimization_CrossingDetection_Shuffle:
@@ -113,13 +109,14 @@ HP_Optimization_CrossingDetection_OrderPrediction:
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
   data_sampling: 'Distributed' # OpticalFlow
+  Transfer_Learning: False
   path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results/' #'/media/jorge/DATOS/TFG/tuner_keras_results'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/' #'/media/jorge/DATOS/TFG/hyperparameters'
   path_weights: '/pub/experiments/jzafra/models/'
-  tuner_type_pretext_task: 'Bayesian_Optimization'
-  project_name_pretext_task: '11102020-174000'
+  tuner_type_pretext_task: '' #'Bayesian_Optimization'
+  project_name_pretext_task: '' #'06112020-172000'
   epochs: 100
   seed: 1
   random: False
@@ -131,7 +128,7 @@ HP_Optimization_CrossingDetection_OrderPrediction:
     max_trials: 100                   #Random_Search, Bayesian_Optimization
     max_epochs: 100                   #HyperBand
     num_initial_points: 5             #Bayesian_Optimization
-    project_name: '11102020-174000'
+    project_name: '07112020-172000'
 CrossingDetection_Shuffle:
   n_frames: 16
   dim: !!python/tuple [ 128, 128 ]
@@ -148,23 +145,28 @@ CrossingDetection_Shuffle:
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
   path_output_model: '/pub/experiments/jzafra/models/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
+  tuner_type_pretext_task: 'Bayesian_Optimization'
+  project_name_pretext_task: '06112020-172000'
   epochs: 100
   seed: 1
   random: False
-Transfer_Learning_CrossingDetection_OrderPrediction:
+CrossingDetection_OrderPrediction:
   dim: !!python/tuple [ 128, 128 ]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
   data_sampling: 'Distributed' # OpticalFlow
-  project_name: '11102020-174000'
+  project_name: '07112020-172000'
   tuner_type: 'Bayesian_Optimization'
+  Transfer_Learning: True
   path_weights: '/pub/experiments/jzafra/models/'
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
   path_output_model: '/pub/experiments/jzafra/models/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
+  tuner_type_pretext_task: 'Bayesian_Optimization'
+  project_name_pretext_task: '06112020-172000'
   epochs: 100
   seed: 1
   random: False
@@ -174,7 +176,7 @@ Performance_CrossingDetection_Shuffle:
   n_channels: 3
   dataset: 'PIE_dataset'
   data_sampling: 'OpticalFlow'
-  Transfer_Learning: True
+  Transfer_Learning: False
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
@@ -189,106 +191,15 @@ Performance_CrossingDetection_OrderPrediction:
   n_channels: 3
   dataset: 'PIE_dataset'
   data_sampling: 'Distributed'
+  Transfer_Learning: True
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
   path_weights: '/pub/experiments/jzafra/models/'
   type_model: 'SIAMESE'
-  project_name: '11102020-174000'
+  project_name: '07112020-172000'
   tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
-Performance_PretexTasks:
-
-#Hyperparameters_Optimization_Pretext_Tasks:
-#  dim: !!python/tuple [128, 128]
-#  dataset: 'PIE_dataset'
-#  pretext_task: 'Shuffle'
-#  type_model: 'CONV3D'
-#  data_sampling: 'Distributed' # OpticalFlow
-#  path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
-#  path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
-#  path_dir_results: '/pub/experiments/jzafra/tuner_keras_results' #'/media/jorge/DATOS/TFG/tuner_keras_results'
-#  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters' #'/media/jorge/DATOS/TFG/hyperparameters'
-#  epochs: 100
-#  n_frames: 16
-#  seed: 1
-#  n_classes: 2
-#  n_channels: 3
-#  random: False
-#  tuner:
-#    type: 'Random_Search'
-#    objetive: val_loss
-#    seed: 1
-#    executions_per_trial: 2           #Random_Search, HyperBand
-#    max_trials: 100                   #Random_Search, Bayesian_Optimization
-#    max_epochs: 100                   #HyperBand
-#    num_initial_points: 5             #Bayesian_Optimization
-#    project_name: '11102020-174000'
-
-
-Hyperparameters_Optimization_Downstream_Tasks:
-  dim: !!python/tuple [ 128, 128 ]
-  dataset: 'PIE_dataset'
-  pretext_task: 'Shuffle'
-  downstream_task: 'Crossing-detection'
-  type_model: 'CONV3D'
-  data_sampling: 'Distributed' # OpticalFlow
-  path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
-  path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
-  path_dir_results: '/pub/experiments/jzafra/tuner_keras_results' #'/media/jorge/DATOS/TFG/tuner_keras_results'
-  path_hyperparameters: '/pub/experiments/jzafra/hyperparameters' #'/media/jorge/DATOS/TFG/hyperparameters'
-  path_weights: '/pub/experiments/jzafra/models/'
-  tuner_type_pretext_task: 'Bayesian_Optimization'
-  project_name_pretext_task: '11102020-174000'
-  epochs: 100
-  n_frames: 16
-  seed: 1
-  n_classes: 2
-  n_channels: 3
-  random: False
-  tuner:
-    type: 'Random_Search'
-    objetive: val_loss
-    seed: 1
-    executions_per_trial: 2
-    max_trials: 100
-    project_name: '11102020-174000'
-    #tuner:
-    #type: 'Random_Search'
-    #objetive: val_loss
-    #seed: 1
-    #num_initial_points: 5
-    #max_trials: 100
-    #project_name: '11102020-174000'
-  #Transfer_Learning:
-  #  activated: True
-  #  downstream_task: 'Crossing-detection'
-  #  path_weights_conv_layers: '/pub/experiments/jzafra/models/PIE_dataset/Shuffle/CONV3D/06092020-170054/weights.h5'
-
-Transfer_Learning:
-  dataset: 'PIE_dataset'
-  pretext_task: 'Shuffle'
-  model_name: 'CONV3D'
-  input_model: '06092020-170054'
-  type_model: 'Crossing-detection'
-  path_weights: '/pub/experiments/jzafra/models'
-  path_instances: '/pub/experiments/jzafra/instances/'
-  path_id_instances: '/pub/experiments/jzafra/ids_instances/'
-  tensorboard_logs: '/pub/experiments/jzafra/tensorboard'
-  path_output_model: '/pub/experiments/jzafra/models'
-  epochs: 100
-  seed: 1
-  random: False
-  dim: !!python/tuple [128, 128]
-  n_frames: 16
-  n_classes: 2
-  channels: 3
-  batch_size: 8
-  normalized: True
-  shuffle: True
-  path_hyperparameters_classification_layer: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Classification_Layer/14092020-130900.json'
-  path_hyperparameters_fine_tuning: '/pub/experiments/jzafra/hyperparameters/PIE_dataset/Transfer_Learning/Shuffle/Bayesian_Optimization/CONV3D/Fine_Tuning/14092020-130900.json'
-
 
 

@@ -49,7 +49,6 @@ from pathlib import Path
 from os.path import join
 import json
 import numpy as np
-from datetime import datetime
 
 from FuncionesAuxiliares import read_instance_file_txt
 
@@ -75,13 +74,16 @@ path_id_instances = Path(join(config['CrossingDetection_Shuffle']['path_id_insta
 
 epochs = config['CrossingDetection_Shuffle']['epochs']
 
-#date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
 validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
 if config['CrossingDetection_Shuffle']['Transfer_Learning']:
+
+    tuner_type_pretext_task = config['CrossingDetection_Shuffle']['tuner_type_pretext_task']
+
+    project_name_pretext_task = config['CrossingDetection_Shuffle']['project_name_pretext_task']
 
     tensorboard_logs = str(Path(join(config['CrossingDetection_Shuffle']['tensorboard_logs'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name)))
 
@@ -112,6 +114,14 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
+
+    """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
+    LA TAREA DE PRETEXTO"""
+    path_weights = Path(join(config['CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'conv_weights.npy'))
+
+    """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
+    los pesos solo van a ser cargados en las capas de convolución"""
+
     if type_model == 'CONV3D':
 
         dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
@@ -120,9 +130,9 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
         learning_rate = hyperparameters_cl['learning_rate']
 
         #El modelo es definido con las capas convolucionales congeladas
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate)
+        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D_TL((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate, path_weights)
 
-    elif type_model == 'C3D':
+    """elif type_model == 'C3D':
 
         dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
         dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
@@ -130,20 +140,11 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
         units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
         learning_rate = hyperparameters_cl['learning_rate']
 
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
+        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)"""
 
 
 
     #######################################################################################################
-
-    """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
-    LA TAREA DE PRETEXTO"""
-    path_weights = Path(join(config['CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
-
-    """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
-    los pesos solo van a ser cargados en las capas de convolución"""
-
-    model.load_weights(str(path_weights), by_name=True)
 
     model.summary()
 
@@ -169,7 +170,7 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
     """Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
     coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
-    model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
     model.summary()
 
@@ -185,7 +186,7 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
 
     np.save(path_output_model / 'history.npy', history.history)
 
-    #model.save(path_output_model / 'model.h5')
+    model.save(path_output_model / 'model.h5')
 
     model.save_weights(str(path_output_model / 'weights.h5'))
 
@@ -212,6 +213,7 @@ else:
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
     if type_model == 'CONV3D':
+        
         dropout_rate_1 = hyperparameters['dropout_rate_1']
         dropout_rate_2 = hyperparameters['dropout_rate_2']
         unit = hyperparameters['unit']
@@ -244,7 +246,7 @@ else:
 
     np.save(path_output_model / 'history.npy', history.history)
 
-    # model.save(path_output_model / 'model.h5')
+    model.save(path_output_model / 'model.h5')
 
     model.save_weights(str(path_output_model / 'weights.h5'))
 

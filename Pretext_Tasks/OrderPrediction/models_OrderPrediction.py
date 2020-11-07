@@ -1,24 +1,41 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Flatten, Dense, Input, concatenate
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import Sequential
 
-import os, sys
+from tensorflow.keras.layers import Flatten, Dense, Input, concatenate, Dropout, Conv2D, MaxPooling2D, BatchNormalization
+from tensorflow.keras.optimizers import Adam, SGD
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
-sys.path.append(os.path.join(rootdir, 'base_models'))
 
-from base_models import CaffeNet
-
-def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_dense_layers_2, learning_rate):
+def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_dense_layers_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum):
     # Se definen las 4 entradas del modelo
     input_1 = Input(shape=the_input_shape)
     input_2 = Input(shape=the_input_shape)
     input_3 = Input(shape=the_input_shape)
     input_4 = Input(shape=the_input_shape)
 
-    base_model = CaffeNet(the_input_shape)
+    #CaffeNet
+    base_model = Sequential(name='CaffeNet')
+
+    base_model.add(Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
+                     activation='relu', input_shape=the_input_shape, name='Conv2D_1_CaffeNet'))
+    base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_1_CaffeNet'))
+    base_model.add(BatchNormalization())
+    
+    base_model.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
+                     activation='relu', name='Conv2D_2_CaffeNet'))
+    base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_2_CaffeNet'))
+    base_model.add(BatchNormalization())
+
+    base_model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_3_CaffeNet'))
+    
+    base_model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_4_CaffeNet'))
+
+    base_model.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                    activation='relu', name='Conv2D_5_CaffeNet'))
+
+    base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_3_CaffeNet'))
+
 
     # Las 4 entradas son pasadas a través del modelo base (calculo de las distintas convoluciones)
     output_1 = base_model(input_1)
@@ -42,6 +59,13 @@ def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_d
     features_3 = dense_1(features_3)
     features_4 = dense_1(features_4)
 
+    dropout_1 = Dropout(dropout_rate_1, name='Dropout_1_OrderPrediction')
+
+    features_1 = dropout_1(features_1)
+    features_2 = dropout_1(features_2)
+    features_3 = dropout_1(features_3)
+    features_4 = dropout_1(features_4)
+
     Features_12 = concatenate([features_1, features_2])
     Features_13 = concatenate([features_1, features_3])
     Features_14 = concatenate([features_1, features_4])
@@ -59,6 +83,16 @@ def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_d
     RelationShip_2_4 = dense_2(Features_24)
     RelationShip_3_4 = dense_2(Features_34)
 
+    dropout_2 = Dropout(dropout_rate_2, name='Dropout_2_OrderPrediction')
+
+    RelationShip_1_2 = dropout_2(RelationShip_1_2)
+    RelationShip_1_3 = dropout_2(RelationShip_1_3)
+    RelationShip_1_4 = dropout_2(RelationShip_1_4)
+    RelationShip_2_3 = dropout_2(RelationShip_2_3)
+    RelationShip_2_4 = dropout_2(RelationShip_2_4)
+    RelationShip_3_4 = dropout_2(RelationShip_3_4)
+
+
     # Concatenación de todas las relaciones
     Features_Final = concatenate(
         [RelationShip_1_2, RelationShip_1_3, RelationShip_1_4, RelationShip_2_3, RelationShip_2_4, RelationShip_3_4])
@@ -69,7 +103,7 @@ def model_OrderPrediction_SIAMESE(the_input_shape, units_dense_layers_1, units_d
 
     siamese_model.summary()
 
-    optimizer = Adam(learning_rate=learning_rate)
+    optimizer = SGD(learning_rate=learning_rate, momentum=momentum)
 
     siamese_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 

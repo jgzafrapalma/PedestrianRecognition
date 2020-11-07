@@ -1,10 +1,8 @@
 import os, sys
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(parentdir)
-rootdir = os.path.dirname(parentparentdir)
-sys.path.append(os.path.join(rootdir, 'Downstream_Tasks', 'CrossingDetection', 'OrderPrediction'))
+rootdir = os.path.dirname(currentdir)
+sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'OrderPrediction'))
 
 import DataGenerators_CrossingDetection_OrderPrediction
 

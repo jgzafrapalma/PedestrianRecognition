@@ -1,19 +1,10 @@
-import os, sys
-
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-rootdir = os.path.dirname(parentdir)
-sys.path.append(os.path.join(rootdir, 'base_models'))
-
-from base_models import CaffeNet
-
 from kerastuner import HyperModel
 
-from tensorflow.keras.layers import Flatten, Dense, Input, concatenate
+from tensorflow.keras.layers import Flatten, Dense, Input, concatenate, Dropout, Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD
 
-
+from tensorflow.keras import Sequential
 
 class HyperModel_OrderPrediction_SIAMESE(HyperModel):
     """Constructor de la clase, recibe las dimensiones de la entrada y el número de clases (salidas)"""
@@ -30,7 +21,29 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
         input_3 = Input(shape=self.the_input_shape)
         input_4 = Input(shape=self.the_input_shape)
 
-        base_model = CaffeNet(self.the_input_shape)
+        #CaffeNet
+        base_model = Sequential(name='CaffeNet')
+
+        base_model.add(Conv2D(filters=96, kernel_size=(11, 11), strides=(4, 4), padding='valid', data_format='channels_last',
+                        activation='relu', input_shape=self.the_input_shape, name='Conv2D_1_CaffeNet'))
+        base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_1_CaffeNet'))
+        base_model.add(BatchNormalization())
+        
+        base_model.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1, 1), padding='same', data_format='channels_last',
+                        activation='relu', name='Conv2D_2_CaffeNet'))
+        base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_2_CaffeNet'))
+        base_model.add(BatchNormalization())
+
+        base_model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                        activation='relu', name='Conv2D_3_CaffeNet'))
+        
+        base_model.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                        activation='relu', name='Conv2D_4_CaffeNet'))
+
+        base_model.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', data_format='channels_last',
+                        activation='relu', name='Conv2D_5_CaffeNet'))
+
+        base_model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format='channels_last', name='MaxPooling2D_3_CaffeNet'))
 
         # Las 4 entradas son pasadas a través del modelo base (calculo de las distintas convoluciones)
         output_1 = base_model(input_1)
@@ -60,6 +73,18 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
         features_3 = dense_1(features_3)
         features_4 = dense_1(features_4)
 
+        dropout_1 = Dropout(
+            rate=hp.Float(
+                "dropout_rate_1", min_value=0.0, max_value=0.5, default=0.25, step=0.05
+            ),
+            name='Dropout_1_OrderPrediction'
+        )
+
+        features_1 = dropout_1(features_1)
+        features_2 = dropout_1(features_2)
+        features_3 = dropout_1(features_3)
+        features_4 = dropout_1(features_4)
+
         Features_12 = concatenate([features_1, features_2])
         Features_13 = concatenate([features_1, features_3])
         Features_14 = concatenate([features_1, features_4])
@@ -82,6 +107,21 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
         RelationShip_2_3 = dense_2(Features_23)
         RelationShip_2_4 = dense_2(Features_24)
         RelationShip_3_4 = dense_2(Features_34)
+        
+
+        dropout_2 = Dropout(
+            rate=hp.Float(
+                "dropout_rate_2", min_value=0.0, max_value=0.5, default=0.25, step=0.05
+            ),
+            name='Dropout_2_OrderPrediction'
+        )
+
+        RelationShip_1_2 = dropout_2(RelationShip_1_2)
+        RelationShip_1_3 = dropout_2(RelationShip_1_3)
+        RelationShip_1_4 = dropout_2(RelationShip_1_4)
+        RelationShip_2_3 = dropout_2(RelationShip_2_3)
+        RelationShip_2_4 = dropout_2(RelationShip_2_4)
+        RelationShip_3_4 = dropout_2(RelationShip_3_4)
 
         # Concatenación de todas las relaciones
         Features_Final = concatenate(
@@ -93,10 +133,11 @@ class HyperModel_OrderPrediction_SIAMESE(HyperModel):
 
         siamese_model.summary()
 
-        optimizer = Adam(
+        optimizer = SGD(
             learning_rate=hp.Float(
                 "learning_rate", min_value=1e-4, max_value=1e-2, sampling="LOG", default=1e-3
-            )
+            ),
+            momentum=hp.Choice("momentum", [0.0, 0.2, 0.4, 0.6, 0.8, 0.9])
         )
 
         siamese_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])

@@ -20,8 +20,8 @@ with open(os.path.join(rootdir, 'config.yaml'), 'r') as file_descriptor:
 """Inicialización de los generadores de números aleatorios. Se hace al inicio del codigo para evitar que el importar
 otras librerias ya inicializen sus propios generadores"""
 
-if not config['Transfer_Learning_CrossingDetection_OrderPrediction']['random']:
-    SEED = config['Transfer_Learning_CrossingDetection_OrderPrediction']['seed']
+if not config['CrossingDetection_OrderPrediction']['random']:
+    SEED = config['CrossingDetection_OrderPrediction']['seed']
     from numpy.random import seed
 
     seed(SEED)
@@ -57,112 +57,180 @@ import DataGenerators_CrossingDetection_OrderPrediction, models_CrossingDetectio
 
 from tensorflow.keras.callbacks import TensorBoard, EarlyStopping, ReduceLROnPlateau
 
-dim = config['Transfer_Learning_CrossingDetection_OrderPrediction']['dim']
-n_channels = config['Transfer_Learning_CrossingDetection_OrderPrediction']['n_channels']
+dim = config['CrossingDetection_OrderPrediction']['dim']
+n_channels = config['CrossingDetection_OrderPrediction']['n_channels']
 
-dataset = config['Transfer_Learning_CrossingDetection_OrderPrediction']['dataset']
-type_model = config['Transfer_Learning_CrossingDetection_OrderPrediction']['type_model']
-project_name = config['Transfer_Learning_CrossingDetection_OrderPrediction']['project_name']
-tuner_type = config['Transfer_Learning_CrossingDetection_OrderPrediction']['tuner_type']
-data_sampling = config['Transfer_Learning_CrossingDetection_OrderPrediction']['data_sampling']
+dataset = config['CrossingDetection_OrderPrediction']['dataset']
+type_model = config['CrossingDetection_OrderPrediction']['type_model']
+project_name = config['CrossingDetection_OrderPrediction']['project_name']
+tuner_type = config['CrossingDetection_OrderPrediction']['tuner_type']
+data_sampling = config['CrossingDetection_OrderPrediction']['data_sampling']
 
-path_instances = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
-path_id_instances = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
+path_instances = Path(join(config['CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_id_instances = Path(join(config['CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
-epochs = config['Transfer_Learning_CrossingDetection_OrderPrediction']['epochs']
-
-# date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
-
-tensorboard_logs = str(Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['tensorboard_logs'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', data_sampling, tuner_type, type_model, project_name)))
+epochs = config['CrossingDetection_OrderPrediction']['epochs']
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
 
 validation_ids_instances = read_instance_file_txt(path_id_instances / 'validation.txt')
 
-##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
-path_hyperparameters_CL = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+if config['CrossingDetection_OrderPrediction']['Transfer_Learning']:
 
-path_hyperparameters_FT = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
+    tuner_type_pretext_task = config['CrossingDetection_OrderPrediction']['tuner_type_pretext_task']
 
-with path_hyperparameters_CL.open('r') as file_descriptor:
-    hyperparameters_cl = json.load(file_descriptor)
+    project_name_pretext_task = config['CrossingDetection_OrderPrediction']['project_name_pretext_task']
 
-with path_hyperparameters_FT.open('r') as file_descriptor:
-    hyperparameters_ft = json.load(file_descriptor)
+    tensorboard_logs = str(Path(join(config['CrossingDetection_OrderPrediction']['tensorboard_logs'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name)))
 
-learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+    ##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
+    path_hyperparameters_CL = Path(join(config['CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-params = {'dim': dim,
-          'path_instances': path_instances,
-          'batch_size': hyperparameters_cl['batch_size'],
-          'n_clases': 2,
-          'n_channels': n_channels,
-          'normalized': hyperparameters_cl['normalized'],
-          'shuffle': hyperparameters_cl['shuffle']}
+    path_hyperparameters_FT = Path(join(config['CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
 
-train_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(train_ids_instances, **params)
+    with path_hyperparameters_CL.open('r') as file_descriptor:
+        hyperparameters_cl = json.load(file_descriptor)
 
-validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
+    with path_hyperparameters_FT.open('r') as file_descriptor:
+        hyperparameters_ft = json.load(file_descriptor)
 
-if type_model == 'SIAMESE':
+    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
 
-    units_dense_layer_1 = hyperparameters_cl['units_dense_layer_1']
-    units_dense_layer_2 = hyperparameters_cl['units_dense_layer_2']
-    learning_rate = hyperparameters_cl['learning_rate']
+    params = {'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': hyperparameters_cl['batch_size'],
+            'n_clases': 2,
+            'n_channels': n_channels,
+            'normalized': hyperparameters_cl['normalized'],
+            'shuffle': hyperparameters_cl['shuffle']}
 
-    # El modelo es definido con las capas convolucionales congeladas
-    model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, learning_rate)
+    train_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(train_ids_instances, **params)
 
-#######################################################################################################
+    validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
 
-"""SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
-LA TAREA DE PRETEXTO"""
-path_weights = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_weights'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model, project_name, 'weights.h5'))
 
-"""En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
-los pesos solo van a ser cargados en las capas de convolución"""
+    """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
+    LA TAREA DE PRETEXTO"""
 
-model.load_weights(str(path_weights), by_name=True)
+    """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
+    los pesos solo van a ser cargados en las capas de convolución"""
 
-model.summary()
+    path_weights = Path(join(config['CrossingDetection_OrderPrediction']['path_weights'], dataset, 'OrderPrediction', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'conv_weights.npy'))
 
-# CALLBACKS
+    if type_model == 'SIAMESE':
 
-tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_images=True)
+        units_dense_layer_1 = hyperparameters_cl['units_dense_layers_1']
+        units_dense_layer_2 = hyperparameters_cl['units_dense_layers_2']
+        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+        learning_rate = hyperparameters_cl['learning_rate']
 
-earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+        # El modelo es definido con las capas convolucionales congeladas
+        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_TL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, path_weights)
 
-reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
+    #######################################################################################################
 
-keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
+    model.summary()
 
-# ENTRENAMIENTO
+    # CALLBACKS
 
-model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+    tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_images=True)
 
-# FINE TUNING
+    earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
 
-# SE DESCONGELAN TODAS LAS CAPAS PARA REALIZAR EL AJUSTE FINO
+    reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
 
-model.trainable = True
+    keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
 
-"""Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
-coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
-model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy'])
+    # ENTRENAMIENTO
 
-model.summary()
+    model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
-history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+    # FINE TUNING
 
-# GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
+    # SE DESCONGELAN TODAS LAS CAPAS PARA REALIZAR EL AJUSTE FINO
 
-path_output_model = Path(join(config['Transfer_Learning_CrossingDetection_OrderPrediction']['path_output_model'], dataset, 'Transfer_Learning', 'CrossingDetection', 'OrderPrediction', data_sampling, tuner_type, type_model, project_name))
+    model.trainable = True
 
-# Se crean los directorios en los que se van a almacenar los resultados
-path_output_model.mkdir(parents=True, exist_ok=True)
+    """Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
+    coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
+    model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
-np.save(path_output_model / 'history.npy', history.history)
+    model.summary()
 
-# model.save(path_output_model / 'model.h5')
+    history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
-model.save_weights(str(path_output_model / 'weights.h5'))
+    # GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
+
+    path_output_model = Path(join(config['CrossingDetection_OrderPrediction']['path_output_model'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name))
+
+    # Se crean los directorios en los que se van a almacenar los resultados
+    path_output_model.mkdir(parents=True, exist_ok=True)
+
+    np.save(path_output_model / 'history.npy', history.history)
+
+    model.save(path_output_model / 'model.h5')
+
+    model.save_weights(str(path_output_model / 'weights.h5'))
+
+else:
+
+    tensorboard_logs = str(Path(join(config['CrossingDetection_OrderPrediction']['tensorboard_logs'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name)))
+
+    ##################################LECTURA DE LOS HIPERPARÁMETROS#######################################
+    path_hyperparameters = Path(join(config['CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name + '.json'))
+
+    with path_hyperparameters.open('r') as file_descriptor:
+        hyperparameters = json.load(file_descriptor)
+
+    params = {'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': hyperparameters['batch_size'],
+            'n_clases': 2,
+            'n_channels': n_channels,
+            'normalized': hyperparameters['normalized'],
+            'shuffle': hyperparameters['shuffle']}
+
+    train_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(train_ids_instances, **params)
+
+    validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
+
+    if type_model == 'SIAMESE':
+
+        units_dense_layer_1 = hyperparameters_cl['units_dense_layers_1']
+        units_dense_layer_2 = hyperparameters_cl['units_dense_layers_2']
+        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
+        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
+        learning_rate = hyperparameters_cl['learning_rate']
+
+        # El modelo es definido con las capas convolucionales congeladas
+        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_NTL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate)
+
+    model.summary()
+
+    # CALLBACKS
+
+    tensorboard = TensorBoard(log_dir=tensorboard_logs, histogram_freq=1, write_images=True)
+
+    earlystopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='min', restore_best_weights=True)
+
+    reducelronplateau = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, mode='min', min_delta=0.0001, cooldown=0, min_lr=0)
+
+    keras_callbacks = [tensorboard, earlystopping, reducelronplateau]
+
+    # ENTRENAMIENTO
+
+    history = model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
+
+    # GUARDADO DEL MODELO FINAL, PESOS Y HISTORY
+
+    path_output_model = Path(join(config['CrossingDetection_OrderPrediction']['path_output_model'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name))
+
+    # Se crean los directorios en los que se van a almacenar los resultados
+    path_output_model.mkdir(parents=True, exist_ok=True)
+
+    np.save(path_output_model / 'history.npy', history.history)
+
+    model.save(path_output_model / 'model.h5')
+
+    model.save_weights(str(path_output_model / 'weights.h5'))

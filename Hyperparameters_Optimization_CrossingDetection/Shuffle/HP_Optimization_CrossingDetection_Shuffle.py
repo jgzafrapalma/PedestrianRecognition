@@ -43,7 +43,6 @@ sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
 
 import pickle
-#import logging
 from os.path import join
 import time
 from pathlib import Path
@@ -78,12 +77,13 @@ validation_ids_instances = read_instance_file_txt(path_id_instances / 'validatio
 
 tuner_type = config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['type']
 project_name = config['HP_Optimization_CrossingDetection_Shuffle']['tuner']['project_name']
-tuner_type_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['tuner_type_pretext_task']
-project_name_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['project_name_pretext_task']
 
 epochs = config['HP_Optimization_CrossingDetection_Shuffle']['epochs']
 
 if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
+
+    tuner_type_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['tuner_type_pretext_task']
+    project_name_pretext_task = config['HP_Optimization_CrossingDetection_Shuffle']['project_name_pretext_task']
 
     # AÑADIR A ESTOS DIRECTORIOS EL MODELO FINAL PARA EL CUÁL SE ESTA CALCULANDO
 
@@ -105,15 +105,15 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
 
     #Ruta en la que se encuentran los pesos que se van a cargar en la capa convolucional del modelo
-    path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'weights.h5')
+    path_weights = Path(config['HP_Optimization_CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'conv_weights.npy')
 
     if type_model == 'CONV3D':
 
         hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)
 
-    elif type_model == 'C3D':
+    """elif type_model == 'C3D':
 
-        hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)
+        hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)"""
 
 
     #SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
@@ -196,17 +196,14 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     if type_model == 'CONV3D':
 
-        best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
-                                                                        dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layer=best_hp['unit'], learning_rate=best_hp['learning_rate'])
+        best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D_TL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
+                                                                        dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layer=best_hp['unit'], learning_rate=best_hp['learning_rate'], path_conv_weights=path_weights)
 
-    elif type_model == 'C3D':
+    """elif type_model == 'C3D':
 
         best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
                                                                         dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layers_1=best_hp['units_dense_layers_1'],
-                                                                        units_dense_layers_2=best_hp['units_dense_layers_2'], learning_rate=best_hp['learning_rate'])
-
-    # Falta cargar los pesos obtenidos en el entrenamiento de la tarea de pretexto
-    best_model.load_weights(str(path_weights), by_name=True)
+                                                                        units_dense_layers_2=best_hp['units_dense_layers_2'], learning_rate=best_hp['learning_rate'])"""
 
     params = {
         'dim': dim,
@@ -232,10 +229,14 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     best_model.fit(x=train_generator, validation_data=validation_generator, epochs=epochs, callbacks=keras_callbacks)
 
-    #Se guardan los pesos del modelo que va a ser utilizado en el aguste fino
-    best_model.save_weights(str(path_output_results_CL / project_name / 'weights.h5'))
+    #Se guardan los pesos del modelo que va a ser utilizado en el ajuste fino
+    weights_best_model = best_model.get_weights()
 
-    path_weights = path_output_results_CL / project_name / 'weights.h5'
+    with (path_output_results_CL / project_name / 'weights.npy').open('wb') as file_descriptor:
+        np.save(file_descriptor, weights_best_model)
+
+
+    path_weights = path_output_results_CL / project_name / 'weights.npy'
 
 
     # Fine Tuning
@@ -244,9 +245,9 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
         hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)
 
-    elif type_model == 'C3D':
+    """elif type_model == 'C3D':
 
-        hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)
+        hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)"""
 
     if tuner_type == 'Random_Search':
 

@@ -49,7 +49,6 @@ from os.path import join
 import json
 import numpy as np
 from pathlib import Path
-#from datetime import datetime
 
 import models_Shuffle
 import DataGenerators_Shuffle
@@ -60,10 +59,11 @@ from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
-#date_time = datetime.now().strftime("%d%m%Y-%H%M%S")
 
 #Se cargan las variables necesarias del fichero de configuración
+n_frames = config['Shuffle']['n_frames']
 dim = config['Shuffle']['dim']
+n_channels = config['Shuffle']['n_channels']
 dataset = config['Shuffle']['dataset']
 type_model = config['Shuffle']['type_model']
 data_sampling = config['Shuffle']['data_sampling']
@@ -76,9 +76,7 @@ path_id_instances = Path(join(config['Shuffle']['path_id_instances'], dataset))
 
 
 epochs = config['Shuffle']['epochs']
-n_frames = config['Shuffle']['n_frames']
-n_classes = config['Shuffle']['n_classes']
-n_channels = config['Shuffle']['n_channels']
+
 
 #Se carga la ruta en la que se almacena los resultados de tensorboard
 #tensorboard_logs = str(Path(join(config['Shuffle']['tensorboard_logs'], dataset, 'Shuffle', data_sampling, tuner_type, type_model, date_time)))
@@ -99,7 +97,7 @@ step_swaps = hyperparameters['step_swaps']
 params = {'dim': dim,
           'path_instances': path_instances,
           'batch_size': batch_size,
-          'n_clases': n_classes,
+          'n_clases': 2,
           'n_channels': n_channels,
           'n_frames': n_frames,
           'normalized': normalized,
@@ -124,7 +122,7 @@ if type_model == 'CONV3D':
 
     model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, unit, learning_rate)
 
-elif type_model == 'C3D':
+"""elif type_model == 'C3D':
 
     dropout_rate_1 = hyperparameters['dropout_rate_1']
     dropout_rate_2 = hyperparameters['dropout_rate_2']
@@ -133,7 +131,7 @@ elif type_model == 'C3D':
     units_dense_layers_1 = hyperparameters['units_dense_layers_1']
     units_dense_layers_2 = hyperparameters['units_dense_layers_2']
 
-    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
+    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)"""
 
 
 
@@ -160,6 +158,12 @@ path_output_model.mkdir(parents=True, exist_ok=True)
 
 np.save(path_output_model / 'history.npy', history.history)
 
-#model.save(path_output_model / 'model.h5')
+model.save(path_output_model / 'model.h5')
 
 model.save_weights(str(path_output_model / 'weights.h5'))
+
+#Se guardan los pesos de las capas convolucionales
+conv_weights = model.layers[1].get_weights()
+
+with (path_output_model / 'conv_weights.npy').open('wb') as file_descriptor:
+    np.save(file_descriptor, conv_weights)

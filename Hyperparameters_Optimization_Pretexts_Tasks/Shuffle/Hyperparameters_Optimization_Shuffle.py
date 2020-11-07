@@ -46,7 +46,6 @@ import pickle
 import time
 from pathlib import Path
 import json
-#import logging
 
 import HyperModels_Shuffle, Tuners_Shuffle
 
@@ -55,9 +54,9 @@ from FuncionesAuxiliares import read_instance_file_txt
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
-
-#logging.basicConfig(format='Date-Time : %(asctime)s : Line No. : %(lineno)d - %(message)s', level=logging.INFO)
-
+n_frames = config['Hyperparameters_Optimization_Shuffle']['n_frames']
+dim = config['Hyperparameters_Optimization_Shuffle']['dim']
+n_channels = config['Hyperparameters_Optimization_Shuffle']['n_channels']
 dataset = config['Hyperparameters_Optimization_Shuffle']['dataset']
 type_model = config['Hyperparameters_Optimization_Shuffle']['type_model']
 data_sampling = config['Hyperparameters_Optimization_Shuffle']['data_sampling']
@@ -74,11 +73,7 @@ tuner_type = config['Hyperparameters_Optimization_Shuffle']['tuner']['type']
 project_name = config['Hyperparameters_Optimization_Shuffle']['tuner']['project_name']
 
 
-dim = config['Hyperparameters_Optimization_Shuffle']['dim']
 epochs = config['Hyperparameters_Optimization_Shuffle']['epochs']
-n_frames = config['Hyperparameters_Optimization_Shuffle']['n_frames']
-n_classes = config['Hyperparameters_Optimization_Shuffle']['n_classes']
-n_channels = config['Hyperparameters_Optimization_Shuffle']['n_channels']
 
 
 path_output_results = Path(join(config['Hyperparameters_Optimization_Shuffle']['path_dir_results'], dataset, 'Shuffle', data_sampling, tuner_type, type_model))
@@ -93,11 +88,11 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 #SE DEFINE EL HYPERMODELO EN FUNCIÓN DEL TIPO DE MODELO
 if type_model == 'CONV3D':
 
-    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2)
 
-elif type_model == 'C3D':
+"""elif type_model == 'C3D':
 
-    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)
+    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)"""
 
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':
@@ -148,7 +143,7 @@ tuner.search_space_summary()
 
 start_time = time.time()
 
-tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_classes, n_channels, 1, epochs, [earlystopping, reducelronplateau])
+tuner.search(train_ids_instances, validation_ids_instances, dim, path_instances, n_frames, n_channels, 1, epochs, [earlystopping, reducelronplateau])
 
 stop_time = time.time()
 
