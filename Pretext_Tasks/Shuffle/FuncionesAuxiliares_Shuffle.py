@@ -26,7 +26,7 @@ def ShuffleFrames(frames, n_swaps):
         if not equal_arrays(indexes_start, indexes_end):
             break
 
-    # A partir de los indices obtenidos se obtiene la imagen final
+    # A partir de los indices se obtiene la imagen final
     for i in range(n_frames):
         for j in range(n_frames):
             if indexes_end[j] == i:

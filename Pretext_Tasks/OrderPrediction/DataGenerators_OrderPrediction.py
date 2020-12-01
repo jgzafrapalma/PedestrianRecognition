@@ -55,44 +55,8 @@ class DataGeneratorOrderPrediction(Sequence):
                     self.list_IDs_epoch.append((ped_noext + '_' + str(class1) + 'p.pkl'))
                     self.list_IDs_epoch.append((ped_noext + '_' + str(class2) + 'p.pkl'))
 
-        #self.curriculum_learning_level = 1
-
-        #Número de epocas necesarías para pasar el nivel 1 de dificultad de puzzle al nivel 2
-        #self.change_level1_to_level2 = int(n_epochs * 0.25)
-        # Número de epocas necesarías para pasar el nivel 2 de dificultad de puzzle al nivel 3
-        #self.change_level2_to_level3 = self.change_level1_to_level2 + int(n_epochs * 0.35)
-
-        #self.n_epochs = 0 #Llevar la cuenta del número de epocas que se han ejecutado
-
 
     def on_epoch_end(self):
-
-        #print("Nueva epoca")
-
-        """self.n_epochs += 1 # Número de epocas que se llevan ejecutadas
-
-        #Cuando se esta en el último nivel de dificultad no hay que comprobar nada
-        if self.curriculum_learning_level == 1:
-
-            #Se comprueba si han pasado el número de epocas necesarias para pasar del nivel 1 al nivel 2, para la siguiente época
-            if self.n_epochs == self.change_level1_to_level2:
-                print("Cambio de dificultad 1 - 2")
-                self.restant_classes_pedestrians = dict([(ped, [4, 5, 6, 7]) for ped in self.list_IDs])
-                self.curriculum_learning_level = 2
-            else:
-                self.restant_classes_pedestrians = dict([(ped, [0, 1, 2, 3]) for ped in self.list_IDs])
-
-        elif self.curriculum_learning_level == 2:
-
-            if self.n_epochs == self.change_level2_to_level3:
-                print("Cambio de dificultad 2 - 3")
-                self.restant_classes_pedestrians = dict([(ped, [8, 9, 10, 11]) for ped in self.list_IDs])
-                self.curriculum_learning_level = 3
-            else:
-                self.restant_classes_pedestrians = dict([(ped, [4, 5, 6, 7]) for ped in self.list_IDs])
-
-        else:
-            self.restant_classes_pedestrians = dict([(ped, [8, 9, 10, 11]) for ped in self.list_IDs])"""
 
 
         self.restant_classes_pedestrians = dict([(ped, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) for ped in self.list_IDs])

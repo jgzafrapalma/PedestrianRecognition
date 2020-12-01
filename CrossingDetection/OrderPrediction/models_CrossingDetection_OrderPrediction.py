@@ -8,7 +8,7 @@ import tensorflow as tf
 
 import numpy as np
 
-def model_CrossingDetection_OrderPrediction_SIAMESE_TL(the_input_shape, units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, path_conv_weights):
+def model_CrossingDetection_OrderPrediction_SIAMESE_TL(the_input_shape, units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum, path_conv_weights):
 
     # Se definen las 4 entradas del modelo
     input_1 = Input(shape=the_input_shape)
@@ -130,7 +130,7 @@ def model_CrossingDetection_OrderPrediction_SIAMESE_TL(the_input_shape, units_de
 
     siamese_model.summary()
 
-    optimizer = SGD(learning_rate=learning_rate)
+    optimizer = SGD(learning_rate=learning_rate, momentum=momentum)
 
     siamese_model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
@@ -138,7 +138,7 @@ def model_CrossingDetection_OrderPrediction_SIAMESE_TL(the_input_shape, units_de
 
 
 
-def model_CrossingDetection_OrderPrediction_SIAMESE_NTL(the_input_shape, units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate):
+def model_CrossingDetection_OrderPrediction_SIAMESE_NTL(the_input_shape, units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum):
 
     # Se definen las 4 entradas del modelo
     input_1 = Input(shape=the_input_shape)
@@ -251,7 +251,7 @@ def model_CrossingDetection_OrderPrediction_SIAMESE_NTL(the_input_shape, units_d
 
     siamese_model.summary()
 
-    optimizer = SGD(learning_rate=learning_rate)
+    optimizer = SGD(learning_rate=learning_rate, momentum=momentum)
 
     siamese_model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 

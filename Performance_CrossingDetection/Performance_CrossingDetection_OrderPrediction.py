@@ -37,8 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
-
 sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'OrderPrediction'))
 
@@ -67,74 +65,150 @@ tuner_type = config['Performance_CrossingDetection_OrderPrediction']['tuner_type
 n_channels = config['Performance_CrossingDetection_OrderPrediction']['n_channels']
 
 #Ruta donde se encuentran las instancias que van a ser utilizadas para obtener las predicciones del modelo final
-path_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', str(dim[0]) + '_' + str(dim[1]), data_sampling))
 path_ids_instances = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
 
-path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
+if config['Performance_CrossingDetection_OrderPrediction']['Transfer_Learning']:
 
 
-with path_hyperparameters_CL.open('r') as file_descriptor:
-    hyperparameters_cl = json.load(file_descriptor)
+    path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
 
-params = {'dim': dim,
-          'path_instances': path_instances,
-          'batch_size': hyperparameters_cl['batch_size'],
-          'n_clases': 2,
-          'n_channels': n_channels,
-          'normalized': hyperparameters_cl['normalized'],
-          'shuffle': hyperparameters_cl['shuffle']}
+    with path_hyperparameters_CL.open('r') as file_descriptor:
+        hyperparameters_cl = json.load(file_descriptor)
 
 
-validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
-
-validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
-
-
-path_model = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name, 'model.h5'))
-
-
-if type_model == 'SIAMESE':
-
-    model = load_model(str(path_model))
+    params = {'dim': dim,
+            'path_instances': path_instances,
+            'batch_size': hyperparameters_cl['batch_size'],
+            'n_clases': 2,
+            'n_channels': n_channels,
+            'normalized': hyperparameters_cl['normalized'],
+            'shuffle': hyperparameters_cl['shuffle']}
 
 
-y_predictions = model.predict(x=validation_generator)
+    validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
 
-y_prob_positive = y_predictions[:, 1]
+    validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
 
-y_predictions = np.round(y_predictions)
 
-"""Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
-id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
+    path_model = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_model'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name, 'model.h5'))
 
-y_true = y_validation.argmax(axis=1)
-y_pred = y_predictions.argmax(axis=1)
 
-print("MATRIZ DE CONFUSIÓN: ")
-print(confusion_matrix(y_true, y_pred))
+    if type_model == 'SIAMESE':
 
-print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
+        model = load_model(str(path_model))
 
-print("F1 Score: %f" % f1_score(y_true, y_pred))
 
-print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+    y_predictions = model.predict(x=validation_generator)
 
-print("Precision Score: %f" % precision_score(y_true, y_pred))
+    y_prob_positive = y_predictions[:, 1]
 
-print("Recall Score: %f" % recall_score(y_true, y_pred))
+    y_predictions = np.round(y_predictions)
 
-print("CLASSIFICATION REPORT: ")
+    """Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+    id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
 
-print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+    y_true = y_validation.argmax(axis=1)
+    y_pred = y_predictions.argmax(axis=1)
 
-#CALCULO DE LA CURVA ROC
+    print("MATRIZ DE CONFUSIÓN: ")
+    print(confusion_matrix(y_true, y_pred))
 
-fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+    print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
 
-plt.plot(fpr, tpr, marker='.')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
+    print("F1 Score: %f" % f1_score(y_true, y_pred))
 
-plt.savefig('curveRoc.png')
+    print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+
+    print("Precision Score: %f" % precision_score(y_true, y_pred))
+
+    print("Recall Score: %f" % recall_score(y_true, y_pred))
+
+    print("CLASSIFICATION REPORT: ")
+
+    print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+
+    #CALCULO DE LA CURVA ROC
+
+    fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+
+    plt.plot(fpr, fpr, marker='.', label='Con Transferencia')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    plt.legend()
+
+    plt.savefig('curveRoc.png')
+
+else:
+
+    path_hyperparameters = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name + '.json'))
+
+    with path_hyperparameters.open('r') as file_descriptor:
+        hyperparameters = json.load(file_descriptor)
+
+
+    params = {'dim': dim,
+        'path_instances': path_instances,
+        'batch_size': hyperparameters['batch_size'],
+        'n_clases': 2,
+        'n_channels': n_channels,
+        'normalized': hyperparameters['normalized'],
+        'shuffle': hyperparameters['shuffle']}
+
+
+    validation_ids_instances = read_instance_file_txt(path_ids_instances / 'test.txt')
+
+    validation_generator = DataGenerators_CrossingDetection_OrderPrediction.DataGeneratorCrossingDetectionOrderPrediction(validation_ids_instances, **params)
+
+
+    path_model = Path(join(config['Performance_CrossingDetection_OrderPrediction']['path_model'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'OrderPrediction', tuner_type, type_model, project_name, 'model.h5'))
+
+
+    if type_model == 'SIAMESE':
+
+        model = load_model(str(path_model))
+
+
+    y_predictions = model.predict(x=validation_generator)
+
+    y_prob_positive = y_predictions[:, 1]
+
+    y_predictions = np.round(y_predictions)
+
+    """Se obtiene los identificadores de las intancias y su etiqueta en el orden en el que son insertadas en el modelo final"""
+    id_instances_validation, y_validation = validation_generator.get_ID_instances_and_labels()
+
+    y_true = y_validation.argmax(axis=1)
+    y_pred = y_predictions.argmax(axis=1)
+
+    print("MATRIZ DE CONFUSIÓN: ")
+    print(confusion_matrix(y_true, y_pred))
+
+    print("ACCURACY: %f" % accuracy_score(y_true, y_pred))
+
+    print("F1 Score: %f" % f1_score(y_true, y_pred))
+
+    print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
+
+    print("Precision Score: %f" % precision_score(y_true, y_pred))
+
+    print("Recall Score: %f" % recall_score(y_true, y_pred))
+
+    print("CLASSIFICATION REPORT: ")
+
+    print(classification_report(y_true, y_pred, target_names=['No crossing', 'Crossing']))
+
+    #CALCULO DE LA CURVA ROC
+
+    fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
+
+    plt.plot(fpr, tpr, marker='.', color='r', label='Sin transferencia')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    plt.legend()
+
+    plt.savefig('curveRoc.png')

@@ -37,8 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
-
 sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'base_models'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
@@ -71,7 +69,6 @@ tuner_type = config['Performance_CrossingDetection_Shuffle']['tuner_type']
 
 
 #Ruta donde se encuentran las instancias que van a ser utilizadas para obtener las predicciones del modelo final
-#path_instances = Path(join(config['Performance_FinalModels']['path_instances'], dataset, type_model, pretext_task))
 path_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_instances'], dataset, 'CrossingDetection', str(n_frames) + '_frames', data_sampling))
 path_ids_instances = Path(join(config['Performance_CrossingDetection_Shuffle']['path_id_instances'], dataset))
 
@@ -80,15 +77,9 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     path_hyperparameters_CL = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Classification_Layer', project_name + '.json'))
 
-    path_hyperparameters_FT = Path(join(config['Performance_CrossingDetection_Shuffle']['path_hyperparameters'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, 'Fine_Tuning', project_name + '.json'))
-
     with path_hyperparameters_CL.open('r') as file_descriptor:
         hyperparameters_cl = json.load(file_descriptor)
 
-    with path_hyperparameters_FT.open('r') as file_descriptor:
-        hyperparameters_ft = json.load(file_descriptor)
-
-    learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
 
     params = {'dim': dim,
             'path_instances': path_instances,
@@ -103,30 +94,14 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
+
+    path_model = Path(join(config['Performance_CrossingDetection_Shuffle']['path_model'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'model.h5'))
+
+
     if type_model == 'CONV3D':
 
-        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-        unit = hyperparameters_cl['unit']
+        model = load_model(str(path_model))
 
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate_fine_tuning)
-
-    elif type_model == 'C3D':
-
-        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-        units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
-        units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
-        learning_rate = hyperparameters_cl['learning_rate']
-
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)
-
-
-    #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', data_sampling, 'Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'weights.h5'))
-
-    #Se carga el modelo final
-    model.load_weights(str(path_weights), by_name=True)
 
     y_predictions = model.predict(x=validation_generator)
 
@@ -150,7 +125,7 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
     print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
 
     print("Precision Score: %f" % precision_score(y_true, y_pred))
-    
+
     print("Recall Score: %f" % recall_score(y_true, y_pred))
 
     print("CLASSIFICATION REPORT: ")
@@ -161,11 +136,13 @@ if config['Performance_CrossingDetection_Shuffle']['Transfer_Learning']:
 
     fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
 
-    plt.plot(fpr, tpr, marker='.')
+    plt.plot(fpr, fpr, marker='.', label='Con Transferencia')
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
 
-    plt.savefig('curveRoc.png')
+    plt.legend()
+
+    plt.savefig('curveRocTransferencia.png')
 
 else:
 
@@ -189,20 +166,13 @@ else:
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
 
+    path_model = Path(join(config['Performance_CrossingDetection_Shuffle']['path_model'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'model.h5'))
+
+
     if type_model == 'CONV3D':
 
-        dropout_rate_1 = hyperparameters['dropout_rate_1']
-        dropout_rate_2 = hyperparameters['dropout_rate_2']
-        unit = hyperparameters['unit']
-        learning_rate = hyperparameters['learning_rate']
+        model = load_model(str(path_model))
 
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate)
-
-    #Ruta en la que se encuentra el modelo del que se va a evaluar si rendimiento
-    path_weights = Path(join(config['Performance_CrossingDetection_Shuffle']['path_weights'], dataset, 'CrossingDetection', data_sampling, 'No_Transfer_Learning', 'Shuffle', tuner_type, type_model, project_name, 'weights.h5'))
-
-    #Se carga el modelo final
-    model.load_weights(str(path_weights), by_name=True)
 
     y_predictions = model.predict(x=validation_generator)
 
@@ -226,7 +196,7 @@ else:
     print("ROC Score: %f" % roc_auc_score(y_true, y_prob_positive))
 
     print("Precision Score: %f" % precision_score(y_true, y_pred))
-    
+
     print("Recall Score: %f" % recall_score(y_true, y_pred))
 
     print("CLASSIFICATION REPORT: ")
@@ -237,8 +207,10 @@ else:
 
     fpr, tpr, _ = roc_curve(y_true, y_prob_positive)
 
-    plt.plot(fpr, tpr, marker='.')
+    plt.plot(fpr, tpr, marker='.', color='r', label='Sin transferencia')
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
 
-    plt.savefig('curveRoc.png')
+    plt.legend()
+
+    plt.savefig('curveRocNoTransferencia.png')

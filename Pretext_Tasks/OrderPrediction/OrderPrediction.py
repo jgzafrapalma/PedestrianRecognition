@@ -38,7 +38,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
 
 #Se añade el directorio utilities a sys.path para que pueda ser usaado por el comando import
 sys.path.append(os.path.join(rootdir, 'utilities'))
@@ -67,7 +66,7 @@ tuner_type = config['OrderPrediction']['tuner_type']
 project_name = config['OrderPrediction']['project_name']
 
 
-path_instances = Path(join(config['OrderPrediction']['path_instances'], dataset, 'OrderPrediction', data_sampling))
+path_instances = Path(join(config['OrderPrediction']['path_instances'], dataset, 'OrderPrediction', str(dim[0]) + '_' + str(dim[1]), data_sampling))
 path_id_instances = Path(join(config['OrderPrediction']['path_id_instances'], dataset))
 
 

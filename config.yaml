@@ -22,11 +22,11 @@ Hyperparameters_Optimization_Shuffle:
     num_initial_points: 5             #Bayesian_Optimization
     project_name: '03112020-184600'
 Hyperparameters_Optimization_OrderPrediction:
-  dim: !!python/tuple [ 128, 128 ]
+  dim: !!python/tuple [ 80, 80 ]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'Distributed' # Distributed OpticalFlow
+  data_sampling: 'OpticalFlow' # Distributed OpticalFlow
   path_instances: '/pub/experiments/jzafra/instances/'              #'/media/jorge/DATOS/TFG/instances/'             
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/media/jorge/DATOS/TFG/ids_instances/'        
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results'   #'/media/jorge/DATOS/TFG/tuner_keras_results'    
@@ -42,14 +42,14 @@ Hyperparameters_Optimization_OrderPrediction:
     max_trials: 100                   #Random_Search, Bayesian_Optimization
     max_epochs: 100                   #HyperBand
     num_initial_points: 5             #Bayesian_Optimization
-    project_name: '06112020-172000'
+    project_name: '08112020-002900'
 Shuffle:
   n_frames: 16
   dim: !!python/tuple [128, 128]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
-  data_sampling: 'OpticalFlow'
+  data_sampling: 'Distributed'
   tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
   project_name: '03112020-184600'
   path_instances: '/pub/experiments/jzafra/instances/'              #'/media/jorge/DATOS/TFG/instances/'             
@@ -61,13 +61,13 @@ Shuffle:
   seed: 1
   random: False
 OrderPrediction:
-  dim: !!python/tuple [128, 128]
+  dim: !!python/tuple [80, 80]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'Distributed'
-  tuner_type: 'Bayesian_Optimization' #Random_Search, Manual, ...
-  project_name: '06112020-172000'
+  data_sampling: 'OpticalFlow'
+  tuner_type: 'Manual' #Random_Search, Manual, ...
+  project_name: '08112020-002900'
   path_instances: '/pub/experiments/jzafra/instances/'              #'/pub/experiments/jzafra/instances/'         '/media/jorge/DATOS/TFG/instances/'  
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'       #'/pub/experiments/jzafra/ids_instances/'     '/media/jorge/DATOS/TFG/ids_instances/'     
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'  #'/pub/experiments/jzafra/hyperparameters/'   '/media/jorge/DATOS/TFG/hyperparameters/'
@@ -82,7 +82,7 @@ HP_Optimization_CrossingDetection_Shuffle:
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
-  data_sampling: 'OpticalFlow' # OpticalFlow
+  data_sampling: 'Distributed' # OpticalFlow
   Transfer_Learning: False
   path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
@@ -102,21 +102,21 @@ HP_Optimization_CrossingDetection_Shuffle:
     max_trials: 100                   #Random_Search, Bayesian_Optimization
     max_epochs: 100                   #HyperBand
     num_initial_points: 5             #Bayesian_Optimization
-    project_name: '03112020-184600'
+    project_name: '09112020-184600'
 HP_Optimization_CrossingDetection_OrderPrediction:
-  dim: !!python/tuple [ 128, 128 ]
+  dim: !!python/tuple [ 80, 80 ]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'Distributed' # OpticalFlow
-  Transfer_Learning: False
+  data_sampling: 'OpticalFlow' # OpticalFlow
+  Transfer_Learning: True
   path_instances: '/pub/experiments/jzafra/instances/' #'/media/jorge/DATOS/TFG/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/' #'/media/jorge/DATOS/TFG/ids_instances/'
   path_dir_results: '/pub/experiments/jzafra/tuner_keras_results/' #'/media/jorge/DATOS/TFG/tuner_keras_results'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/' #'/media/jorge/DATOS/TFG/hyperparameters'
   path_weights: '/pub/experiments/jzafra/models/'
-  tuner_type_pretext_task: '' #'Bayesian_Optimization'
-  project_name_pretext_task: '' #'06112020-172000'
+  tuner_type_pretext_task: 'Manual'
+  project_name_pretext_task: '08112020-002900'
   epochs: 100
   seed: 1
   random: False
@@ -128,15 +128,15 @@ HP_Optimization_CrossingDetection_OrderPrediction:
     max_trials: 100                   #Random_Search, Bayesian_Optimization
     max_epochs: 100                   #HyperBand
     num_initial_points: 5             #Bayesian_Optimization
-    project_name: '07112020-172000'
+    project_name: '08112020-002900'
 CrossingDetection_Shuffle:
   n_frames: 16
   dim: !!python/tuple [ 128, 128 ]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'CONV3D'
-  data_sampling: 'OpticalFlow' # OpticalFlow
-  project_name: '03112020-184600'
+  data_sampling: 'Distributed' # OpticalFlow
+  project_name: '09112020-184600'
   tuner_type: 'Bayesian_Optimization'
   Transfer_Learning: True
   path_weights: '/pub/experiments/jzafra/models/'
@@ -146,17 +146,17 @@ CrossingDetection_Shuffle:
   path_output_model: '/pub/experiments/jzafra/models/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
   tuner_type_pretext_task: 'Bayesian_Optimization'
-  project_name_pretext_task: '06112020-172000'
+  project_name_pretext_task: '03112020-184600'
   epochs: 100
   seed: 1
   random: False
 CrossingDetection_OrderPrediction:
-  dim: !!python/tuple [ 128, 128 ]
+  dim: !!python/tuple [ 80, 80 ]
   n_channels: 3
   dataset: 'PIE_dataset'
   type_model: 'SIAMESE'
-  data_sampling: 'Distributed' # OpticalFlow
-  project_name: '07112020-172000'
+  data_sampling: 'OpticalFlow' # OpticalFlow
+  project_name: '08112020-002900'
   tuner_type: 'Bayesian_Optimization'
   Transfer_Learning: True
   path_weights: '/pub/experiments/jzafra/models/'
@@ -165,8 +165,8 @@ CrossingDetection_OrderPrediction:
   tensorboard_logs: '/pub/experiments/jzafra/tensorboard/'
   path_output_model: '/pub/experiments/jzafra/models/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
-  tuner_type_pretext_task: 'Bayesian_Optimization'
-  project_name_pretext_task: '06112020-172000'
+  tuner_type_pretext_task: 'Manual'
+  project_name_pretext_task: '08112020-002900'
   epochs: 100
   seed: 1
   random: False
@@ -176,18 +176,18 @@ Performance_CrossingDetection_Shuffle:
   n_channels: 3
   dataset: 'PIE_dataset'
   data_sampling: 'OpticalFlow'
-  Transfer_Learning: False
+  Transfer_Learning: True
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
-  path_weights: '/pub/experiments/jzafra/models/'
+  path_model: '/pub/experiments/jzafra/models/'
   type_model: 'CONV3D'
-  project_name: '03112020-184600'
+  project_name: '09112020-184600'
   tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
 Performance_CrossingDetection_OrderPrediction:
-  dim: !!python/tuple [128, 128]
+  dim: !!python/tuple [80, 80]
   n_channels: 3
   dataset: 'PIE_dataset'
   data_sampling: 'Distributed'
@@ -195,31 +195,31 @@ Performance_CrossingDetection_OrderPrediction:
   path_instances: '/pub/experiments/jzafra/instances/'
   path_id_instances: '/pub/experiments/jzafra/ids_instances/'
   path_hyperparameters: '/pub/experiments/jzafra/hyperparameters/'
-  path_weights: '/pub/experiments/jzafra/models/'
+  path_model: '/pub/experiments/jzafra/models/'
   type_model: 'SIAMESE'
-  project_name: '07112020-172000'
+  project_name: '08112020-002900'
   tuner_type: 'Bayesian_Optimization'
   seed: 1
   random: False
 create_instances_PIE_CrossingDetection:
-  input_path_data: '/media/jorge/DATOS/TFG/data/pie_database.pkl' #'/pub/experiments/jzafra/data/pie_database.pkl' #Dirección donde se encuentra el fichero con la información del conjunto de datos
-  input_path_dataset: '/media/jorge/DATOS/TFG/datasets/PIE_clips' #'/pub/experiments/jzafra/datasets/PIE_clips' #Dirección donde se encuentra el conjunto de datos
-  output_path_frames: '/media/jorge/DATOS/TFG/frames/PIE_dataset' #'/pub/experiments/jzafra/frames/PIE_dataset' #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
-  output_path_instances: '/media/jorge/DATOS/TFG/instances/PIE_dataset' #'/pub/experiments/jzafra/instances/PIE_dataset' #Dirección base donde se van a almacenar las instancias creadas
-  output_path_cuts: '/media/jorge/DATOS/TFG/cuts/PIE_dataset' #'/pub/experiments/jzafra/cuts/PIE_dataset' #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
+  input_path_data: '/pub/experiments/jzafra/data/pie_database.pkl' #'/media/jorge/DATOS/TFG/data/pie_database.pkl'  #Dirección donde se encuentra el fichero con la información del conjunto de datos
+  input_path_dataset: '/pub/experiments/jzafra/datasets/PIE_clips' #'/media/jorge/DATOS/TFG/datasets/PIE_clips'  #Dirección donde se encuentra el conjunto de datos
+  output_path_frames: '/pub/experiments/jzafra/frames/PIE_dataset' #'/media/jorge/DATOS/TFG/frames/PIE_dataset'  #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
+  output_path_instances: '/pub/experiments/jzafra/instances/PIE_dataset' #'/media/jorge/DATOS/TFG/instances/PIE_dataset'  #Dirección base donde se van a almacenar las instancias creadas
+  output_path_cuts: '/pub/experiments/jzafra/cuts/PIE_dataset' #'/media/jorge/DATOS/TFG/cuts/PIE_dataset'  #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
   n_frames: 4 #Número de fotogramas que se van a recortar
   rate: 0.10 #Tasa de incremento de las cajas de coliciones de las capas de coliciones de manera vertical
   shape: !!python/tuple [80, 80] #Tamaño de los fotogramas resultado recortados
-  optical_flow: False #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
+  optical_flow: True #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
 create_instances_PIE_OrderPrediction:
-  input_path_data: '/media/jorge/DATOS/TFG/data/pie_database.pkl' #'/pub/experiments/jzafra/data/pie_database.pkl' #Dirección donde se encuentra el fichero con la información del conjunto de datos
-  input_path_dataset: '/media/jorge/DATOS/TFG/datasets/PIE_clips' #'/pub/experiments/jzafra/datasets/PIE_clips' #Dirección donde se encuentra el conjunto de datos
-  output_path_frames: '/media/jorge/DATOS/TFG/frames/PIE_dataset' #'/pub/experiments/jzafra/frames/PIE_dataset' #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
-  output_path_instances: '/media/jorge/DATOS/TFG/instances/PIE_dataset' #'/pub/experiments/jzafra/instances/PIE_dataset' #Dirección base donde se van a almacenar las instancias creadas
-  output_path_cuts: '/media/jorge/DATOS/TFG/cuts/PIE_dataset' #'/pub/experiments/jzafra/cuts/PIE_dataset' #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
+  input_path_data: '/pub/experiments/jzafra/data/pie_database.pkl' #'/media/jorge/DATOS/TFG/data/pie_database.pkl' #Dirección donde se encuentra el fichero con la información del conjunto de datos
+  input_path_dataset: '/pub/experiments/jzafra/datasets/PIE_clips' #'/media/jorge/DATOS/TFG/datasets/PIE_clips' #Dirección donde se encuentra el conjunto de datos
+  output_path_frames: '/pub/experiments/jzafra/frames/PIE_dataset' #'/media/jorge/DATOS/TFG/frames/PIE_dataset'  #Dirección base donde se quieren almacenar los fotogramas recortados del conjunto de datos
+  output_path_instances: '/pub/experiments/jzafra/instances/PIE_dataset' #'/media/jorge/DATOS/TFG/instances/PIE_dataset'  #Dirección base donde se van a almacenar las instancias creadas
+  output_path_cuts: '/pub/experiments/jzafra/cuts/PIE_dataset' #'/media/jorge/DATOS/TFG/cuts/PIE_dataset' #Dirección base donde se quieren almacenar los resumenes de los fotogramas para poder visualizarlos
   rate: 0.10 #Tasa de incremento de las cajas de coliciones de las capas de coliciones de manera vertical
   shape: !!python/tuple [80, 80] #Tamaño de los fotogramas resultado recortados
-  optical_flow: False #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
+  optical_flow: True #Indica si el resumen es llevado a cabo con flujo optico o de manera uniforme en el tiempo
 create_train_validation_test:
   path_instances: '/pub/experiments/jzafra/data/pie_database.pkl' #Ruta donde se encuentra el fichero con la información de las intancias del conjunto de datos
   percent_validation: 0.15 #Tanto por ciento de instancias que van a pertenecer al conjunto de validación

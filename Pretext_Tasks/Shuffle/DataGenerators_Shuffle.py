@@ -24,7 +24,7 @@ class DataGeneratorShuffle(Sequence):
 
     def on_epoch_end(self):
         #Se crea un vector de indices(desde 0 hasta numero de identificadores menos 1)
-        self.indexes = np.arange(len(self.list_IDs))  # ???? len(self.list_IDs)*2
+        self.indexes = np.arange(len(self.list_IDs))
         #Si shuffle se encuentra a True se cambia el orden de los elementos del vector de indices
         if self.shuffle:
             # Cambios el orden de entrada de los patrones en cada epoca
@@ -46,10 +46,6 @@ class DataGeneratorShuffle(Sequence):
 
         i = 0 # Variable utilizada como contador del indice en el que se estan almacenando las intancias
         for ID_instance in list_IDs_temp:
-
-            #print(ID_instance)
-
-            #frames = extract_Frames_Matriz(self.path_instances, ID_instance, self.n_frames)
 
             with (self.path_instances / ID_instance).open('rb') as input:
                 instance = pickle.load(input)

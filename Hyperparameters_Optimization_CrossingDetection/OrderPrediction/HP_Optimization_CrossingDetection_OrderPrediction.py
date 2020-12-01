@@ -37,8 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
-
 sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'OrderPrediction'))
 
@@ -70,7 +68,7 @@ dataset = config['HP_Optimization_CrossingDetection_OrderPrediction']['dataset']
 type_model = config['HP_Optimization_CrossingDetection_OrderPrediction']['type_model']
 data_sampling = config['HP_Optimization_CrossingDetection_OrderPrediction']['data_sampling']
 
-path_instances = Path(join(config['HP_Optimization_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_instances = Path(join(config['HP_Optimization_CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', str(dim[0]) + '_' + str(dim[1]), data_sampling))
 path_id_instances = Path(join(config['HP_Optimization_CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
 train_ids_instances = read_instance_file_txt(path_id_instances / 'train.txt')
@@ -196,7 +194,7 @@ if config['HP_Optimization_CrossingDetection_OrderPrediction']['Transfer_Learnin
 
         best_model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_TL(the_input_shape=(dim[0], dim[1], n_channels), units_dense_layer_1=best_hp['units_dense_layers_1'],
                                                                                                             units_dense_layer_2=best_hp['units_dense_layers_2'], dropout_rate_1=best_hp['dropout_rate_1'], 
-                                                                                                            dropout_rate_2=best_hp['dropout_rate_2'], learning_rate=best_hp['learning_rate'], path_conv_weights=path_weights)
+                                                                                                            dropout_rate_2=best_hp['dropout_rate_2'], learning_rate=best_hp['learning_rate'], momentum=best_hp['momentum'], path_conv_weights=path_weights)
 
     params = {
         'dim': dim,

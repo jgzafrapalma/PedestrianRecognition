@@ -37,7 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
 sys.path.append(os.path.join(rootdir, 'CrossingDetection', 'Shuffle'))
@@ -47,6 +46,8 @@ from os.path import join
 import time
 from pathlib import Path
 import json
+
+import numpy as np
 
 
 import HyperModels_CrossingDetection_Shuffle, Tuners_CrossingDetection_Shuffle
@@ -110,10 +111,6 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
     if type_model == 'CONV3D':
 
         hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)
-
-    """elif type_model == 'C3D':
-
-        hypermodel_cl = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_CL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights)"""
 
 
     #SE DECLARA EL TUNER EN FUNCIÓN DE SU TIPO, DEL MODELO FINAL Y DE LA TAREA DE PRETEXTO
@@ -199,12 +196,6 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
         best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D_TL(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
                                                                         dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layer=best_hp['unit'], learning_rate=best_hp['learning_rate'], path_conv_weights=path_weights)
 
-    """elif type_model == 'C3D':
-
-        best_model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), dropout_rate_1=best_hp['dropout_rate_1'],
-                                                                        dropout_rate_2=best_hp['dropout_rate_2'], units_dense_layers_1=best_hp['units_dense_layers_1'],
-                                                                        units_dense_layers_2=best_hp['units_dense_layers_2'], learning_rate=best_hp['learning_rate'])"""
-
     params = {
         'dim': dim,
         'path_instances': path_instances,
@@ -245,9 +236,6 @@ if config['HP_Optimization_CrossingDetection_Shuffle']['Transfer_Learning']:
 
         hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_CONV3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)
 
-    """elif type_model == 'C3D':
-
-        hypermodel_ft = HyperModels_CrossingDetection_Shuffle.HyperModel_Shuffle_C3D_CrossingDetection_FT(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2, path_weights=path_weights, hyperparameters=best_hp)"""
 
     if tuner_type == 'Random_Search':
 

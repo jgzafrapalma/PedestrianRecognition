@@ -19,11 +19,11 @@ class TunerBayesianOrderPrediction(kerastuner.tuners.BayesianOptimization):
         params = {
             'dim': dim,
             'path_instances': path_instances,
-            'batch_size': 64, #trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
+            'batch_size': trial.hyperparameters.Choice('batch_size', values=[8, 16, 32, 64], default=32),
             'n_clases': 12,
             'n_channels': n_channels,
-            'normalized': True,
-            'shuffle': True,
+            'normalized': trial.hyperparameters.Boolean('normalized', default=True),
+            'shuffle': trial.hyperparameters.Boolean('shuffle', default=True),
             'n_epochs': epochs
         }
 

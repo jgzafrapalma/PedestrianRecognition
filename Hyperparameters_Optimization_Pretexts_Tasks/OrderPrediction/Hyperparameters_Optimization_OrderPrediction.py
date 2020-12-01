@@ -37,8 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
-
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
 from os.path import join
@@ -55,11 +53,14 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 
+dim = config['Hyperparameters_Optimization_OrderPrediction']['dim']
+n_channels = config['Hyperparameters_Optimization_OrderPrediction']['n_channels']
+
 dataset = config['Hyperparameters_Optimization_OrderPrediction']['dataset']
 type_model = config['Hyperparameters_Optimization_OrderPrediction']['type_model']
 data_sampling = config['Hyperparameters_Optimization_OrderPrediction']['data_sampling']
 
-path_instances = Path(join(config['Hyperparameters_Optimization_OrderPrediction']['path_instances'], dataset, 'OrderPrediction', data_sampling))
+path_instances = Path(join(config['Hyperparameters_Optimization_OrderPrediction']['path_instances'], dataset, 'OrderPrediction', str(dim[0]) + '_' + str(dim[1]), data_sampling))
 path_id_instances = Path(join(config['Hyperparameters_Optimization_OrderPrediction']['path_id_instances'], dataset))
 
 #Se cargan los identificadores correspondientes a las instancias de entrenamiento y validación
@@ -70,10 +71,7 @@ validation_ids_instances = read_instance_file_txt(path_id_instances / 'validatio
 tuner_type = config['Hyperparameters_Optimization_OrderPrediction']['tuner']['type']
 project_name = config['Hyperparameters_Optimization_OrderPrediction']['tuner']['project_name']
 
-
-dim = config['Hyperparameters_Optimization_OrderPrediction']['dim']
 epochs = config['Hyperparameters_Optimization_OrderPrediction']['epochs']
-n_channels = config['Hyperparameters_Optimization_OrderPrediction']['n_channels']
 
 
 path_output_results = Path(join(config['Hyperparameters_Optimization_OrderPrediction']['path_dir_results'], dataset, 'OrderPrediction', data_sampling, tuner_type, type_model))

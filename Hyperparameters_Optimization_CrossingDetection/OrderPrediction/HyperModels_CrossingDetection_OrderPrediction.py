@@ -154,7 +154,8 @@ class HyperModel_OrderPrediction_SIAMESE_CrossingDetection_CL(HyperModel):
         optimizer = SGD(
             learning_rate=hp.Float(
                 "learning_rate", min_value=1e-4, max_value=1e-2, sampling="LOG", default=1e-3
-            )
+            ),
+            momentum=hp.Choice("momentum", [0.0, 0.2, 0.4, 0.6, 0.8, 0.9])
         )
 
         siamese_model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
@@ -291,7 +292,8 @@ class HyperModel_OrderPrediction_SIAMESE_CrossingDetection_FT(HyperModel):
         optimizer = SGD(
             learning_rate=hp.Float(
                 "learning_rate", min_value=1e-4, max_value=1e-2, sampling="LOG", default=1e-3
-            )
+            ),
+            momentum=hp.Choice("momentum", [0.0, 0.2, 0.4, 0.6, 0.8, 0.9])
         )
 
         with (self.path_weights).open('rb') as file_descriptor:

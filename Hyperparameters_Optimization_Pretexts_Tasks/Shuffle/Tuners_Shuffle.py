@@ -1,6 +1,5 @@
 import os, sys
 
-#Falta importar del DataGenerator
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 rootdir = os.path.dirname(parentdir)

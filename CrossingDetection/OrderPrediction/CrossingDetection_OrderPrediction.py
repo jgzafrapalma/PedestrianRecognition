@@ -40,11 +40,10 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-#########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD
 from pathlib import Path
 from os.path import join
 import json
@@ -66,7 +65,7 @@ project_name = config['CrossingDetection_OrderPrediction']['project_name']
 tuner_type = config['CrossingDetection_OrderPrediction']['tuner_type']
 data_sampling = config['CrossingDetection_OrderPrediction']['data_sampling']
 
-path_instances = Path(join(config['CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', data_sampling))
+path_instances = Path(join(config['CrossingDetection_OrderPrediction']['path_instances'], dataset, 'CrossingDetection', '4_frames', str(dim[0]) + '_' + str(dim[1]), data_sampling))
 path_id_instances = Path(join(config['CrossingDetection_OrderPrediction']['path_id_instances'], dataset))
 
 epochs = config['CrossingDetection_OrderPrediction']['epochs']
@@ -95,6 +94,7 @@ if config['CrossingDetection_OrderPrediction']['Transfer_Learning']:
         hyperparameters_ft = json.load(file_descriptor)
 
     learning_rate_fine_tuning = hyperparameters_ft['learning_rate']
+    momentum_fine_tuning = hyperparameters_ft['momentum']
 
     params = {'dim': dim,
             'path_instances': path_instances,
@@ -112,9 +112,6 @@ if config['CrossingDetection_OrderPrediction']['Transfer_Learning']:
     """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
     LA TAREA DE PRETEXTO"""
 
-    """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
-    los pesos solo van a ser cargados en las capas de convolución"""
-
     path_weights = Path(join(config['CrossingDetection_OrderPrediction']['path_weights'], dataset, 'OrderPrediction', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'conv_weights.npy'))
 
     if type_model == 'SIAMESE':
@@ -124,11 +121,11 @@ if config['CrossingDetection_OrderPrediction']['Transfer_Learning']:
         dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
         dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
         learning_rate = hyperparameters_cl['learning_rate']
+        momentum = hyperparameters_cl['momentum']
 
         # El modelo es definido con las capas convolucionales congeladas
-        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_TL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, path_weights)
+        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_TL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum, path_weights)
 
-    #######################################################################################################
 
     model.summary()
 
@@ -154,7 +151,7 @@ if config['CrossingDetection_OrderPrediction']['Transfer_Learning']:
 
     """Se vuelve a realizar un entrenamiento pero ahora modificando los pesos de todas las capas, con un
     coeficiente de aprendizaje bajo (obtenido a partir de optimizando de hiperparámetros)"""
-    model.compile(optimizer=Adam(learning_rate=learning_rate_fine_tuning), loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
+    model.compile(optimizer=SGD(learning_rate=learning_rate_fine_tuning, momentum=momentum), loss='binary_crossentropy', metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
     model.summary()
 
@@ -197,14 +194,14 @@ else:
 
     if type_model == 'SIAMESE':
 
-        units_dense_layer_1 = hyperparameters_cl['units_dense_layers_1']
-        units_dense_layer_2 = hyperparameters_cl['units_dense_layers_2']
-        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-        learning_rate = hyperparameters_cl['learning_rate']
+        units_dense_layer_1 = hyperparameters['units_dense_layers_1']
+        units_dense_layer_2 = hyperparameters['units_dense_layers_2']
+        dropout_rate_1 = hyperparameters['dropout_rate_1']
+        dropout_rate_2 = hyperparameters['dropout_rate_2']
+        learning_rate = hyperparameters['learning_rate']
+        momentum = hyperparameters['momentum']
 
-        # El modelo es definido con las capas convolucionales congeladas
-        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_NTL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate)
+        model = models_CrossingDetection_OrderPrediction.model_CrossingDetection_OrderPrediction_SIAMESE_NTL((dim[0], dim[1], n_channels), units_dense_layer_1, units_dense_layer_2, dropout_rate_1, dropout_rate_2, learning_rate, momentum)
 
     model.summary()
 

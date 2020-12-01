@@ -39,7 +39,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-#########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
@@ -115,12 +114,9 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
     validation_generator = DataGenerators_CrossingDetection_Shuffle.DataGeneratorCrossingDetectionShuffe(validation_ids_instances, **params)
 
 
-    """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONES APRENDIDOS A TRAVÉS DE
+    """SE DEFINE EL NUEVO MODELO Y SE CARGAN LOS PESOS DE LAS CAPAS CONVOLUCIONALES APRENDIDOS A TRAVÉS DE
     LA TAREA DE PRETEXTO"""
     path_weights = Path(join(config['CrossingDetection_Shuffle']['path_weights'], dataset, 'Shuffle', data_sampling, tuner_type_pretext_task, type_model, project_name_pretext_task, 'conv_weights.npy'))
-
-    """En vez de cargar el modelo se van a cargar los pesos sobre un nuevo modelo generado, en el que
-    los pesos solo van a ser cargados en las capas de convolución"""
 
     if type_model == 'CONV3D':
 
@@ -132,19 +128,6 @@ if config['CrossingDetection_Shuffle']['Transfer_Learning']:
         #El modelo es definido con las capas convolucionales congeladas
         model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_CONV3D_TL((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, unit, learning_rate, path_weights)
 
-    """elif type_model == 'C3D':
-
-        dropout_rate_1 = hyperparameters_cl['dropout_rate_1']
-        dropout_rate_2 = hyperparameters_cl['dropout_rate_2']
-        units_dense_layers_1 = hyperparameters_cl['units_dense_layers_1']
-        units_dense_layers_2 = hyperparameters_cl['units_dense_layers_2']
-        learning_rate = hyperparameters_cl['learning_rate']
-
-        model = models_CrossingDetection_Shuffle.model_CrossingDetection_Shuffle_C3D((n_frames, dim[0], dim[1], n_channels), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)"""
-
-
-
-    #######################################################################################################
 
     model.summary()
 

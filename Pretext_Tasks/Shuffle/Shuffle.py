@@ -38,7 +38,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
 
 
 #Se añade el directorio utilities a sys.path para que pueda ser usaado por el comando import
@@ -121,17 +120,6 @@ if type_model == 'CONV3D':
     unit = hyperparameters['unit']
 
     model = models_Shuffle.model_Shuffle_CONV3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, unit, learning_rate)
-
-"""elif type_model == 'C3D':
-
-    dropout_rate_1 = hyperparameters['dropout_rate_1']
-    dropout_rate_2 = hyperparameters['dropout_rate_2']
-    learning_rate = hyperparameters['learning_rate']
-
-    units_dense_layers_1 = hyperparameters['units_dense_layers_1']
-    units_dense_layers_2 = hyperparameters['units_dense_layers_2']
-
-    model = models_Shuffle.model_Shuffle_C3D((n_frames, dim[0], dim[1], 3), dropout_rate_1, dropout_rate_2, units_dense_layers_1, units_dense_layers_2, learning_rate)"""
 
 
 

@@ -37,7 +37,6 @@ configProto = ConfigProto()
 configProto.gpu_options.allow_growth = True
 session = InteractiveSession(config=configProto)
 
-########################################################################################################################
 
 sys.path.append(os.path.join(rootdir, 'utilities'))
 
@@ -89,10 +88,6 @@ path_output_hyperparameters.mkdir(parents=True, exist_ok=True)
 if type_model == 'CONV3D':
 
     hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_CONV3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=2)
-
-"""elif type_model == 'C3D':
-
-    hypermodel = HyperModels_Shuffle.HyperModel_Shuffle_C3D(the_input_shape=(n_frames, dim[0], dim[1], n_channels), num_classes=n_classes)"""
 
 #SE DEFINE EL TUNER EN FUNCIÓN DE SU TIPO
 if tuner_type == 'Random_Search':

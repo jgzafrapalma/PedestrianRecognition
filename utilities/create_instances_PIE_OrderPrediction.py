@@ -55,7 +55,7 @@ def create_instances_PIE_OrderPrediction(input_path_data, input_path_dataset, ou
 
                     Path_Instances = Path(join(output_path_instances, 'OrderPrediction', str(shape[0]) + '_' + str(shape[1]), 'OpticalFlow'))
 
-                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'OpticalFlow', str(shape[0]) + '_' + str(shape[1]), ped.stem))
+                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', str(shape[0]) + '_' + str(shape[1]), 'OpticalFlow', ped.stem))
 
                     output_frames = extractFramesOpticalFlow(Path_Ped, 4)
 
@@ -63,7 +63,7 @@ def create_instances_PIE_OrderPrediction(input_path_data, input_path_dataset, ou
 
                     Path_Instances = Path(join(output_path_instances, 'OrderPrediction', str(shape[0]) + '_' + str(shape[1]), 'Distributed'))
 
-                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', 'Distributed', str(shape[0]) + '_' + str(shape[1]), ped.stem))
+                    Path_Cuts = Path(join(output_path_cuts, 'OrderPrediction', str(shape[0]) + '_' + str(shape[1]), 'Distributed', ped.stem))
 
                     output_frames = extractFramesUniform(Path_Ped, 4)
 
@@ -76,12 +76,12 @@ def create_instances_PIE_OrderPrediction(input_path_data, input_path_dataset, ou
                 logging.info("Permutaciones(instancias) para el peatón %s creadas con exitos" % ped.stem)
 
 create_instances_PIE_OrderPrediction(
-    input_path_data=config['create_instances_PIE_CrossingDetection']['input_path_data'],
-    input_path_dataset=config['create_instances_PIE_CrossingDetection']['input_path_dataset'],
-    output_path_frames=config['create_instances_PIE_CrossingDetection']['output_path_frames'],
-    output_path_instances=config['create_instances_PIE_CrossingDetection']['output_path_instances'],
-    output_path_cuts=config['create_instances_PIE_CrossingDetection']['output_path_cuts'],
-    rate=config['create_instances_PIE_CrossingDetection']['rate'],
-    shape=config['create_instances_PIE_CrossingDetection']['shape'],
-    optical_flow=config['create_instances_PIE_CrossingDetection']['optical_flow']
+    input_path_data=config['create_instances_PIE_OrderPrediction']['input_path_data'],
+    input_path_dataset=config['create_instances_PIE_OrderPrediction']['input_path_dataset'],
+    output_path_frames=config['create_instances_PIE_OrderPrediction']['output_path_frames'],
+    output_path_instances=config['create_instances_PIE_OrderPrediction']['output_path_instances'],
+    output_path_cuts=config['create_instances_PIE_OrderPrediction']['output_path_cuts'],
+    rate=config['create_instances_PIE_OrderPrediction']['rate'],
+    shape=config['create_instances_PIE_OrderPrediction']['shape'],
+    optical_flow=config['create_instances_PIE_OrderPrediction']['optical_flow']
 )
