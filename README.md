@@ -1,7 +1,7 @@
 # PedestrianRecognition
 ### Description
-PedestrianRecognition is a software that obstains and evaluates models that solve the task of recognition of crossing action through self-supervised learning techniques. The self-supervised methods implemented are:
-- __Temporal order verification__: verify whether a sequence of input frames is in correct temporal order.
+PedestrianRecognition is a software that trains and evaluates models that solve the task of recognizing the action of crossing through self-supervised learning techniques. The self-supervised methods implemented are:
+- __Temporal order verification__: verify whether a sequence of input frames is in a correct temporal order.
 
 ![image](./imgs/Verification.png)  
 
@@ -39,12 +39,12 @@ $ pip install -r requirements.txt
 
 # Download dataset
 
-The dataset must be downloaded from the following [webside](http://data.nvision2.eecs.yorku.ca/PIE_dataset/PIE_clips/). Also following the [repository](https://github.com/aras62/PIE) instructions, the data file must be generated with the information of the notations necessary for the generation of the instances.
+The dataset must be downloaded from the following [website](http://data.nvision2.eecs.yorku.ca/PIE_dataset/PIE_clips/). Also following the [repository](https://github.com/aras62/PIE) instructions, the data file must be generated with the information of the annotations necessary for the generation of the instances.
 
 
 # Create instances
 
-To create the instances with which the models are trained, the following repository scripts must be executed. 
+To create the instances for training the different models, the following repository scripts must be executed. 
 
 
 ```bash
@@ -52,10 +52,10 @@ $ python utilities/create_instances_PIE_CrossingDetection.py
 $ python utilities/create_instances_PIE_OrderPrediction.py
 ```
 
-Through the configuration file at least the values of the following parameters must be provided for both scripts:
+Through the configuration file, at least, the values of the following parameters must be provided for both scripts:
 - **input_path_data**: path where the file with the dataset information is located.
 - **input_path_dataset**: path where the downloaded dataset is located.
-- **output_path_frames**: base path where you want to sotre the cuts frames from the dataset.
+- **output_path_frames**: base path where you want to sotore the cut frames from the dataset.
 - **output_path_instances**: base path where the created instances will be stored.
 - **output_path_cuts**: base path where you want to stored the summaries of the frames in order to view them.
 - **optical_flow**: frames summary type.
@@ -63,13 +63,13 @@ Through the configuration file at least the values of the following parameters m
 
 # Create train, validation and test
 
-The following script is sued to create the training, validation and test datasets:
+The following script is used to create the training, validation and test datasets:
 
 ```bash
 $ python utilities/create_train_validation_test.py
 ```
 
-Through the configuration file at least the values of the following parameters must be provided:
+Through the configuration file, at least, the values of the following parameters must be provided:
 - **path_instances**: path where the file with the information of the data set instances is located. It is located in the data folder of the repository.
 - **path_output**: folder where the text files containing the train, validation and test instances will be stored.
 
@@ -106,7 +106,7 @@ Through the configuration file at least the values of the following parameters m
 - **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
 - **path_output_model**: base path where the model weights solving the pretext task are stored.
 
-Third, the yperparameters of the models that solve the task of recognition of the crossing action must be optimized. For this the following script is executed:
+Third, the hyperparameters of the models that solve the task of recognition of the crossing action must be optimized. For this the following script is executed:
 
 ```bash
 $ python Hyperparameters_Optimization_CrossingDetection/Shuffle/HP_Optimization_CrossingDetection_Shuffle.py
