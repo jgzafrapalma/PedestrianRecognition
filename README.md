@@ -8,3 +8,31 @@ PedestrianRecognition is a software that obstains and evaluates models that solv
 - __Temporal order recognition__: recognize the order of a sequence of input frames.
 
 ![image](./imgs/OrderPrediction.png)  
+
+
+# Required software and libraries
+
+- Ubuntu 18.04 OR 16.04 LTS
+- Python 3.6
+- CUDA 10.1
+- cuDNN 7.6
+- TensorRT 6.0
+- Tensorflow 2.2.0
+- Keras 2.3.0
+
+To install the rest of the libraries, follow these steps:
+
+```bash
+# Repository files
+$ git clone git@github.com:YorYYi/PedestrianRecognition.git
+$ cd PedestrianRecognition/
+
+#Create virtual environment
+$ python -m venv virtual_environmment_path/virtual_environmment_name
+
+#Activate virtual environment
+$ source virtual_environmment_path/virtual_environmment_name
+
+# Install requirements
+$ pip install -r requirements.txt
+```
