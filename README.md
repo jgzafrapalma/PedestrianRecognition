@@ -121,6 +121,26 @@ Through the configuration file at least the values of the following parameters m
 - **path_dir_results**: base path where hyperparameters tuning trials are stored.
 - **path_hyperparameters**: base path where the best hyperparameters are stored.
 - **path_weights**: it corresponds to the value of the parameter **path_output_model** indicated in the script **Shuffle.py**.
-- **project_name_pretext_task**: name of the model hyperparameters optimization project that solves the pretext task.
+- **project_name_pretext_task**: name of the model hyperparameters optimization project that solves the pretext task. It corresponds to the value of the parameters **project_name** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
 - **project_name**: name of the hyperparameters optimization project.
+
+Fourth, obtain the model that solves the task of recognition of the crossing action. For this the following script is executed:
+
+
+```bash
+$ python CrossingDetection/Shuffle/CrossingDetection_Shuffle.py
+```
+
+Through the configuration file at least the values of the following parameters must be provided:
+
+- **data_sampling**: frames summary type.
+- **project_name**: name of the hyperparameters optimization project.
+- **Transfer_Learning**: indicates if knowledge transfer is used.
+- **path_weights**: it corresponds to the value of the parameter **path_output_model** indicated in the script **Shuffle.py**.
+- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_output_model**: base path where the model that solving the task of recognition of crossing action is stored.
+- **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **HP_Optimization_CrossingDetection_Shuffle.py**.
+- **project_name_pretext_task**: name of the model hyperparameters optimization project that solves the pretext task. It corresponds to the value of the parameters **project_name** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
+
 
