@@ -49,5 +49,18 @@ To create the instances with which the models are trained, the following reposit
 
 ```bash
 $ python utilities/create_instances_PIE_CrossingDetection.py
+$ python utilities/create_instances_PIE_OrderPrediction.py
 ```
+
+Through the configuration file, the value of the following parameters must be provided for both scripts:
+- **input_path_data**: path where the file with the dataset information is located.
+- **input_path_dataset**: path where the downloaded dataset is located.
+- **output_path_frames**: base path where you want to sotre the cuts frames from the dataset.
+- **output_path_instances**: base path where the created instances will be stored.
+- **output_path_cuts**: base path where you want to stored the summaries of the frames in order to view them.
+- **optical_flow**: frames summary type.
+
+
+
+
 
