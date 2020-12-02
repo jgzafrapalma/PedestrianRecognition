@@ -7,3 +7,5 @@ Temporal order verification is to verify whether a sequence of input frames is i
 ![image](./imgs/Verification.png)  
 
 - __Temporal order recognition__: 
+
+![image](./imgs/OrderPrediction.png)  
