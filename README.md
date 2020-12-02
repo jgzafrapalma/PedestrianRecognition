@@ -36,3 +36,18 @@ $ source virtual_environmment_path/virtual_environmment_name
 # Install requirements
 $ pip install -r requirements.txt
 ```
+
+#Download dataset
+
+
+
+
+# Create instances
+
+To create the instances with which the models are trained, the following repository scripts must be executed.
+
+
+```bash
+$ python utilities/create_instances_PIE_CrossingDetection.py
+```
+
