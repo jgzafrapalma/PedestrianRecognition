@@ -39,12 +39,12 @@ $ pip install -r requirements.txt
 
 # Download dataset
 
-
+The dataset must be downloaded from the following [webside](http://data.nvision2.eecs.yorku.ca/PIE_dataset/PIE_clips/). Also following the [repository](https://github.com/aras62/PIE) instructions, the data file must be generated with the information of the notations necessary for the generation of the instances.
 
 
 # Create instances
 
-To create the instances with which the models are trained, the following repository scripts must be executed.
+To create the instances with which the models are trained, the following repository scripts must be executed. 
 
 
 ```bash
