@@ -74,3 +74,19 @@ Through the configuration file, the values of the following parameters must be p
 - **path_output**: folder where the text files containing the train, validation and test instances will be stored.
 
 
+# Example of use. Temporal order verification
+
+First, the hyperparameters of the models that solve the pretext tasks must be optimized. For this the following script is executed:
+
+```bash
+$ python Hyperparameters_Optimization_Pretexts_Tasks/Shuffle/Hyperparameters_Optimization_Shuffle.py
+```
+
+Through the configuration file, the values of the following parameters must be provided:
+
+- **data_sampling**: frames summary type.
+- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_dir_results**: base path where hyperparameters tuning trials are stored.
+- **path_hyperparameters**: base path where the best hyperparameters are stored.
+- **project_name**: name of the hyperparameters optimization project.
