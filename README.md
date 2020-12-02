@@ -162,4 +162,4 @@ Through the configuration file at least the values of the following parameters m
 
 # Credits
 - __Jorge Zafra Palma__ - Lead Developer - [GitHub](https://github.com/xXNukem/)
-- __Dr. Manuel Jesús Marín Jiménez__ - Advisor - [GitHub](https://github.com/mjmarin)
+- __Manuel Jesús Marín Jiménez__ - Advisor - [GitHub](https://github.com/mjmarin)
