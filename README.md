@@ -52,7 +52,7 @@ $ python utilities/create_instances_PIE_CrossingDetection.py
 $ python utilities/create_instances_PIE_OrderPrediction.py
 ```
 
-Through the configuration file, the value of the following parameters must be provided for both scripts:
+Through the configuration file, the values of the following parameters must be provided for both scripts:
 - **input_path_data**: path where the file with the dataset information is located.
 - **input_path_dataset**: path where the downloaded dataset is located.
 - **output_path_frames**: base path where you want to sotre the cuts frames from the dataset.
@@ -61,6 +61,16 @@ Through the configuration file, the value of the following parameters must be pr
 - **optical_flow**: frames summary type.
 
 
+# Create train, validation and test
 
+The following script is sued to create the training, validation and test datasets:
+
+```bash
+$ python utilities/create_train_validation_test.py
+```
+
+Through the configuration file, the values of the following parameters must be provided:
+- **path_instances**: path where the file with the information of the data set instances is located. It is located in the data folder of the repository.
+- **path_output**: folder where the text files containing the train, validation and test instances will be stored.
 
 
