@@ -106,5 +106,21 @@ Through the configuration file at least the values of the following parameters m
 - **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
 - **path_output_model**: base path where the model weights solving the pretext task are stored.
 
+Third, the yperparameters of the models that solve the task of recognition of the crossing action must be optimized. For this the following script is executed:
 
+```bash
+$ python Hyperparameters_Optimization_CrossingDetection/Shuffle/HP_Optimization_CrossingDetection_Shuffle.py
+```
+
+Through the configuration file at least the values of the following parameters must be provided:
+
+- **data_sampling**: frames summary type.
+- **Transfer_Learning**: indicates if knowledge transfer is used.
+- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_dir_results**: base path where hyperparameters tuning trials are stored.
+- **path_hyperparameters**: base path where the best hyperparameters are stored.
+- **path_weights**: it corresponds to the value of the parameter **path_output_model** indicated in the script **Shuffle.py**.
+- **project_name_pretext_task**: name of the model hyperparameters optimization project that solves the pretext task.
+- **project_name**: name of the hyperparameters optimization project.
 
