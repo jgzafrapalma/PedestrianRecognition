@@ -52,7 +52,7 @@ $ python utilities/create_instances_PIE_CrossingDetection.py
 $ python utilities/create_instances_PIE_OrderPrediction.py
 ```
 
-Through the configuration file, the values of the following parameters must be provided for both scripts:
+Through the configuration file at least the values of the following parameters must be provided for both scripts:
 - **input_path_data**: path where the file with the dataset information is located.
 - **input_path_dataset**: path where the downloaded dataset is located.
 - **output_path_frames**: base path where you want to sotre the cuts frames from the dataset.
@@ -69,7 +69,7 @@ The following script is sued to create the training, validation and test dataset
 $ python utilities/create_train_validation_test.py
 ```
 
-Through the configuration file, the values of the following parameters must be provided:
+Through the configuration file at least the values of the following parameters must be provided:
 - **path_instances**: path where the file with the information of the data set instances is located. It is located in the data folder of the repository.
 - **path_output**: folder where the text files containing the train, validation and test instances will be stored.
 
@@ -82,11 +82,29 @@ First, the hyperparameters of the models that solve the pretext tasks must be op
 $ python Hyperparameters_Optimization_Pretexts_Tasks/Shuffle/Hyperparameters_Optimization_Shuffle.py
 ```
 
-Through the configuration file, the values of the following parameters must be provided:
+Through the configuration file at least the values of the following parameters must be provided:
 
 - **data_sampling**: frames summary type.
-- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
-- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_instance**: it corresponds to the value of the parameter **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameter **path_output** indicated in the script **create_train_validation_test.py**.
 - **path_dir_results**: base path where hyperparameters tuning trials are stored.
 - **path_hyperparameters**: base path where the best hyperparameters are stored.
 - **project_name**: name of the hyperparameters optimization project.
+
+Second, the model that solves the pretext task must be obtained. For this the following script is executed:
+
+```bash
+$ python Pretexts_Tasks/Shuffle/Shuffle.py
+```
+
+Through the configuration file at least the values of the following parameters must be provided:
+
+- **data_sampling**: frames summary type.
+- **project_name**: name of the hyperparameters optimization project.
+- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
+- **path_output_model**: base path where the model weights solving the pretext task are stored.
+
+
+
