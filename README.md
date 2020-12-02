@@ -143,4 +143,23 @@ Through the configuration file at least the values of the following parameters m
 - **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **HP_Optimization_CrossingDetection_Shuffle.py**.
 - **project_name_pretext_task**: name of the model hyperparameters optimization project that solves the pretext task. It corresponds to the value of the parameters **project_name** indicated in the script **Hyperparameters_Optimization_Shuffle.py**.
 
+Finally, the performance of the model is obtained. For this the following script is executed:
 
+```bash
+$ python Performance_CrossingDetection/Performance_CrossingDetection_Shuffle.py
+```
+
+Through the configuration file at least the values of the following parameters must be provided:
+
+- **data_sampling**: frames summary type.
+- **Transfer_Learning**: indicates if knowledge transfer is used.
+- **path_instance**: it corresponds to the value of the parameters **output_path_instances** indicated in the script **create_instances_PIE_CrossingDetection.py**.
+- **path_id_instances**: it corresponds to the value of the parameters **path_output** indicated in the script **create_train_validation_test.py**.
+- **path_hyperparameters**: it corresponds to the value of the parameter **path_hyperparameters** indicated in the script **HP_Optimization_CrossingDetection_Shuffle.py**.
+- **path_model**: it corresponds to the value of the parameter **path_output_model** indicated in the script **CrossingDetection_Shuffle.py**.
+- **project_name**: name of the hyperparameters optimization project.
+
+
+# Credits
+- __Jorge Zafra Palma__ - Lead Developer - [GitHub](https://github.com/xXNukem/)
+- __Dr. Manuel Jesús Marín Jiménez__ - Advisor - [GitHub](https://github.com/mjmarin)
